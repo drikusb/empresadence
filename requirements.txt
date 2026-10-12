@@ -1,6 +1,6 @@
 # Versions are pinned so every build installs the same packages; Dependabot opens PRs for bumps.
 # To bump one by hand: edit the pin, `docker compose up --build`, then run `python manage.py test apps`.
-Django==5.2.18
+Django==6.1.2
 psycopg2-binary==2.9.13
 gunicorn==26.2.0
 whitenoise==6.12.0
