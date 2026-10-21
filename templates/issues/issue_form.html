@@ -124,14 +124,11 @@
                             <select name="{{ form.originating_team.html_name }}"
                                     id="{{ form.originating_team.id_for_label }}"
                                     class="form-select {% if form.originating_team.errors %}is-invalid{% endif %}">
-                                <option value="">— Select team —</option>
                                 {% for val, label in form.originating_team.field.choices %}
-                                {% if val %}
                                 <option value="{{ val }}" {% if form.originating_team.value|stringformat:"s" == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
-                                {% endif %}
                                 {% endfor %}
                             </select>
-                            <div class="form-text">The team that raised this {{ terms.issue|lower }}. Cannot be changed later.</div>
+                            <div class="form-text">The team that raised this {{ terms.issue|lower }}.</div>
                             {% for error in form.originating_team.errors %}
                             <div class="invalid-feedback">{{ error }}</div>
                             {% endfor %}

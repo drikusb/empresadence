@@ -121,3 +121,35 @@ def get_assignable_teams(user, org):
     if not is_org_admin(user, org):
         teams = teams.filter(members__user=user)
     return teams.order_by('name')
+
+
+class TeamPickerMixin:
+    """Make a model form's team field a real picker.
+
+    Call ``init_team_picker`` from ``__init__`` once the fields exist. It limits
+    the field to the teams ``user`` may file records under (see
+    ``get_assignable_teams``) plus ``default`` itself, so an existing record
+    stays where it is when its editor is not on that team, and makes
+    ``default`` the initial choice. It returns the team the form's other
+    team-scoped fields (owner, parent Rock, linked Rock or Issue) should be
+    limited to: the submitted team when the form is bound, otherwise
+    ``default``.
+    """
+
+    team_field_name = 'team'
+
+    def init_team_picker(self, default, user):
+        field = self.fields[self.team_field_name]
+        teams = Team.objects.none()
+        if default is not None:
+            teams = get_assignable_teams(user, default.organization)
+            teams = (teams | Team.objects.filter(pk=default.pk)).distinct().order_by('name')
+        field.queryset = teams
+        field.empty_label = None
+        field.initial = default
+        if not self.is_bound:
+            return default
+        try:
+            return teams.get(pk=self.data.get(self.add_prefix(self.team_field_name)))
+        except (ValueError, TypeError, Team.DoesNotExist):
+            return default

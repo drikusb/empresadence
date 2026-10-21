@@ -4,26 +4,29 @@ from django import forms
 from django.contrib.auth.models import User
 
 from apps.accounts.models import Team
+from apps.accounts.scoping import TeamPickerMixin
 from apps.rocks.models import Rock
 from apps.issues.models import Issue
 from .models import ToDo
 
 
-class ToDoForm(forms.ModelForm):
+class ToDoForm(TeamPickerMixin, forms.ModelForm):
     class Meta:
         model = ToDo
-        # team excluded: always set to the user's active team in the view
-        fields = ['title', 'description', 'owner', 'due_date', 'linked_rock', 'linked_issue']
+        fields = ['title', 'description', 'owner', 'team', 'due_date', 'linked_rock',
+                  'linked_issue']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
             'due_date': forms.DateInput(attrs={'type': 'date'}),
         }
 
-    def __init__(self, *args, team=None, **kwargs):
+    def __init__(self, *args, team=None, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         if not self.instance.pk:
             self.fields['due_date'].initial = date.today() + timedelta(days=7)
 
+        # The submitted team when bound, so owner and links follow a change of team.
+        team = self.init_team_picker(team, user)
         if team:
             self.fields['owner'].queryset = (
                 User.objects
@@ -40,6 +43,15 @@ class ToDoForm(forms.ModelForm):
                 Issue.objects
                 .filter(originating_team=team, status__in=[Issue.STATUS_OPEN, Issue.STATUS_IN_IDS])
                 .order_by('-created_at')
+            )
+            self.fields['owner'].error_messages['invalid_choice'] = (
+                f'That person is not a member of {team.name}.'
+            )
+            self.fields['linked_rock'].error_messages['invalid_choice'] = (
+                f'The linked Rock must be on {team.name}.'
+            )
+            self.fields['linked_issue'].error_messages['invalid_choice'] = (
+                f'The linked Issue must have been raised by {team.name}.'
             )
         else:
             self.fields['owner'].queryset = User.objects.none()

@@ -199,7 +199,6 @@ class RockCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
     def form_valid(self, form):
-        form.instance.team = get_active_team(self.request)
         form.instance.created_by = self.request.user
         terms = get_terms(self.request)
         messages.success(self.request, f'{terms.rock} "{form.instance.title}" created.')

@@ -78,6 +78,7 @@ class ToDoCreateView(LoginRequiredMixin, CreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['team'] = get_active_team(self.request)
+        kwargs['user'] = self.request.user
         return kwargs
 
     def get_initial(self):
@@ -91,21 +92,9 @@ class ToDoCreateView(LoginRequiredMixin, CreateView):
             initial['linked_rock'] = rock_pk
         if issue_pk:
             initial['linked_issue'] = issue_pk
-        # Pre-fill team from GET or user's first team
-        team_pk = self.request.GET.get('team')
-        if team_pk:
-            initial['team'] = team_pk
-        else:
-            try:
-                first_team = self.request.user.profile.teams.first()
-                if first_team:
-                    initial['team'] = first_team.pk
-            except AttributeError:
-                pass
         return initial
 
     def form_valid(self, form):
-        form.instance.team = get_active_team(self.request)
         terms = get_terms(self.request)
         messages.success(self.request, f'{terms.todo} "{form.instance.title}" created.')
         return super().form_valid(form)
@@ -128,6 +117,7 @@ class ToDoUpdateView(LoginRequiredMixin, OrgScopedMixin, UpdateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['team'] = self.get_object().team
+        kwargs['user'] = self.request.user
         return kwargs
 
     def form_valid(self, form):
