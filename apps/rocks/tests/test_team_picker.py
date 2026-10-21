@@ -165,3 +165,27 @@ class RockTeamPickerTest(TestCase):
         )
         rock.refresh_from_db()
         self.assertEqual(rock.team, self.alpha)
+
+
+class MissingTeamFallsBackTest(TestCase):
+    """A POST without a team keeps the old behaviour: the record goes to the active team."""
+
+    def test_rock_created_without_a_team_lands_on_the_active_team(self):
+        from django.contrib.auth.models import User
+        from django.urls import reverse
+        from apps.accounts.models import Membership, Organization, Team, UserProfile
+        from apps.rocks.models import Rock
+        org = Organization.objects.create(name='Fallback')
+        team = Team.objects.create(organization=org, name='Leadership')
+        user = User.objects.create_user(username='u', password='pw')
+        Membership.objects.create(user=user, organization=org, role=Membership.ROLE_ADMIN)
+        UserProfile.objects.get_or_create(user=user)
+        user.profile.teams.add(team)
+        self.client.force_login(user)
+        self.client.post(reverse('accounts:team_switch', args=[team.pk]), {'next': '/'})
+        resp = self.client.post(reverse('rocks:create'), {
+            'title': 'No team posted', 'owner': user.pk, 'quarter': Rock.current_quarter(),
+            'year': Rock.current_year(), 'due_date': '2026-12-31',
+        })
+        self.assertEqual(resp.status_code, 302, resp.content[:300])
+        self.assertEqual(Rock.objects.get(title='No team posted').team, team)

@@ -149,7 +149,13 @@ class TeamPickerMixin:
         field.initial = default
         if not self.is_bound:
             return default
+        name = self.add_prefix(self.team_field_name)
+        if not self.data.get(name) and default is not None:
+            # A submission without a team (an older client, a script, a test that
+            # predates the picker) keeps the previous behaviour: the active team.
+            self.data = self.data.copy()
+            self.data[name] = str(default.pk)
         try:
-            return teams.get(pk=self.data.get(self.add_prefix(self.team_field_name)))
+            return teams.get(pk=self.data.get(name))
         except (ValueError, TypeError, Team.DoesNotExist):
             return default
