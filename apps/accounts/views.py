@@ -29,6 +29,7 @@ from .scoping import (
     SESSION_TEAM_KEY, OrgScopedMixin, get_active_org, get_active_team, get_org_object_or_404,
     get_user_orgs, is_org_admin, set_active_org,
 )
+from .team_scope import SCOPE_ALL, get_scope, get_visible_teams
 from .terminology import get_terms
 
 
@@ -63,7 +64,15 @@ class HealthzView(View):
 # ---------------------------------------------------------------------------
 
 class HomeView(LoginRequiredMixin, TemplateView):
+    """The dashboard: counts across every team the user may see, or the active team alone.
+
+    The scope is switched with ``?scope=all|team`` and kept under its own session
+    key, apart from the Rocks and Scorecards lists. Unlike those lists it starts
+    wide, so the first thing a user sees is the whole of what they may see.
+    """
+
     template_name = 'home.html'
+    scope_session_key = 'dashboard_scope'
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -81,11 +90,21 @@ class HomeView(LoginRequiredMixin, TemplateView):
         ctx = super().get_context_data(**kwargs)
         org = get_active_org(self.request)
         ctx['org'] = org
-        team = get_active_team(self.request)
+        scope = get_scope(self.request, self.scope_session_key, default=SCOPE_ALL)
+        active_team = get_active_team(self.request)
+        visible_teams = list(get_visible_teams(self.request))
+        if scope == SCOPE_ALL:
+            teams = visible_teams
+        else:
+            teams = [active_team] if active_team else []
+        ctx.update({
+            'scope': scope,
+            'active_team': active_team,
+            'visible_teams': visible_teams,
+            'scoped_teams': teams,
+        })
 
-        if team:
-            teams = [team]
-
+        if teams:
             ctx['active_rocks'] = Rock.objects.filter(team__in=teams).exclude(
                 status__in=[Rock.STATUS_COMPLETE, Rock.STATUS_DROPPED]
             ).count()
