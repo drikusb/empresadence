@@ -180,8 +180,10 @@
                     </div>
                     {% endif %}
 
-                    {# Company-wide flag (admins only, field is omitted entirely otherwise).
-                       Only shown for long-term issues, since that's the only kind the VTO displays. #}
+                    {% comment %}
+                      Company-wide flag (admins only, field is omitted entirely otherwise).
+                      Only shown for long-term issues, since that's the only kind the VTO displays.
+                    {% endcomment %}
                     {% if form.is_company_issue %}
                     <div class="form-check mb-3" id="company-issue-field" style="display:none">
                         <input type="checkbox"
