@@ -1,11 +1,12 @@
 {% extends "base.html" %}
-{% block page_title %}Rocks — {{ quarter_label }}{% endblock %}
+{% load terms %}
+{% block page_title %}{{ terms.rocks }} — {{ quarter_label }}{% endblock %}
 
 {% block content %}
 {# ── Header ── #}
 <div class="row mb-3 align-items-center">
     <div class="col">
-        <h1 class="h3 mb-0"><i class="bi bi-gem me-2 text-success"></i>Rocks</h1>
+        <h1 class="h3 mb-0"><i class="bi bi-gem me-2 text-success"></i>{{ terms.rocks }}</h1>
     </div>
     <div class="col-auto d-flex gap-2">
         <a href="{% url 'rocks:export_csv' %}?quarter={{ quarter }}&year={{ year }}" class="btn btn-outline-secondary">
@@ -15,7 +16,7 @@
             <i class="bi bi-clock-history me-1"></i>Archive
         </a>
         <a href="{% url 'rocks:create' %}" class="btn btn-dark">
-            <i class="bi bi-plus-lg me-1"></i>New Rock
+            <i class="bi bi-plus-lg me-1"></i>New {{ terms.rock }}
         </a>
     </div>
 </div>
@@ -76,13 +77,13 @@
     <div class="mb-4">
         <div class="d-flex align-items-center mb-2">
             <h5 class="mb-0 me-2">{{ team.name }}</h5>
-            <span class="badge bg-light text-dark border">{{ team_rocks|length }} Rock{{ team_rocks|length|pluralize }}</span>
+            <span class="badge bg-light text-dark border">{{ team_rocks|length }} {% term 'rock' count=team_rocks|length %}</span>
             {% if team_rocks|length < 3 %}
-            <span class="badge bg-warning text-dark ms-2" title="EOS recommends 3–7 Rocks per team">
+            <span class="badge bg-warning text-dark ms-2" title="EOS recommends 3–7 {{ terms.rocks }} per team">
                 <i class="bi bi-exclamation-triangle me-1"></i>Below minimum
             </span>
             {% elif team_rocks|length > 7 %}
-            <span class="badge bg-danger ms-2" title="EOS recommends 3–7 Rocks per team">
+            <span class="badge bg-danger ms-2" title="EOS recommends 3–7 {{ terms.rocks }} per team">
                 <i class="bi bi-exclamation-triangle me-1"></i>Above maximum
             </span>
             {% endif %}
@@ -121,10 +122,11 @@
                                 {{ rock.title }}
                             </a>
                             {% if rock.is_company_rock %}
-                            <i class="bi bi-building text-muted ms-1" title="Company Rock, shown on the VTO"></i>
+                            <i class="bi bi-building text-muted ms-1" title="Company {{ terms.rock }}, shown on the {{ terms.vto }}"></i>
                             {% endif %}
                             {% if rock.child_rocks.exists %}
-                            <i class="bi bi-diagram-2 text-muted ms-1" title="Has child Rocks"></i>
+                            <i class="bi bi-diagram-2 text-muted ms-1"
+                               title="Has child {{ terms.rocks }}"></i>
                             {% endif %}
                             {% if rock.dependencies.exists %}
                             <i class="bi bi-link text-muted ms-1" title="Has cross-team dependencies"></i>
@@ -199,10 +201,10 @@
 {% else %}
 <div class="text-center py-5 text-muted">
     <i class="bi bi-gem display-3 d-block mb-3 text-success opacity-25"></i>
-    <h4>No Rocks for {{ quarter_label }}</h4>
-    <p class="mb-4">EOS recommends 3–7 Rocks per team each quarter.</p>
+    <h4>No {{ terms.rocks }} for {{ quarter_label }}</h4>
+    <p class="mb-4">EOS recommends 3–7 {{ terms.rocks }} per team each quarter.</p>
     <a href="{% url 'rocks:create' %}" class="btn btn-dark">
-        <i class="bi bi-plus-lg me-1"></i>Create first Rock
+        <i class="bi bi-plus-lg me-1"></i>Create first {{ terms.rock }}
     </a>
 </div>
 {% endif %}

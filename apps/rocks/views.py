@@ -16,6 +16,7 @@ from .forms import RockForm, RockStatusForm, RockDependencyForm
 from apps.accounts.scoping import (
     OrgScopedMixin, get_active_team, get_org_object_or_404, is_org_admin,
 )
+from apps.accounts.terminology import get_terms
 from apps.issues.models import Issue, IssueActivity
 
 
@@ -139,7 +140,8 @@ class RockCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.team = get_active_team(self.request)
         form.instance.created_by = self.request.user
-        messages.success(self.request, f'Rock "{form.instance.title}" created.')
+        terms = get_terms(self.request)
+        messages.success(self.request, f'{terms.rock} "{form.instance.title}" created.')
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -163,7 +165,8 @@ class RockUpdateView(LoginRequiredMixin, OrgScopedMixin, UpdateView):
         return kwargs
 
     def form_valid(self, form):
-        messages.success(self.request, f'Rock "{form.instance.title}" updated.')
+        terms = get_terms(self.request)
+        messages.success(self.request, f'{terms.rock} "{form.instance.title}" updated.')
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -210,7 +213,8 @@ class RockDeleteView(LoginRequiredMixin, OrgScopedMixin, DeleteView):
     success_url = reverse_lazy('rocks:list')
 
     def form_valid(self, form):
-        messages.success(self.request, f'Rock "{self.object.title}" deleted.')
+        terms = get_terms(self.request)
+        messages.success(self.request, f'{terms.rock} "{self.object.title}" deleted.')
         return super().form_valid(form)
 
 
@@ -353,15 +357,16 @@ class MilestoneCreateView(LoginRequiredMixin, View):
         title = request.POST.get('title', '').strip()
         due_date = request.POST.get('due_date') or None
         description = request.POST.get('description', '').strip()
+        terms = get_terms(request)
         if title:
             order = rock.milestones.count()
             RockMilestone.objects.create(
                 rock=rock, title=title, due_date=due_date,
                 description=description, order=order,
             )
-            messages.success(request, 'Milestone added.')
+            messages.success(request, f'{terms.milestone} added.')
         else:
-            messages.error(request, 'Milestone title is required.')
+            messages.error(request, f'{terms.milestone} title is required.')
         return redirect('rocks:detail', pk=pk)
 
 
@@ -380,7 +385,7 @@ class MilestoneEditView(LoginRequiredMixin, View):
             milestone.description = request.POST.get('description', '').strip()
             milestone.due_date = request.POST.get('due_date') or None
             milestone.save(update_fields=['title', 'description', 'due_date'])
-            messages.success(request, 'Milestone updated.')
+            messages.success(request, f'{get_terms(request).milestone} updated.')
         return redirect('rocks:detail', pk=milestone.rock_id)
 
 
@@ -399,7 +404,7 @@ class MilestoneDeleteView(LoginRequiredMixin, View):
         milestone = _get_milestone(request, pk)
         rock_pk = milestone.rock_id
         milestone.delete()
-        messages.success(request, 'Milestone removed.')
+        messages.success(request, f'{get_terms(request).milestone} removed.')
         return redirect('rocks:detail', pk=rock_pk)
 
 
@@ -421,7 +426,7 @@ class RockIssueLinkView(LoginRequiredMixin, View):
             action=IssueActivity.ACTION_ROCK_LINKED,
             notes=f'Linked to Rock "{rock.title}".',
         )
-        messages.success(request, f'Issue "{issue.title}" linked.')
+        messages.success(request, f'{get_terms(request).issue} "{issue.title}" linked.')
         return redirect('rocks:detail', pk=pk)
 
 
@@ -437,5 +442,5 @@ class RockIssueUnlinkView(LoginRequiredMixin, View):
             action=IssueActivity.ACTION_ROCK_UNLINKED,
             notes=f'Unlinked from Rock "{rock.title}".',
         )
-        messages.success(request, f'Issue "{issue.title}" unlinked.')
+        messages.success(request, f'{get_terms(request).issue} "{issue.title}" unlinked.')
         return redirect('rocks:detail', pk=pk)

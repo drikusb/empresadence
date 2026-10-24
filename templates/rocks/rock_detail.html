@@ -18,8 +18,8 @@
                     <span class="badge bg-light text-dark border">Q{{ rock.quarter }} {{ rock.year }}</span>
                     <span class="badge bg-light text-dark border">{{ rock.team.name }}</span>
                     {% if rock.is_company_rock %}
-                    <span class="badge bg-dark" title="Shown on the VTO">
-                        <i class="bi bi-building me-1"></i>Company Rock
+                    <span class="badge bg-dark" title="Shown on the {{ terms.vto }}">
+                        <i class="bi bi-building me-1"></i>Company {{ terms.rock }}
                     </span>
                     {% endif %}
                     {% if rock.is_checkin_overdue %}
@@ -106,7 +106,7 @@
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <h6 class="text-muted text-uppercase fw-semibold mb-0" style="font-size:.7rem;letter-spacing:.05em">
-                        <i class="bi bi-flag me-1"></i>Milestones
+                        <i class="bi bi-flag me-1"></i>{{ terms.milestones }}
                         {% if rock.milestone_count %}
                         <span class="text-body fw-normal ms-1">({{ rock.milestones_complete }}/{{ rock.milestone_count }})</span>
                         {% endif %}
@@ -148,12 +148,12 @@
                             </span>
                             {% endif %}
                             {% if can_edit %}
-                            <a href="{% url 'rocks:milestone_edit' ms.pk %}" class="btn btn-sm btn-outline-secondary border-0 p-0 px-1 mt-1" title="Edit milestone">
+                            <a href="{% url 'rocks:milestone_edit' ms.pk %}" class="btn btn-sm btn-outline-secondary border-0 p-0 px-1 mt-1" title="Edit {{ terms.milestone|lower }}">
                                 <i class="bi bi-pencil" style="font-size:.75rem"></i>
                             </a>
                             <form method="post" action="{% url 'rocks:milestone_delete' ms.pk %}" class="mt-1">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-outline-danger border-0 p-0 px-1" title="Remove milestone">
+                                <button type="submit" class="btn btn-sm btn-outline-danger border-0 p-0 px-1" title="Remove {{ terms.milestone|lower }}">
                                     <i class="bi bi-x-lg" style="font-size:.75rem"></i>
                                 </button>
                             </form>
@@ -168,7 +168,7 @@
                 <form method="post" action="{% url 'rocks:milestone_add' rock.pk %}">
                     {% csrf_token %}
                     <div class="d-flex gap-2 align-items-start mb-2">
-                        <input type="text" name="title" class="form-control form-control-sm" placeholder="Add a milestone…" required>
+                        <input type="text" name="title" class="form-control form-control-sm" placeholder="Add a {{ terms.milestone|lower }}…" required>
                         <input type="date" name="due_date" class="form-control form-control-sm" style="max-width:140px">
                         <button type="submit" class="btn btn-sm btn-outline-secondary text-nowrap">
                             <i class="bi bi-plus"></i> Add
@@ -178,7 +178,7 @@
                               placeholder="Description (optional)…"></textarea>
                 </form>
                 {% elif not rock.milestone_count %}
-                <p class="text-muted small mb-0">No milestones yet.</p>
+                <p class="text-muted small mb-0">No {{ terms.milestones|lower }} yet.</p>
                 {% endif %}
             </div>
         </div>
@@ -239,7 +239,7 @@
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">
                 <h6 class="text-muted text-uppercase fw-semibold mb-3" style="font-size:.7rem;letter-spacing:.05em">
-                    <i class="bi bi-exclamation-circle me-1"></i>Linked Issues ({{ linked_issues|length }})
+                    <i class="bi bi-exclamation-circle me-1"></i>Linked {{ terms.issues }} ({{ linked_issues|length }})
                 </h6>
                 <ul class="list-group list-group-flush">
                     {% for issue in linked_issues %}
@@ -256,7 +256,7 @@
                             <form method="post" action="{% url 'rocks:issue_unlink' rock.pk %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="issue_id" value="{{ issue.pk }}">
-                                <button type="submit" class="btn btn-sm btn-outline-danger border-0 p-0 px-1" title="Unlink issue">
+                                <button type="submit" class="btn btn-sm btn-outline-danger border-0 p-0 px-1" title="Unlink {{ terms.issue|lower }}">
                                     <i class="bi bi-x-lg" style="font-size:.75rem"></i>
                                 </button>
                             </form>
@@ -274,7 +274,7 @@
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">
                 <h6 class="text-muted text-uppercase fw-semibold mb-2" style="font-size:.7rem;letter-spacing:.05em">
-                    <i class="bi bi-diagram-2 me-1"></i>Parent Rock
+                    <i class="bi bi-diagram-2 me-1"></i>Parent {{ terms.rock }}
                 </h6>
                 <a href="{{ rock.parent_rock.get_absolute_url }}" class="text-decoration-none">
                     <span class="badge bg-{{ rock.parent_rock.status_badge_class }} me-2">{{ rock.parent_rock.get_status_display }}</span>
@@ -290,7 +290,7 @@
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">
                 <h6 class="text-muted text-uppercase fw-semibold mb-3" style="font-size:.7rem;letter-spacing:.05em">
-                    <i class="bi bi-diagram-2 me-1"></i>Child Rocks ({{ child_rocks|length }})
+                    <i class="bi bi-diagram-2 me-1"></i>Child {{ terms.rocks }} ({{ child_rocks|length }})
                 </h6>
                 <ul class="list-group list-group-flush">
                     {% for child in child_rocks %}
@@ -376,7 +376,7 @@
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <h6 class="text-muted text-uppercase fw-semibold mb-0" style="font-size:.7rem;letter-spacing:.05em">
-                        <i class="bi bi-check2-square me-1 text-primary"></i>To-Dos
+                        <i class="bi bi-check2-square me-1 text-primary"></i>{{ terms.todos }}
                     </h6>
                     <a href="{% url 'todos:create' %}?rock={{ rock.pk }}&next={{ request.get_full_path }}" class="btn btn-sm btn-outline-secondary border-0 py-0">
                         <i class="bi bi-plus"></i>
@@ -404,7 +404,7 @@
         {% else %}
         <div class="mb-4">
             <a href="{% url 'todos:create' %}?rock={{ rock.pk }}&next={{ request.get_full_path }}" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-plus me-1"></i>Add To-Do
+                <i class="bi bi-plus me-1"></i>Add {{ terms.todo }}
             </a>
         </div>
         {% endif %}
@@ -458,7 +458,7 @@
                     <div class="mb-2">
                         <select name="{{ dependency_form.depends_on_rock.html_name }}"
                                 class="form-select form-select-sm {% if dependency_form.depends_on_rock.errors %}is-invalid{% endif %}">
-                            <option value="">— Select a Rock —</option>
+                            <option value="">— Select a {{ terms.rock }} —</option>
                             {% for val, label in dependency_form.depends_on_rock.field.choices %}
                             {% if val %}
                             <option value="{{ val }}">{{ label }}</option>
@@ -479,7 +479,7 @@
                         <i class="bi bi-link me-1"></i>Add Dependency
                     </button>
                     {% else %}
-                    <p class="text-muted small mb-0">No other Rocks available to link.</p>
+                    <p class="text-muted small mb-0">No other {{ terms.rocks }} available to link.</p>
                     {% endif %}
                 </form>
             </div>
@@ -491,25 +491,25 @@
         <div class="card border-0 shadow-sm mt-4">
             <div class="card-body">
                 <h6 class="text-muted text-uppercase fw-semibold mb-3" style="font-size:.7rem;letter-spacing:.05em">
-                    Link Issue
+                    Link {{ terms.issue }}
                 </h6>
                 {% if linkable_issues %}
                 <form method="post" action="{% url 'rocks:issue_link' rock.pk %}">
                     {% csrf_token %}
                     <div class="mb-2">
                         <select name="issue_id" class="form-select form-select-sm">
-                            <option value="">— Select an Issue —</option>
+                            <option value="">— Select an {{ terms.issue }} —</option>
                             {% for issue in linkable_issues %}
                             <option value="{{ issue.pk }}">[{{ issue.get_status_display }}] {{ issue.title }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <button type="submit" class="btn btn-sm btn-outline-secondary w-100">
-                        <i class="bi bi-link me-1"></i>Link Issue
+                        <i class="bi bi-link me-1"></i>Link {{ terms.issue }}
                     </button>
                 </form>
                 {% else %}
-                <p class="text-muted small mb-0">No open issues available to link.</p>
+                <p class="text-muted small mb-0">No open {{ terms.issues|lower }} available to link.</p>
                 {% endif %}
             </div>
         </div>

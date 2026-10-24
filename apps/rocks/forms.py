@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 
+from apps.accounts.terminology import terms_for
 from .models import Rock, RockDependency
 from apps.accounts.models import Team
 from apps.accounts.scoping import is_org_admin
@@ -13,10 +14,7 @@ class RockForm(forms.ModelForm):
         fields = ['title', 'description', 'owner', 'quarter', 'year', 'due_date',
                   'parent_rock', 'is_company_rock']
         widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'What is this Rock? Keep it concise.',
-            }),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
@@ -32,12 +30,13 @@ class RockForm(forms.ModelForm):
 
     def __init__(self, *args, team=None, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        terms = self.terms = terms_for(team.organization if team else None)
         # Only an admin of the team's organisation may flag a Rock as company-wide.
         is_admin = bool(user) and is_org_admin(user, team.organization if team else None)
         if is_admin:
             self.fields['confirm_demote_children'] = forms.BooleanField(
                 required=False,
-                label="Also remove company-wide status from this Rock's company-wide child Rocks",
+                label=f"Also remove company-wide status from this {terms.rock}'s company-wide child {terms.rocks}",
                 widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             )
         else:
@@ -52,8 +51,9 @@ class RockForm(forms.ModelForm):
         else:
             self.fields['owner'].queryset = User.objects.none()
             self.fields['parent_rock'].queryset = Rock.objects.none()
+        self.fields['title'].widget.attrs['placeholder'] = f'What is this {terms.rock}? Keep it concise.'
         self.fields['parent_rock'].required = False
-        self.fields['parent_rock'].empty_label = '— None (top-level Rock) —'
+        self.fields['parent_rock'].empty_label = f'— None (top-level {terms.rock}) —'
         self.fields['description'].required = False
 
         if not self.instance.pk:
@@ -81,7 +81,7 @@ class RockForm(forms.ModelForm):
         if is_company_rock and parent_rock and not parent_rock.is_company_rock:
             self.add_error(
                 'parent_rock',
-                'A company-wide Rock needs a company-wide parent, or no parent at all.',
+                f'A company-wide {self.terms.rock} needs a company-wide parent, or no parent at all.',
             )
 
         self._children_to_demote = Rock.objects.none()
@@ -96,11 +96,12 @@ class RockForm(forms.ModelForm):
                 else:
                     count = children.count()
                     titles = ', '.join(children.values_list('title', flat=True))
+                    terms = self.terms
                     self.add_error(None, (
-                        f'Demoting this Rock will also remove company-wide status from '
-                        f'{count} child Rock{"s" if count != 1 else ""}: {titles}. '
-                        'Check "Also remove company-wide status from this Rock’s '
-                        'company-wide child Rocks" below and save again to confirm.'
+                        f'Demoting this {terms.rock} will also remove company-wide status from '
+                        f'{count} child {terms.get("rock", count=count)}: {titles}. '
+                        f'Check "Also remove company-wide status from this {terms.rock}’s '
+                        f'company-wide child {terms.rocks}" below and save again to confirm.'
                     ))
         return cleaned_data
 
@@ -123,15 +124,15 @@ class RockDependencyForm(forms.ModelForm):
         fields = ['depends_on_rock', 'description']
         widgets = {
             'depends_on_rock': forms.Select(attrs={'class': 'form-select'}),
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 2,
-                'placeholder': 'Why does this Rock depend on the other? (optional)',
-            }),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
 
     def __init__(self, *args, rock=None, **kwargs):
         super().__init__(*args, **kwargs)
+        terms = terms_for(rock.team.organization if rock else None)
+        self.fields['description'].widget.attrs['placeholder'] = (
+            f'Why does this {terms.rock} depend on the other? (optional)'
+        )
         if rock:
             # Show only rocks from the same org, different team, same quarter/year
             self.fields['depends_on_rock'].queryset = (

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block page_title %}Rocks Archive — {{ quarter_label }}{% endblock %}
+{% load terms %}
+{% block page_title %}{{ terms.rocks }} Archive — {{ quarter_label }}{% endblock %}
 
 {% block content %}
 {# ── Header ── #}
@@ -29,7 +30,7 @@
     <div class="col-sm-4">
         <div class="card border-0 shadow-sm text-center py-3">
             <div class="fs-2 fw-bold">{{ total }}</div>
-            <div class="text-muted small">Total Rocks</div>
+            <div class="text-muted small">Total {{ terms.rocks }}</div>
         </div>
     </div>
     <div class="col-sm-4">
@@ -56,7 +57,7 @@
              aria-valuenow="{{ completion_pct }}" aria-valuemin="0" aria-valuemax="100">
         </div>
     </div>
-    <div class="text-muted small mt-1">{{ complete }} of {{ total }} Rocks completed</div>
+    <div class="text-muted small mt-1">{{ complete }} of {{ total }} {{ terms.rocks }} completed</div>
 </div>
 {% endif %}
 
@@ -67,7 +68,7 @@
         {% with complete_count=team_rocks|length %}
         <div class="d-flex align-items-center mb-2 gap-2">
             <h5 class="mb-0">{{ team.name }}</h5>
-            <span class="badge bg-light text-dark border">{{ team_rocks|length }} Rock{{ team_rocks|length|pluralize }}</span>
+            <span class="badge bg-light text-dark border">{{ team_rocks|length }} {% term 'rock' count=team_rocks|length %}</span>
         </div>
         {% endwith %}
 
@@ -121,8 +122,8 @@
 {% else %}
 <div class="text-center py-5 text-muted">
     <i class="bi bi-clock-history display-3 d-block mb-3 opacity-25"></i>
-    <h4>No Rocks for {{ quarter_label }}</h4>
-    <p>No Rocks were recorded for this quarter.</p>
+    <h4>No {{ terms.rocks }} for {{ quarter_label }}</h4>
+    <p>No {{ terms.rocks }} were recorded for this quarter.</p>
 </div>
 {% endif %}
 {% endblock %}

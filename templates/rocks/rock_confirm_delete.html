@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block page_title %}Delete Rock{% endblock %}
+{% load terms %}
+{% block page_title %}Delete {{ terms.rock }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -9,22 +10,22 @@
                 <div class="mb-3">
                     <i class="bi bi-trash display-4 text-danger"></i>
                 </div>
-                <h4 class="mb-2">Delete Rock?</h4>
+                <h4 class="mb-2">Delete {{ terms.rock }}?</h4>
                 <p class="text-muted mb-1">You're about to permanently delete:</p>
                 <p class="fw-semibold mb-3">{{ object.title }}</p>
 
                 {% if object.child_rocks.exists %}
                 <div class="alert alert-warning text-start small">
                     <i class="bi bi-exclamation-triangle me-1"></i>
-                    This Rock has <strong>{{ object.child_rocks.count }} child Rock{{ object.child_rocks.count|pluralize }}</strong>.
-                    Child Rocks will lose their parent link but will not be deleted.
+                    This {{ terms.rock }} has <strong>{{ object.child_rocks.count }} child {% term 'rock' count=object.child_rocks.count %}</strong>.
+                    Child {{ terms.rocks }} will lose their parent link but will not be deleted.
                 </div>
                 {% endif %}
 
                 {% if object.dependencies.exists or object.dependents.exists %}
                 <div class="alert alert-warning text-start small">
                     <i class="bi bi-link me-1"></i>
-                    This Rock has dependency links. All dependency records will be removed.
+                    This {{ terms.rock }} has dependency links. All dependency records will be removed.
                 </div>
                 {% endif %}
 
