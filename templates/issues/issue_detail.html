@@ -21,8 +21,8 @@
                     {% endif %}
                     <span class="badge bg-{{ issue.status_badge_class }}">{{ issue.get_status_display }}</span>
                     {% if issue.is_company_issue %}
-                    <span class="badge bg-dark" title="Shown on the VTO">
-                        <i class="bi bi-building me-1"></i>Company Issue
+                    <span class="badge bg-dark" title="Shown on the {{ terms.vto }}">
+                        <i class="bi bi-building me-1"></i>Company {{ terms.issue }}
                     </span>
                     {% endif %}
                     {% if issue.is_delegated %}
@@ -81,7 +81,7 @@
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">
                 <h6 class="text-muted text-uppercase fw-semibold mb-3" style="font-size:.7rem;letter-spacing:.05em">
-                    <i class="bi bi-gem me-1 text-success"></i>Linked Rocks
+                    <i class="bi bi-gem me-1 text-success"></i>Linked {{ terms.rocks }}
                 </h6>
                 <ul class="list-group list-group-flush">
                     {% for rock in linked_rocks %}
@@ -106,7 +106,7 @@
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <h6 class="text-muted text-uppercase fw-semibold mb-0" style="font-size:.7rem;letter-spacing:.05em">
-                        <i class="bi bi-check2-square me-1 text-primary"></i>To-Dos
+                        <i class="bi bi-check2-square me-1 text-primary"></i>{{ terms.todos }}
                     </h6>
                     <a href="{% url 'todos:create' %}?issue={{ issue.pk }}&next={{ request.get_full_path }}" class="btn btn-sm btn-outline-secondary border-0 py-0">
                         <i class="bi bi-plus"></i>
@@ -135,7 +135,7 @@
         {% elif issue.is_open and can_edit %}
         <div class="mb-4">
             <a href="{% url 'todos:create' %}?issue={{ issue.pk }}&next={{ request.get_full_path }}" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-plus me-1"></i>Add To-Do
+                <i class="bi bi-plus me-1"></i>Add {{ terms.todo }}
             </a>
         </div>
         {% endif %}
@@ -238,7 +238,7 @@
                         <input type="hidden" name="status" value="in_ids">
                         <input type="hidden" name="resolution_notes" value="">
                         <button type="submit" class="btn btn-warning w-100">
-                            <i class="bi bi-arrow-repeat me-1"></i>Move to IDS
+                            <i class="bi bi-arrow-repeat me-1"></i>Move to {{ terms.ids }}
                         </button>
                     </form>
                     {% elif issue.status == 'in_ids' %}
@@ -271,7 +271,7 @@
                     <input type="hidden" name="status" value="dropped">
                     <input type="hidden" name="resolution_notes" value="Issue dropped.">
                     <button type="submit" class="btn btn-outline-secondary w-100 btn-sm">
-                        <i class="bi bi-x-circle me-1"></i>Drop Issue
+                        <i class="bi bi-x-circle me-1"></i>Drop {{ terms.issue }}
                     </button>
                 </form>
             </div>

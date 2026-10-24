@@ -1,18 +1,19 @@
 {% extends "base.html" %}
-{% block page_title %}Issues{% endblock %}
+{% block page_title %}{{ terms.issues }}{% endblock %}
 
+{% load terms %}
 {% block content %}
 {# ── Header ── #}
 <div class="row mb-3 align-items-center">
     <div class="col">
-        <h1 class="h3 mb-0"><i class="bi bi-exclamation-triangle me-2 text-warning"></i>Issues</h1>
+        <h1 class="h3 mb-0"><i class="bi bi-exclamation-triangle me-2 text-warning"></i>{{ terms.issues }}</h1>
     </div>
     <div class="col-auto d-flex gap-2">
         <a href="{% url 'issues:export_csv' %}?{{ request.GET.urlencode }}" class="btn btn-outline-secondary">
             <i class="bi bi-download me-1"></i>Export CSV
         </a>
         <a href="{% url 'issues:create' %}" class="btn btn-dark">
-            <i class="bi bi-plus-lg me-1"></i>New Issue
+            <i class="bi bi-plus-lg me-1"></i>New {{ terms.issue }}
         </a>
     </div>
 </div>
@@ -70,6 +71,7 @@
 
 {# ── Issue list ── #}
 {% if issues %}
+<p class="text-muted small mb-2">{{ issues|length }} {% term 'issue' count=issues|length %}</p>
 <div class="card border-0 shadow-sm">
     <ul class="list-group list-group-flush">
         {% for issue in issues %}
@@ -92,7 +94,7 @@
                         {{ issue.title }}
                     </a>
                     {% if issue.is_company_issue %}
-                    <i class="bi bi-building text-muted ms-1" title="Company Issue, shown on the VTO"></i>
+                    <i class="bi bi-building text-muted ms-1" title="Company {{ terms.issue }}, shown on the {{ terms.vto }}"></i>
                     {% endif %}
                     <div class="text-muted small mt-1 d-flex gap-2 flex-wrap align-items-center">
                         <span>
@@ -104,7 +106,9 @@
                         </span>
                         {% endif %}
                         {% if issue.linked_rocks.exists %}
-                        <span><i class="bi bi-gem me-1 text-success"></i>{{ issue.linked_rocks.count }} Rock{{ issue.linked_rocks.count|pluralize }}</span>
+                        {% with n=issue.linked_rocks.count %}
+                        <span><i class="bi bi-gem me-1 text-success"></i>{{ n }} {% term 'rock' count=n %}</span>
+                        {% endwith %}
                         {% endif %}
                         {% if issue.issue_type == 'long_term' and issue.target_quarter %}
                         <span class="text-muted"><i class="bi bi-calendar3 me-1"></i>Target Q{{ issue.target_quarter }} {{ issue.target_year }}</span>
@@ -142,7 +146,7 @@
                                 <input type="hidden" name="status" value="in_ids">
                                 <input type="hidden" name="resolution_notes" value="">
                                 <button type="submit" class="dropdown-item text-warning">
-                                    <i class="bi bi-arrow-repeat me-2"></i>Move to IDS
+                                    <i class="bi bi-arrow-repeat me-2"></i>Move to {{ terms.ids }}
                                 </button>
                             </form>
                         </li>
@@ -161,10 +165,10 @@
 {% else %}
 <div class="text-center py-5 text-muted">
     <i class="bi bi-exclamation-triangle display-3 d-block mb-3 text-warning opacity-25"></i>
-    <h4>No Issues found</h4>
-    <p class="mb-4">Issues capture problems and opportunities. Resolve them using the IDS process.</p>
+    <h4>No {{ terms.issues }} found</h4>
+    <p class="mb-4">{{ terms.issues }} capture problems and opportunities. Resolve them using the {{ terms.ids }} process.</p>
     <a href="{% url 'issues:create' %}" class="btn btn-dark">
-        <i class="bi bi-plus-lg me-1"></i>Create first Issue
+        <i class="bi bi-plus-lg me-1"></i>Create first {{ terms.issue }}
     </a>
 </div>
 {% endif %}

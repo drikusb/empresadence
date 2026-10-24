@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block page_title %}{{ action }} Issue{% endblock %}
+{% block page_title %}{{ action }} {{ terms.issue }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -10,7 +10,7 @@
                 <i class="bi bi-arrow-left"></i>
             </a>
             <h1 class="h3 mb-0">
-                <i class="bi bi-exclamation-triangle me-2 text-warning"></i>{{ action }} Issue
+                <i class="bi bi-exclamation-triangle me-2 text-warning"></i>{{ action }} {{ terms.issue }}
             </h1>
         </div>
 
@@ -37,7 +37,7 @@
                                id="{{ form.title.id_for_label }}"
                                value="{{ form.title.value|default:'' }}"
                                class="form-control {% if form.title.errors %}is-invalid{% endif %}"
-                               placeholder="The presenting issue — concise, 1 sentence">
+                               placeholder="The presenting {{ terms.issue|lower }} — concise, 1 sentence">
                         {% for error in form.title.errors %}
                         <div class="invalid-feedback">{{ error }}</div>
                         {% endfor %}
@@ -58,7 +58,7 @@
 
                     {# Issue type #}
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Issue Type <span class="text-danger">*</span></label>
+                        <label class="form-label fw-semibold">{{ terms.issue }} Type <span class="text-danger">*</span></label>
                         <div class="d-flex gap-3">
                             {% for val, label in form.issue_type.field.choices %}
                             <div class="form-check">
@@ -71,7 +71,7 @@
                             </div>
                             {% endfor %}
                         </div>
-                        <div class="form-text">Short-term: resolve within 90 days. Long-term: strategic, added to VTO Issues List.</div>
+                        <div class="form-text">Short-term: resolve within 90 days. Long-term: strategic, added to the {{ terms.vto }} {{ terms.issues }} List.</div>
                         {% for error in form.issue_type.errors %}
                         <div class="text-danger small">{{ error }}</div>
                         {% endfor %}
@@ -131,7 +131,7 @@
                                 {% endif %}
                                 {% endfor %}
                             </select>
-                            <div class="form-text">The team that raised this issue. Cannot be changed later.</div>
+                            <div class="form-text">The team that raised this {{ terms.issue|lower }}. Cannot be changed later.</div>
                             {% for error in form.originating_team.errors %}
                             <div class="invalid-feedback">{{ error }}</div>
                             {% endfor %}
@@ -160,7 +160,7 @@
                     {# Linked rocks #}
                     {% if form.linked_rocks.field.queryset.exists %}
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Linked Rocks</label>
+                        <label class="form-label fw-semibold">Linked {{ terms.rocks }}</label>
                         <div class="border rounded p-2" style="max-height:160px;overflow-y:auto">
                             {% for rock in form.linked_rocks.field.queryset %}
                             <div class="form-check">
@@ -176,7 +176,7 @@
                             </div>
                             {% endfor %}
                         </div>
-                        <div class="form-text">Which active Rocks does this issue affect?</div>
+                        <div class="form-text">Which active {{ terms.rocks }} does this {{ terms.issue|lower }} affect?</div>
                     </div>
                     {% endif %}
 
@@ -192,9 +192,9 @@
                                class="form-check-input"
                                {% if form.is_company_issue.value %}checked{% endif %}>
                         <label for="{{ form.is_company_issue.id_for_label }}" class="form-check-label">
-                            Company-wide Issue
+                            Company-wide {{ terms.issue }}
                         </label>
-                        <div class="form-text">Shows this long-term Issue on the VTO, instead of just this team's Issues list.</div>
+                        <div class="form-text">Shows this long-term {{ terms.issue }} on the {{ terms.vto }}, instead of just this team's {{ terms.issues }} list.</div>
                     </div>
                     {% endif %}
 
@@ -202,7 +202,7 @@
 
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-dark">
-                            <i class="bi bi-check-lg me-1"></i>{{ action }} Issue
+                            <i class="bi bi-check-lg me-1"></i>{{ action }} {{ terms.issue }}
                         </button>
                         <a href="{% url 'issues:list' %}" class="btn btn-outline-secondary">Cancel</a>
                     </div>

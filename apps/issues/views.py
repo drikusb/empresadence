@@ -12,6 +12,7 @@ from .forms import IssueForm, IssueStatusForm, IssueDelegateForm, IssueCommentFo
 from apps.accounts.scoping import (
     OrgScopedMixin, get_active_team, get_org_object_or_404, is_org_admin,
 )
+from apps.accounts.terminology import get_terms
 
 ISSUE_ORG_LOOKUP = 'originating_team__organization'
 
@@ -113,7 +114,8 @@ class IssueCreateView(LoginRequiredMixin, CreateView):
                 self.object, self.request.user, IssueActivity.ACTION_DELEGATED,
                 notes=f'Delegated to {self.object.delegated_to_team.name} on creation.'
             )
-        messages.success(self.request, f'Issue "{self.object.title}" created.')
+        terms = get_terms(self.request)
+        messages.success(self.request, f'{terms.issue} "{self.object.title}" created.')
         return response
 
     def get_success_url(self):
@@ -138,7 +140,8 @@ class IssueUpdateView(LoginRequiredMixin, OrgScopedMixin, UpdateView):
         return kwargs
 
     def form_valid(self, form):
-        messages.success(self.request, f'Issue "{self.object.title}" updated.')
+        terms = get_terms(self.request)
+        messages.success(self.request, f'{terms.issue} "{self.object.title}" updated.')
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -158,7 +161,10 @@ class IssueDetailView(LoginRequiredMixin, OrgScopedMixin, DetailView):
         issue = self.object
         ctx['activity'] = issue.activity.select_related('actor', 'actor__profile').order_by('created_at')
         ctx['linked_rocks'] = issue.linked_rocks.select_related('team', 'owner')
-        ctx['status_form'] = IssueStatusForm(initial={'status': issue.status, 'resolution_notes': issue.resolution_notes})
+        ctx['status_form'] = IssueStatusForm(
+            initial={'status': issue.status, 'resolution_notes': issue.resolution_notes},
+            terms=get_terms(self.request),
+        )
         ctx['delegate_form'] = IssueDelegateForm(
             initial={'delegated_to_team': issue.delegated_to_team},
             organization=issue.originating_team.organization,
@@ -175,7 +181,8 @@ class IssueDeleteView(LoginRequiredMixin, OrgScopedMixin, DeleteView):
     success_url = reverse_lazy('issues:list')
 
     def form_valid(self, form):
-        messages.success(self.request, f'Issue "{self.object.title}" deleted.')
+        terms = get_terms(self.request)
+        messages.success(self.request, f'{terms.issue} "{self.object.title}" deleted.')
         return super().form_valid(form)
 
 
@@ -190,7 +197,7 @@ class IssueStatusView(LoginRequiredMixin, View):
         issue = _get_issue(request, pk)
         if not _can_edit(request.user, issue):
             return HttpResponseForbidden()
-        form = IssueStatusForm(request.POST)
+        form = IssueStatusForm(request.POST, terms=get_terms(request))
         if form.is_valid():
             new_status = form.cleaned_data['status']
             resolution_notes = form.cleaned_data.get('resolution_notes', '')
@@ -232,7 +239,8 @@ class IssueDelegateView(LoginRequiredMixin, View):
                 issue.save(update_fields=['delegated_to_team', 'updated_at'])
                 _log(issue, request.user, IssueActivity.ACTION_DELEGATED,
                      notes=f'Delegated to {new_team.name}.')
-                messages.success(request, f'Issue delegated to {new_team.name}.')
+                terms = get_terms(request)
+                messages.success(request, f'{terms.issue} delegated to {new_team.name}.')
             else:
                 # Recall delegation
                 issue.delegated_to_team = None

@@ -3,6 +3,7 @@ from django import forms
 from apps.accounts.models import Team
 from apps.accounts.scoping import is_org_admin
 from apps.rocks.models import Rock
+from apps.accounts.terminology import Terms, terms_for
 from .models import Issue, IssueActivity
 
 
@@ -46,6 +47,7 @@ class IssueForm(forms.ModelForm):
         self.fields['linked_rocks'].required = False
         self.fields['target_quarter'].required = False
         self.fields['target_year'].required = False
+        self.terms = terms_for(team.organization if team else None)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -54,9 +56,11 @@ class IssueForm(forms.ModelForm):
         target_year = cleaned_data.get('target_year')
         if issue_type == Issue.TYPE_LONG_TERM:
             if not target_quarter:
-                self.add_error('target_quarter', 'Required for long-term issues.')
+                self.add_error('target_quarter', f'Required for long-term {self.terms.issues.lower()}.')
             if not target_year:
-                self.add_error('target_year', 'Required for long-term issues.')
+                self.add_error(
+                    'target_year', f'Required for long-term {self.terms.issues.lower()}.'
+                )
         elif 'is_company_issue' in cleaned_data:
             # Company-wide only means anything for long-term issues, the VTO only
             # ever shows those. Don't let a short-term issue carry the flag.
@@ -72,12 +76,19 @@ class IssueStatusForm(forms.Form):
         max_length=2000,
     )
 
+    def __init__(self, *args, terms=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.terms = terms or Terms()
+
     def clean(self):
         cleaned_data = super().clean()
         status = cleaned_data.get('status')
         notes = cleaned_data.get('resolution_notes', '').strip()
         if status == Issue.STATUS_RESOLVED and not notes:
-            self.add_error('resolution_notes', 'Please describe how this issue was resolved.')
+            self.add_error(
+                'resolution_notes',
+                f'Please describe how this {self.terms.issue.lower()} was resolved.',
+            )
         return cleaned_data
 
 
