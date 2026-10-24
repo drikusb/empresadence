@@ -22,7 +22,7 @@
                         <i class="bi bi-calendar3 text-primary fs-4"></i>
                     </div>
                     <div>
-                        <h5 class="card-title mb-0">Level 10 Meetings</h5>
+                        <h5 class="card-title mb-0">{{ terms.meetings }}</h5>
                         <small class="text-muted">Weekly 90-minute rhythm</small>
                     </div>
                 </div>
@@ -30,22 +30,24 @@
                     {% if next_meeting.is_active %}
                     <p class="mb-1"><span class="badge bg-success">In Progress</span></p>
                     <p class="mb-0 fw-semibold">{{ next_meeting.team.name }}</p>
-                    <p class="text-muted small mb-3">Segment: {{ next_meeting.segment_name }}</p>
+                    <p class="text-muted small mb-3">Segment: {{ next_meeting_segment }}</p>
                     <a href="{{ next_meeting.get_absolute_url }}" class="btn btn-success btn-sm">
-                        <i class="bi bi-play-fill me-1"></i>Rejoin Meeting
+                        <i class="bi bi-play-fill me-1"></i>Rejoin {{ terms.meeting }}
                     </a>
                     {% else %}
-                    <p class="mb-1 text-muted small">Next meeting</p>
+                    <p class="mb-1 text-muted small">Next {{ terms.meeting|lower }}</p>
                     <p class="mb-0 fw-semibold">{{ next_meeting.team.name }}</p>
                     <p class="text-muted small mb-3">{{ next_meeting.scheduled_date }}</p>
                     <a href="{{ next_meeting.get_absolute_url }}" class="btn btn-primary btn-sm">
-                        <i class="bi bi-calendar-check me-1"></i>View Meeting
+                        <i class="bi bi-calendar-check me-1"></i>View {{ terms.meeting }}
                     </a>
                     {% endif %}
                 {% else %}
-                    <p class="text-muted small mb-3">No upcoming meetings scheduled.</p>
+                    <p class="text-muted small mb-3">
+                        No upcoming {{ terms.meetings|lower }} scheduled.
+                    </p>
                     <a href="{% url 'meetings:list' %}" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-plus me-1"></i>Schedule Meeting
+                        <i class="bi bi-plus me-1"></i>Schedule {{ terms.meeting }}
                     </a>
                 {% endif %}
             </div>
@@ -61,7 +63,7 @@
                         <i class="bi bi-gem text-success fs-4"></i>
                     </div>
                     <div>
-                        <h5 class="card-title mb-0">Rocks</h5>
+                        <h5 class="card-title mb-0">{{ terms.rocks }}</h5>
                         <small class="text-muted">Quarterly priorities</small>
                     </div>
                 </div>
@@ -80,7 +82,7 @@
                 </div>
                 {% endif %}
                 <a href="{% url 'rocks:list' %}" class="btn btn-outline-success btn-sm">
-                    <i class="bi bi-gem me-1"></i>View Rocks
+                    <i class="bi bi-gem me-1"></i>View {{ terms.rocks }}
                 </a>
             </div>
         </div>
@@ -95,7 +97,7 @@
                         <i class="bi bi-exclamation-triangle text-warning fs-4"></i>
                     </div>
                     <div>
-                        <h5 class="card-title mb-0">Issues</h5>
+                        <h5 class="card-title mb-0">{{ terms.issues }}</h5>
                         <small class="text-muted">Identify, Discuss, Solve</small>
                     </div>
                 </div>
@@ -104,11 +106,11 @@
                     <div class="fs-4 fw-bold {% if open_issues > 10 %}text-danger{% elif open_issues > 5 %}text-warning{% else %}text-success{% endif %}">
                         {{ open_issues }}
                     </div>
-                    <div class="text-muted small">Open issues</div>
+                    <div class="text-muted small">Open {{ terms.issues|lower }}</div>
                 </div>
                 {% endif %}
                 <a href="{% url 'issues:list' %}" class="btn btn-outline-warning btn-sm">
-                    <i class="bi bi-exclamation-triangle me-1"></i>View Issues
+                    <i class="bi bi-exclamation-triangle me-1"></i>View {{ terms.issues }}
                 </a>
             </div>
         </div>
@@ -123,18 +125,18 @@
                         <i class="bi bi-check2-square text-info fs-4"></i>
                     </div>
                     <div>
-                        <h5 class="card-title mb-0">To-Dos</h5>
+                        <h5 class="card-title mb-0">{{ terms.todos }}</h5>
                         <small class="text-muted">Weekly action items</small>
                     </div>
                 </div>
                 {% if open_todos is not None %}
                 <div class="mb-3">
                     <div class="fs-4 fw-bold text-info">{{ open_todos }}</div>
-                    <div class="text-muted small">Open to-dos</div>
+                    <div class="text-muted small">Open {{ terms.todos|lower }}</div>
                 </div>
                 {% endif %}
                 <a href="{% url 'todos:list' %}" class="btn btn-outline-info btn-sm">
-                    <i class="bi bi-check2-square me-1"></i>View To-Dos
+                    <i class="bi bi-check2-square me-1"></i>View {{ terms.todos }}
                 </a>
             </div>
         </div>
@@ -149,16 +151,16 @@
                         <i class="bi bi-map text-secondary fs-4"></i>
                     </div>
                     <div>
-                        <h5 class="card-title mb-0">VTO</h5>
+                        <h5 class="card-title mb-0">{{ terms.vto }}</h5>
                         <small class="text-muted">Vision/Traction Organizer</small>
                     </div>
                 </div>
                 <p class="text-muted small mb-3">
-                    Core Values, Core Focus, 10-Year Target, Marketing Strategy,
-                    3-Year Picture, 1-Year Plan, Rocks, and Issues List.
+                    {{ terms.core_values }}, Core Focus, 10-Year Target, Marketing Strategy,
+                    3-Year Picture, 1-Year Plan, {{ terms.rocks }}, and {{ terms.issues }} List.
                 </p>
                 <a href="{% url 'vto:detail' %}" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-map me-1"></i>View VTO
+                    <i class="bi bi-map me-1"></i>View {{ terms.vto }}
                 </a>
             </div>
         </div>
@@ -173,7 +175,7 @@
                         <i class="bi bi-bar-chart text-danger fs-4"></i>
                     </div>
                     <div>
-                        <h5 class="card-title mb-0">Scorecards</h5>
+                        <h5 class="card-title mb-0">{{ terms.scorecards }}</h5>
                         <small class="text-muted">Weekly metrics</small>
                     </div>
                 </div>
@@ -192,7 +194,7 @@
                 </div>
                 {% endif %}
                 <a href="{% url 'scorecards:list' %}" class="btn btn-outline-danger btn-sm">
-                    <i class="bi bi-bar-chart me-1"></i>View Scorecards
+                    <i class="bi bi-bar-chart me-1"></i>View {{ terms.scorecards }}
                 </a>
             </div>
         </div>
@@ -207,7 +209,7 @@
                         <i class="bi bi-people text-dark fs-4"></i>
                     </div>
                     <div>
-                        <h5 class="card-title mb-0">Accountability Chart</h5>
+                        <h5 class="card-title mb-0">{{ terms.accountability_chart }}</h5>
                         <small class="text-muted">Right people, right seats</small>
                     </div>
                 </div>

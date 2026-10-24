@@ -1,15 +1,15 @@
 {# Segment 6: IDS — Identify, Discuss, Solve #}
 <p class="text-muted small mb-3">
-    Work through the Issues list. For each: <strong>I</strong>dentify the real problem,
-    <strong>D</strong>iscuss briefly, <strong>S</strong>olve — create a To-Do and move on.
+    Work through the {{ terms.issues }} list. For each: <strong>I</strong>dentify the real problem,
+    <strong>D</strong>iscuss briefly, <strong>S</strong>olve — create a {{ terms.todo }} and move on.
 </p>
 
 <div class="d-flex gap-2 mb-3">
     <a href="{% url 'issues:create' %}?next={{ request.path }}" class="btn btn-sm btn-outline-dark">
-        <i class="bi bi-plus me-1"></i>Add Issue
+        <i class="bi bi-plus me-1"></i>Add {{ terms.issue }}
     </a>
     <a href="{% url 'todos:create' %}?next={{ request.path }}" class="btn btn-sm btn-outline-secondary">
-        <i class="bi bi-check2-square me-1"></i>Create To-Do
+        <i class="bi bi-check2-square me-1"></i>Create {{ terms.todo }}
     </a>
 </div>
 
@@ -30,11 +30,11 @@
         </div>
         <div class="d-flex gap-1 flex-shrink-0">
             <a href="{% url 'todos:create' %}?issue={{ issue.pk }}&next={{ request.path }}"
-               class="btn btn-sm btn-outline-success py-0 px-2" title="Create To-Do for this issue">
+               class="btn btn-sm btn-outline-success py-0 px-2" title="Create {{ terms.todo }} for this {{ terms.issue|lower }}">
                 <i class="bi bi-check2-square" style="font-size:.75rem"></i>
             </a>
             <a href="{{ issue.get_absolute_url }}"
-               class="btn btn-sm btn-outline-secondary py-0 px-2" title="Open issue">
+               class="btn btn-sm btn-outline-secondary py-0 px-2" title="Open {{ terms.issue|lower }}">
                 <i class="bi bi-box-arrow-up-right" style="font-size:.7rem"></i>
             </a>
         </div>
@@ -44,6 +44,6 @@
 {% else %}
 <div class="text-center py-4 text-muted">
     <i class="bi bi-check-circle text-success" style="font-size:2rem;"></i>
-    <p class="mt-2 small">No open issues! Add any that come up during discussion.</p>
+    <p class="mt-2 small">No open {{ terms.issues|lower }}! Add any that come up during discussion.</p>
 </div>
 {% endif %}

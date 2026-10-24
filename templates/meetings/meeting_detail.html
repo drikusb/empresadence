@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block page_title %}{{ meeting }} — Level 10 Meeting{% endblock %}
+{% block page_title %}{{ meeting }} — {{ terms.meeting }}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -23,7 +23,7 @@
         <div>
             <h1 class="h4 mb-0">{{ meeting }}</h1>
             <div class="text-muted small">
-                Level 10 Meeting
+                {{ terms.meeting }}
                 {% if meeting.is_active %}
                 <span class="badge bg-success ms-1"><i class="bi bi-record-fill me-1"></i>Live</span>
                 {% elif meeting.is_complete %}
@@ -36,7 +36,7 @@
     <form method="post" action="{% url 'meetings:start' meeting.pk %}">
         {% csrf_token %}
         <button class="btn btn-success">
-            <i class="bi bi-play-fill me-1"></i>Start Meeting
+            <i class="bi bi-play-fill me-1"></i>Start {{ terms.meeting }}
         </button>
     </form>
     {% elif meeting.is_complete %}
@@ -68,7 +68,7 @@
         <form method="post" action="{% url 'meetings:start' meeting.pk %}">
             {% csrf_token %}
             <button class="btn btn-dark btn-lg">
-                <i class="bi bi-play-fill me-2"></i>Start Level 10 Meeting
+                <i class="bi bi-play-fill me-2"></i>Start {{ terms.meeting }}
             </button>
         </form>
     </div>
@@ -114,13 +114,15 @@
         {% if segment_notes %}
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-header bg-transparent py-2">
-                <span class="small fw-semibold"><i class="bi bi-journal-text me-1"></i>Meeting Notes</span>
+                <span class="small fw-semibold">
+                    <i class="bi bi-journal-text me-1"></i>{{ terms.meeting }} Notes
+                </span>
             </div>
             <div class="card-body py-2">
                 {% for note in segment_notes %}
                 <div class="mb-3 {% if not forloop.last %}pb-3 border-bottom{% endif %}">
                     <div class="text-muted fw-semibold mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">
-                        {{ note.segment_name }}
+                        {{ note.segment_label }}
                     </div>
                     <div class="small" style="white-space:pre-line">{{ note.text }}</div>
                     <div class="text-muted mt-1" style="font-size:.7rem">
@@ -135,13 +137,13 @@
 
         {% if meeting.cascading_messages %}
         <div class="card border-0 shadow-sm mb-3">
-            <div class="card-header bg-transparent py-2"><span class="small fw-semibold">Cascading Messages</span></div>
+            <div class="card-header bg-transparent py-2"><span class="small fw-semibold">{{ terms.cascading_messages }}</span></div>
             <div class="card-body py-2 small" style="white-space:pre-line">{{ meeting.cascading_messages }}</div>
         </div>
         {% endif %}
         {% if new_todos %}
         <div class="card border-0 shadow-sm mb-3">
-            <div class="card-header bg-transparent py-2"><span class="small fw-semibold">To-Dos Created This Meeting</span></div>
+            <div class="card-header bg-transparent py-2"><span class="small fw-semibold">{{ terms.todos }} Created This Meeting</span></div>
             <div class="card-body py-2">
                 {% for todo in new_todos %}
                 <div class="d-flex justify-content-between py-1 {% if not forloop.last %}border-bottom{% endif %} small">
@@ -154,7 +156,7 @@
         {% endif %}
         {% if segue_entries %}
         <div class="card border-0 shadow-sm mb-3">
-            <div class="card-header bg-transparent py-2"><span class="small fw-semibold">Segue Entries</span></div>
+            <div class="card-header bg-transparent py-2"><span class="small fw-semibold">{{ terms.segue }} Entries</span></div>
             <div class="card-body py-2">
                 {% for entry in segue_entries %}
                 <div class="mb-2 pb-2 {% if not forloop.last %}border-bottom{% endif %}">

@@ -1,6 +1,7 @@
 {# Segment 7: Conclude — rate the meeting, cascading messages, wrap up #}
 <p class="text-muted small mb-3">
-    Recap To-Dos created, agree on cascading messages, then rate the meeting 1-10.
+    Recap {{ terms.todos }} created, agree on {{ terms.cascading_messages|lower }},
+    then rate the {{ terms.meeting|lower }} 1-10.
 </p>
 
 <div class="row g-3">
@@ -8,12 +9,12 @@
 
         {# Cascading messages #}
         <div class="mb-3">
-            <div class="fw-semibold small mb-2">Cascading Messages</div>
+            <div class="fw-semibold small mb-2">{{ terms.cascading_messages }}</div>
             <p class="text-muted small">What does the rest of the organisation need to know?</p>
         </div>
 
         {# Rating #}
-        <div class="fw-semibold small mb-2">Rate This Meeting</div>
+        <div class="fw-semibold small mb-2">Rate This {{ terms.meeting }}</div>
         <form method="post" action="{% url 'meetings:rate' meeting.pk %}" class="mb-3">
             {% csrf_token %}
             <div class="mb-2">
@@ -62,7 +63,7 @@
     <div class="col-lg-6">
 
         {# New To-Dos created this meeting #}
-        <div class="fw-semibold small mb-2">To-Dos Created This Meeting</div>
+        <div class="fw-semibold small mb-2">{{ terms.todos }} Created This Meeting</div>
         {% if new_todos %}
         <ul class="list-unstyled small mb-3">
             {% for todo in new_todos %}
@@ -76,10 +77,10 @@
             {% endfor %}
         </ul>
         {% else %}
-        <div class="text-muted small fst-italic mb-3">None yet — create To-Dos from the IDS segment or below.</div>
+        <div class="text-muted small fst-italic mb-3">None yet — create {{ terms.todos }} from the {{ terms.ids }} segment or below.</div>
         {% endif %}
         <a href="{% url 'todos:create' %}?next={{ request.path }}" class="btn btn-sm btn-outline-dark mb-3">
-            <i class="bi bi-plus me-1"></i>Add To-Do
+            <i class="bi bi-plus me-1"></i>Add {{ terms.todo }}
         </a>
 
     </div>
@@ -90,12 +91,14 @@
     <form method="post" action="{% url 'meetings:complete' meeting.pk %}">
         {% csrf_token %}
         <div class="mb-3">
-            <label class="form-label small fw-semibold">Cascading Messages</label>
+            <label class="form-label small fw-semibold">{{ terms.cascading_messages }}</label>
             {{ cascading_form.cascading_messages }}
         </div>
+        {% with word=terms.meeting|lower|escapejs %}
         <button type="submit" class="btn btn-success"
-                onclick="return confirm('Complete this meeting? This cannot be undone.')">
-            <i class="bi bi-flag-fill me-1"></i>Complete Meeting
+                onclick="return confirm('Complete this {{ word }}? This cannot be undone.')">
+            <i class="bi bi-flag-fill me-1"></i>Complete {{ terms.meeting }}
         </button>
+        {% endwith %}
     </form>
 </div>

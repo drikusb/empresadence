@@ -49,6 +49,13 @@ class HeadlineForm(forms.ModelForm):
             }),
         }
 
+    def __init__(self, *args, terms=None, **kwargs):
+        """``terms`` (the organisation's vocabulary) names the headline in the placeholder."""
+        super().__init__(*args, **kwargs)
+        if terms is not None:
+            word = terms.get('headline', lower=True)
+            self.fields['text'].widget.attrs['placeholder'] = f'Short {word} — good news or concern'
+
 
 class MeetingRatingForm(forms.ModelForm):
     class Meta:
@@ -65,6 +72,15 @@ class MeetingRatingForm(forms.ModelForm):
             }),
         }
 
+    def __init__(self, *args, terms=None, **kwargs):
+        """``terms`` (the organisation's vocabulary) names the meeting in the placeholder."""
+        super().__init__(*args, **kwargs)
+        if terms is not None:
+            word = terms.get('meeting', lower=True)
+            self.fields['improvement_note'].widget.attrs['placeholder'] = (
+                f"What would make next week's {word} better?"
+            )
+
 
 class CascadingMessagesForm(forms.ModelForm):
     class Meta:
@@ -76,3 +92,12 @@ class CascadingMessagesForm(forms.ModelForm):
                 'placeholder': 'What does the rest of the organisation need to know from this meeting?',
             }),
         }
+
+    def __init__(self, *args, terms=None, **kwargs):
+        """``terms`` (the organisation's vocabulary) names the meeting in the placeholder."""
+        super().__init__(*args, **kwargs)
+        if terms is not None:
+            word = terms.get('meeting', lower=True)
+            self.fields['cascading_messages'].widget.attrs['placeholder'] = (
+                f'What does the rest of the organisation need to know from this {word}?'
+            )

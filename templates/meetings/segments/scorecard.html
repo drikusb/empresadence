@@ -1,6 +1,6 @@
 {# Segment 2: Scorecard Review — check metrics, escalate off-track to Issues #}
 <p class="text-muted small mb-3">
-    Review each metric. Off-track items go straight to the Issues list — no discussion here.
+    Review each metric. Off-track items go straight to the {{ terms.issues }} list — no discussion here.
 </p>
 
 {% if scorecards %}
@@ -25,12 +25,12 @@
 {% else %}
 <div class="text-center py-4 text-muted">
     <i class="bi bi-bar-chart-line" style="font-size:2rem;"></i>
-    <p class="mt-2 small">No scorecards for {{ team.name }}. <a href="{% url 'scorecards:list' %}">Add one.</a></p>
+    <p class="mt-2 small">No {{ terms.scorecards|lower }} for {{ team.name }}. <a href="{% url 'scorecards:list' %}">Add one.</a></p>
 </div>
 {% endif %}
 
 <div class="alert alert-info py-2 small mt-3">
     <i class="bi bi-info-circle me-1"></i>
-    Enter this week's numbers in the <a href="{% url 'scorecards:list' %}">Scorecards</a> module,
-    then come back to review. Off-track items go to <a href="{% url 'issues:list' %}">Issues</a>.
+    Enter this week's numbers in the <a href="{% url 'scorecards:list' %}">{{ terms.scorecards }}</a> module,
+    then come back to review. Off-track items go to <a href="{% url 'issues:list' %}">{{ terms.issues }}</a>.
 </div>

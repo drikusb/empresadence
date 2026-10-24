@@ -4,9 +4,13 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.db.models import Q
 
-from .models import Meeting, MeetingNote, SegueEntry, Headline, MeetingRating, SEGMENT_NAMES, SEGMENT_DURATIONS, SEGMENT_TEMPLATES
+from .models import (
+    Meeting, MeetingNote, SegueEntry, Headline, MeetingRating,
+    SEGMENT_NAMES, SEGMENT_DURATIONS, SEGMENT_TEMPLATES, segment_names_for,
+)
 from .forms import MeetingCreateForm, SegueEntryForm, HeadlineForm, MeetingRatingForm, CascadingMessagesForm
 from apps.accounts.scoping import get_active_org, get_active_team
+from apps.accounts.terminology import get_terms
 
 
 def _get_org(request):
@@ -17,9 +21,13 @@ def _team_member_user_ids(team):
     return list(team.members.values_list('user_id', flat=True))
 
 
-def _build_runner_context(meeting, user):
-    """Build full context dict for the meeting runner view."""
+def _build_runner_context(meeting, user, terms):
+    """Build full context dict for the meeting runner view.
+
+    ``terms`` is the organisation's vocabulary; segment names are shown in it.
+    """
     team = meeting.team
+    segment_names = segment_names_for(terms)
 
     # Scorecards
     from apps.scorecards.models import Scorecard, ScorecardEntry, _current_week_start
@@ -100,16 +108,19 @@ def _build_runner_context(meeting, user):
     segment_notes = [
         all_notes[i] for i in range(len(SEGMENT_NAMES)) if i in all_notes
     ]
+    for note in segment_notes:
+        note.segment_label = segment_names[note.segment]
 
     return {
         'meeting': meeting,
         'team': team,
         'segment_idx': meeting.current_segment,
-        'segment_name': SEGMENT_NAMES[meeting.current_segment],
+        'segment_name': segment_names[meeting.current_segment],
+        'segment_names': segment_names,
         'segment_duration': SEGMENT_DURATIONS[meeting.current_segment],
         'segment_template': f"meetings/segments/{SEGMENT_TEMPLATES[meeting.current_segment]}",
         'is_last_segment': meeting.is_last_segment,
-        'segments': list(enumerate(zip(SEGMENT_NAMES, SEGMENT_DURATIONS))),
+        'segments': list(enumerate(zip(segment_names, SEGMENT_DURATIONS))),
         'current_note': current_note,
         'segment_notes': segment_notes,
         # Segment data
@@ -123,11 +134,11 @@ def _build_runner_context(meeting, user):
         'my_segue': my_segue,
         'segue_form': SegueEntryForm(instance=my_segue),
         'headlines': headlines,
-        'headline_form': HeadlineForm(),
+        'headline_form': HeadlineForm(terms=terms),
         'ratings': ratings,
         'my_rating': my_rating,
-        'rating_form': MeetingRatingForm(instance=my_rating),
-        'cascading_form': CascadingMessagesForm(instance=meeting),
+        'rating_form': MeetingRatingForm(instance=my_rating, terms=terms),
+        'cascading_form': CascadingMessagesForm(instance=meeting, terms=terms),
         'avg_rating': avg_rating,
         'new_todos': new_todos,
     }
@@ -142,15 +153,19 @@ class MeetingListView(LoginRequiredMixin, View):
 
     def get(self, request):
         team = get_active_team(request)
+        terms = get_terms(request)
         if not team:
-            messages.warning(request, 'Join a team to see meetings.')
+            messages.warning(request, f'Join a team to see {terms.get("meeting", plural=True, lower=True)}.')
             return redirect('home')
-        meetings = (
+        meetings = list(
             Meeting.objects
             .filter(team=team)
             .select_related('team')
             .order_by('-scheduled_date')
         )
+        segment_names = segment_names_for(terms)
+        for meeting in meetings:
+            meeting.segment_label = segment_names[meeting.current_segment]
         return render(request, self.template_name, {'meetings': meetings, 'org': team.organization})
 
 
@@ -173,7 +188,7 @@ class MeetingCreateView(LoginRequiredMixin, View):
             meeting = form.save(commit=False)
             meeting.created_by = request.user
             meeting.save()
-            messages.success(request, f'Meeting scheduled for {meeting.scheduled_date}.')
+            messages.success(request, f'{get_terms(request).meeting} scheduled for {meeting.scheduled_date}.')
             return redirect('meetings:detail', pk=meeting.pk)
         return render(request, self.template_name, {'form': form})
 
@@ -196,7 +211,7 @@ class MeetingDetailView(LoginRequiredMixin, View):
         meeting, org = self._get_meeting(request, pk)
         if not org:
             return redirect('accounts:org_setup')
-        ctx = _build_runner_context(meeting, request.user)
+        ctx = _build_runner_context(meeting, request.user, get_terms(request))
         return render(request, self.template_name, ctx)
 
 
@@ -210,9 +225,10 @@ class MeetingPrintView(LoginRequiredMixin, View):
             return redirect('accounts:org_setup')
         meeting = get_object_or_404(Meeting, pk=pk, team__organization=org)
         if not meeting.is_complete:
-            messages.warning(request, 'Finish the meeting before exporting its notes.')
+            word = get_terms(request).get('meeting', lower=True)
+            messages.warning(request, f'Finish the {word} before exporting its notes.')
             return redirect('meetings:detail', pk=pk)
-        ctx = _build_runner_context(meeting, request.user)
+        ctx = _build_runner_context(meeting, request.user, get_terms(request))
         return render(request, self.template_name, ctx)
 
 
@@ -224,7 +240,8 @@ class MeetingStartView(LoginRequiredMixin, View):
         meeting = get_object_or_404(Meeting, pk=pk, team__organization=org)
         if meeting.is_scheduled:
             meeting.start()
-            messages.success(request, 'Meeting started! Good luck — you\'ve got 90 minutes.')
+            word = get_terms(request).meeting
+            messages.success(request, f"{word} started! Good luck — you've got 90 minutes.")
         return redirect('meetings:detail', pk=pk)
 
 
@@ -252,7 +269,7 @@ class MeetingCompleteView(LoginRequiredMixin, View):
         if meeting.is_active:
             cascading = request.POST.get('cascading_messages', '')
             meeting.complete(cascading_messages=cascading)
-            messages.success(request, 'Meeting completed! Great work.')
+            messages.success(request, f'{get_terms(request).meeting} completed! Great work.')
         return redirect('meetings:detail', pk=pk)
 
 
@@ -270,7 +287,7 @@ class SegueAddView(LoginRequiredMixin, View):
         form = SegueEntryForm(request.POST, instance=entry)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Segue entry saved.')
+            messages.success(request, f'{get_terms(request).segue} entry saved.')
         return redirect('meetings:detail', pk=pk)
 
 
@@ -290,7 +307,7 @@ class HeadlineAddView(LoginRequiredMixin, View):
             h.meeting = meeting
             h.author = request.user
             h.save()
-            messages.success(request, 'Headline added.')
+            messages.success(request, f'{get_terms(request).headline} added.')
         return redirect('meetings:detail', pk=pk)
 
 
@@ -318,7 +335,8 @@ class HeadlineEscalateView(LoginRequiredMixin, View):
             )
             headline.escalated_issue = issue
             headline.save(update_fields=['escalated_issue'])
-            messages.success(request, 'Headline escalated to Issues.')
+            terms = get_terms(request)
+            messages.success(request, f'{terms.headline} escalated to {terms.issues}.')
         return redirect('meetings:detail', pk=pk)
 
 

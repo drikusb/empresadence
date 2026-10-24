@@ -1,6 +1,6 @@
 {# Segment 4: Customer / Employee Headlines #}
 <p class="text-muted small mb-3">
-    Share short good news or concerns. No discussion — flag for IDS if needed.
+    Share short good news or concerns. No discussion — flag for {{ terms.ids }} if needed.
 </p>
 
 <form method="post" action="{% url 'meetings:headline_add' meeting.pk %}" class="mb-3">
@@ -36,12 +36,12 @@
         {% if not h.escalated_issue %}
         <form method="post" action="{% url 'meetings:headline_escalate' meeting.pk h.pk %}" class="flex-shrink-0">
             {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-outline-warning py-0 px-2" title="Escalate to Issues">
+            <button type="submit" class="btn btn-sm btn-outline-warning py-0 px-2" title="Escalate to {{ terms.issues }}">
                 <i class="bi bi-arrow-up-circle" style="font-size:.75rem"></i>
             </button>
         </form>
         {% else %}
-        <a href="{{ h.escalated_issue.get_absolute_url }}" class="btn btn-sm btn-outline-secondary py-0 px-2 flex-shrink-0" title="View issue">
+        <a href="{{ h.escalated_issue.get_absolute_url }}" class="btn btn-sm btn-outline-secondary py-0 px-2 flex-shrink-0" title="View {{ terms.issue|lower }}">
             <i class="bi bi-link-45deg" style="font-size:.75rem"></i>
         </a>
         {% endif %}
@@ -49,5 +49,5 @@
     {% endfor %}
 </div>
 {% else %}
-<div class="text-muted small fst-italic">No headlines yet. Add one above.</div>
+<div class="text-muted small fst-italic">No {{ terms.headlines|lower }} yet. Add one above.</div>
 {% endif %}

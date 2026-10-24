@@ -7,7 +7,7 @@
 {# My entry form #}
 <div class="card border-light mb-3">
     <div class="card-header bg-transparent py-2 small fw-semibold">
-        My Segue — {{ request.user.get_full_name|default:request.user.username }}
+        My {{ terms.segue }} — {{ request.user.get_full_name|default:request.user.username }}
     </div>
     <div class="card-body pb-3">
         <form method="post" action="{% url 'meetings:segue' meeting.pk %}">

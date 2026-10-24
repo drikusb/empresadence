@@ -1,6 +1,6 @@
 {# Segment 5: To-Do List Review — mark complete, escalate overdue #}
 <p class="text-muted small mb-3">
-    Review open To-Dos for team members. Mark complete or escalate incomplete items to Issues.
+    Review open {{ terms.todos }} for team members. Mark complete or escalate incomplete items to {{ terms.issues }}.
 </p>
 
 {% if todos %}
@@ -23,7 +23,7 @@
             </button>
         </form>
         {% if todo.escalation_level > 0 %}
-        <a href="{% url 'todos:escalate' todo.pk %}" class="btn btn-sm btn-outline-warning py-0 px-2 flex-shrink-0" title="Escalate to Issues">
+        <a href="{% url 'todos:escalate' todo.pk %}" class="btn btn-sm btn-outline-warning py-0 px-2 flex-shrink-0" title="Escalate to {{ terms.issues }}">
             <i class="bi bi-arrow-up-circle" style="font-size:.75rem"></i>
         </a>
         {% endif %}
@@ -35,15 +35,15 @@
 </div>
 <div class="mt-2 small">
     <a href="{% url 'todos:create' %}?next={{ request.path }}" class="btn btn-sm btn-outline-dark">
-        <i class="bi bi-plus me-1"></i>Add To-Do
+        <i class="bi bi-plus me-1"></i>Add {{ terms.todo }}
     </a>
 </div>
 {% else %}
 <div class="text-center py-4 text-muted">
     <i class="bi bi-check2-square" style="font-size:2rem;"></i>
-    <p class="mt-2 small">No open To-Dos for the team. Great work!</p>
+    <p class="mt-2 small">No open {{ terms.todos }} for the team. Great work!</p>
     <a href="{% url 'todos:create' %}?next={{ request.path }}" class="btn btn-sm btn-outline-dark">
-        <i class="bi bi-plus me-1"></i>Add To-Do
+        <i class="bi bi-plus me-1"></i>Add {{ terms.todo }}
     </a>
 </div>
 {% endif %}

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block page_title %}Remove Seat — Accountability Chart{% endblock %}
+{% block page_title %}Remove {{ terms.seat }} — {{ terms.accountability_chart }}{% endblock %}
+{% load terms %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -9,7 +10,7 @@
             <a href="{% url 'accountability:chart' %}" class="btn btn-sm btn-outline-secondary me-3">
                 <i class="bi bi-arrow-left"></i>
             </a>
-            <h1 class="h3 mb-0">Remove Seat</h1>
+            <h1 class="h3 mb-0">Remove {{ terms.seat }}</h1>
         </div>
 
         <div class="card border-0 shadow-sm" style="border-left: 4px solid var(--bs-danger) !important;">
@@ -21,7 +22,7 @@
                     <div>
                         <h5 class="mb-1">Remove "{{ object.name }}"?</h5>
                         <p class="text-muted mb-0">
-                            This seat and <strong>all child seats beneath it</strong> will be permanently removed.
+                            This {{ terms.seat|lower }} and <strong>all child {{ terms.seats|lower }} beneath it</strong> will be permanently removed.
                             This cannot be undone.
                         </p>
                     </div>
@@ -31,7 +32,7 @@
                 {% if child_count > 0 %}
                 <div class="alert alert-warning py-2 small">
                     <i class="bi bi-exclamation-triangle me-1"></i>
-                    This seat has <strong>{{ child_count }} child seat{{ child_count|pluralize }}</strong>
+                    This {{ terms.seat|lower }} has <strong>{{ child_count }} child {% term 'seat' count=child_count lower=True %}</strong>
                     that will also be deleted.
                 </div>
                 {% endif %}
@@ -47,7 +48,7 @@
                     {% csrf_token %}
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-trash me-1"></i>Yes, Remove Seat
+                            <i class="bi bi-trash me-1"></i>Yes, Remove {{ terms.seat }}
                         </button>
                         <a href="{% url 'accountability:chart' %}" class="btn btn-outline-secondary">Cancel</a>
                     </div>

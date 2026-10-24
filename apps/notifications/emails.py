@@ -12,6 +12,7 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 
 from apps.accounts.branding import brand_for
+from apps.accounts.terminology import terms_for
 
 from .models import NotificationPreference
 
@@ -25,7 +26,11 @@ def _from_email(organization, brand):
 
 
 def _send(user, subject, template_name, context, organization=None):
-    """Links use the organisation's own domain when it has one, else SITE_URL."""
+    """Links use the organisation's own domain when it has one, else SITE_URL.
+
+    Email templates render without the context processors, so the organisation's
+    ``terms`` are passed in here.
+    """
     if not user.email:
         return False
     brand = brand_for(organization)
@@ -33,7 +38,10 @@ def _send(user, subject, template_name, context, organization=None):
     send_mail(
         subject=subject,
         message=render_to_string(
-            template_name, {**context, 'user': user, 'site_url': site_url, 'brand': brand},
+            template_name, {
+                **context, 'user': user, 'site_url': site_url, 'brand': brand,
+                'terms': terms_for(organization),
+            },
         ),
         from_email=_from_email(organization, brand),
         recipient_list=[user.email],
@@ -48,7 +56,8 @@ def send_overdue_todo_digest(user, todos, organization=None):
         return False
     count = len(todos)
     brand = brand_for(organization)
-    subject = f'{count} overdue To-Do{"s" if count != 1 else ""} — {brand.name}'
+    terms = terms_for(organization)
+    subject = f'{count} overdue {terms.get("todo", count=count)} — {brand.name}'
     return _send(
         user, subject, 'notifications/email/overdue_digest.txt', {'todos': todos},
         organization=organization,
@@ -59,10 +68,11 @@ def send_meeting_reminder(user, meeting):
     pref = NotificationPreference.for_user(user)
     if not pref.meeting_reminders:
         return False
-    subject = f'Level 10 Meeting today — {meeting.team.name}'
+    organization = meeting.team.organization
+    subject = f'{terms_for(organization).meeting} today — {meeting.team.name}'
     return _send(
         user, subject, 'notifications/email/meeting_reminder.txt', {'meeting': meeting},
-        organization=meeting.team.organization,
+        organization=organization,
     )
 
 
@@ -70,10 +80,11 @@ def send_rock_off_track_alert(rock):
     pref = NotificationPreference.for_user(rock.owner)
     if not pref.rock_off_track_alerts:
         return False
-    subject = f'Rock marked off track: {rock.title}'
+    organization = rock.team.organization
+    subject = f'{terms_for(organization).rock} marked off track: {rock.title}'
     return _send(
         rock.owner, subject, 'notifications/email/rock_off_track.txt', {'rock': rock},
-        organization=rock.team.organization,
+        organization=organization,
     )
 
 

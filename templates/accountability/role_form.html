@@ -34,7 +34,7 @@
                                value="{{ form.description.value|default:'' }}"
                                class="form-control {% if form.description.errors %}is-invalid{% endif %}"
                                placeholder="e.g. Own the P&L, Drive revenue, Hire and fire the team">
-                        <div class="form-text">A specific responsibility owned by the person in this seat.</div>
+                        <div class="form-text">A specific responsibility owned by the person in this {{ terms.seat|lower }}.</div>
                         {% for e in form.description.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
                     </div>
 

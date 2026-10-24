@@ -1,9 +1,9 @@
 Hi {{ user.first_name|default:user.username }},
 
-Your Rock "{{ rock.title }}" was just marked Off Track.
+Your {{ terms.rock }} "{{ rock.title }}" was just marked Off Track.
 {% if rock.description %}
 {{ rock.description }}
 {% endif %}
-View the Rock: {{ site_url }}{{ rock.get_absolute_url }}
+View the {{ terms.rock }}: {{ site_url }}{{ rock.get_absolute_url }}
 
 — {{ brand.name }}

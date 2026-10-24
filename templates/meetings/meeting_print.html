@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ meeting }} — Meeting Notes — Print{% endblock %}
+{% block title %}{{ meeting }} — {{ terms.meeting }} Notes — Print{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -32,7 +32,7 @@
 <div class="text-center mb-3 border-bottom pb-3">
     <h4 class="mb-0 fw-bold">{{ team.name }}</h4>
     <div class="text-muted small">
-        Level 10 Meeting Notes — {{ meeting.scheduled_date|date:"N j, Y" }}
+        {{ terms.meeting }} Notes — {{ meeting.scheduled_date|date:"N j, Y" }}
         {% if meeting.duration_minutes %} · {{ meeting.duration_minutes }} minutes{% endif %}
     </div>
 </div>
@@ -45,7 +45,7 @@
         <div class="card-body py-2 text-center">
             {% if avg_rating %}
             <span class="fw-bold" style="font-size:1.4rem">{{ avg_rating }}/10</span>
-            <span class="text-muted small ms-1">average meeting rating</span>
+            <span class="text-muted small ms-1">average {{ terms.meeting|lower }} rating</span>
             {% else %}
             <span class="text-muted small fst-italic">No ratings recorded.</span>
             {% endif %}
@@ -55,7 +55,7 @@
     {# Segue #}
     {% if segue_entries %}
     <div class="card mb-2">
-        <div class="card-header py-1 bg-light"><span class="fw-semibold small">Segue</span></div>
+        <div class="card-header py-1 bg-light"><span class="fw-semibold small">{{ terms.segue }}</span></div>
         <div class="card-body py-2 small">
             {% for entry in segue_entries %}
             <div class="mb-1 {% if not forloop.last %}pb-1 border-bottom{% endif %}">
@@ -71,7 +71,7 @@
     {# Headlines #}
     {% if headlines %}
     <div class="card mb-2">
-        <div class="card-header py-1 bg-light"><span class="fw-semibold small">Headlines</span></div>
+        <div class="card-header py-1 bg-light"><span class="fw-semibold small">{{ terms.headlines }}</span></div>
         <div class="card-body py-2 small">
             {% for h in headlines %}
             <div class="d-flex align-items-start gap-2 py-1 {% if not forloop.last %}border-bottom{% endif %}">
@@ -81,7 +81,7 @@
                 <div class="flex-grow-1">
                     {{ h.text }}
                     <span class="text-muted" style="font-size:.7rem"> — {{ h.author.get_full_name|default:h.author.username|default:"Anonymous" }}</span>
-                    {% if h.escalated_issue %}<div class="text-muted" style="font-size:.68rem">Escalated to Issues: {{ h.escalated_issue.title }}</div>{% endif %}
+                    {% if h.escalated_issue %}<div class="text-muted" style="font-size:.68rem">Escalated to {{ terms.issues }}: {{ h.escalated_issue.title }}</div>{% endif %}
                 </div>
             </div>
             {% endfor %}
@@ -92,12 +92,14 @@
     {# Meeting notes, per segment #}
     {% if segment_notes %}
     <div class="card mb-2">
-        <div class="card-header py-1 bg-light"><span class="fw-semibold small">Meeting Notes</span></div>
+        <div class="card-header py-1 bg-light">
+            <span class="fw-semibold small">{{ terms.meeting }} Notes</span>
+        </div>
         <div class="card-body py-2 small">
             {% for note in segment_notes %}
             <div class="mb-2 {% if not forloop.last %}pb-2 border-bottom{% endif %}">
                 <div class="text-muted fw-semibold" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.05em">
-                    {{ note.segment_name }}
+                    {{ note.segment_label }}
                 </div>
                 <div style="white-space:pre-line">{{ note.text }}</div>
             </div>
@@ -109,7 +111,7 @@
     {# Cascading messages #}
     {% if meeting.cascading_messages %}
     <div class="card mb-2">
-        <div class="card-header py-1 bg-light"><span class="fw-semibold small">Cascading Messages</span></div>
+        <div class="card-header py-1 bg-light"><span class="fw-semibold small">{{ terms.cascading_messages }}</span></div>
         <div class="card-body py-2 small" style="white-space:pre-line">{{ meeting.cascading_messages }}</div>
     </div>
     {% endif %}
@@ -117,7 +119,7 @@
     {# To-Dos created during this meeting #}
     {% if new_todos %}
     <div class="card mb-2">
-        <div class="card-header py-1 bg-light"><span class="fw-semibold small">To-Dos Created This Meeting</span></div>
+        <div class="card-header py-1 bg-light"><span class="fw-semibold small">{{ terms.todos }} Created This Meeting</span></div>
         <div class="card-body py-2 small">
             {% for todo in new_todos %}
             <div class="d-flex justify-content-between py-1 {% if not forloop.last %}border-bottom{% endif %}">

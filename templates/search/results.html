@@ -14,7 +14,7 @@
             <input type="search" name="q" id="search-page-input"
                    class="form-control border-start-0 ps-0"
                    value="{{ query }}"
-                   placeholder="Search rocks, issues, to-dos…"
+                   placeholder="Search {{ terms.rocks|lower }}, {{ terms.issues|lower }}, {{ terms.todos|lower }}…"
                    autofocus>
             <button type="submit" class="btn btn-dark px-4">Search</button>
         </div>
@@ -47,7 +47,7 @@
         {% if rocks %}
         <div class="mb-4">
             <h6 class="text-muted text-uppercase fw-semibold mb-2" style="font-size:.7rem;letter-spacing:.05em">
-                <i class="bi bi-gem me-1"></i>Rocks ({{ rocks|length }})
+                <i class="bi bi-gem me-1"></i>{{ terms.rocks }} ({{ rocks|length }})
             </h6>
             <div class="list-group list-group-flush border rounded">
                 {% for rock in rocks %}
@@ -70,7 +70,7 @@
         {% if issues %}
         <div class="mb-4">
             <h6 class="text-muted text-uppercase fw-semibold mb-2" style="font-size:.7rem;letter-spacing:.05em">
-                <i class="bi bi-exclamation-circle me-1"></i>Issues ({{ issues|length }})
+                <i class="bi bi-exclamation-circle me-1"></i>{{ terms.issues }} ({{ issues|length }})
             </h6>
             <div class="list-group list-group-flush border rounded">
                 {% for issue in issues %}
@@ -93,7 +93,7 @@
         {% if todos %}
         <div class="mb-4">
             <h6 class="text-muted text-uppercase fw-semibold mb-2" style="font-size:.7rem;letter-spacing:.05em">
-                <i class="bi bi-check2-square me-1"></i>To-Dos ({{ todos|length }})
+                <i class="bi bi-check2-square me-1"></i>{{ terms.todos }} ({{ todos|length }})
             </h6>
             <div class="list-group list-group-flush border rounded">
                 {% for todo in todos %}

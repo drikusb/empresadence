@@ -1,7 +1,7 @@
 Hi {{ user.first_name|default:user.username }},
 
-Reminder: {{ meeting.team.name }} has a Level 10 Meeting scheduled for today ({{ meeting.scheduled_date|date:"N j, Y" }}).
+Reminder: {{ meeting.team.name }} has a {{ terms.meeting }} scheduled for today ({{ meeting.scheduled_date|date:"N j, Y" }}).
 
-View the meeting: {{ site_url }}{{ meeting.get_absolute_url }}
+View the {{ terms.meeting }}: {{ site_url }}{{ meeting.get_absolute_url }}
 
 — {{ brand.name }}

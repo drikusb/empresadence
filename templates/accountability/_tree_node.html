@@ -56,7 +56,7 @@
                title="Add accountability"><i class="bi bi-list-check" style="font-size:.75rem"></i></a>
             <a href="{% url 'accountability:node_add' %}?parent={{ node.pk }}"
                class="btn btn-sm btn-outline-secondary border-0 py-0 px-1 flex-shrink-0"
-               title="Add child seat"><i class="bi bi-diagram-2" style="font-size:.75rem"></i></a>
+               title="Add child {{ terms.seat|lower }}"><i class="bi bi-diagram-2" style="font-size:.75rem"></i></a>
             <form method="post" action="{% url 'accountability:node_move' node.pk %}" class="d-inline">
                 {% csrf_token %}<input type="hidden" name="direction" value="up">
                 <button type="submit" class="btn btn-sm btn-outline-secondary border-0 py-0 px-1" title="Move left">
@@ -71,10 +71,10 @@
             </form>
             <a href="{% url 'accountability:node_edit' node.pk %}"
                class="btn btn-sm btn-outline-secondary border-0 py-0 px-1"
-               title="Edit seat"><i class="bi bi-pencil" style="font-size:.75rem"></i></a>
+               title="Edit {{ terms.seat|lower }}"><i class="bi bi-pencil" style="font-size:.75rem"></i></a>
             <a href="{% url 'accountability:node_delete' node.pk %}"
                class="btn btn-sm btn-outline-danger border-0 py-0 px-1"
-               title="Remove seat"><i class="bi bi-trash" style="font-size:.75rem"></i></a>
+               title="Remove {{ terms.seat|lower }}"><i class="bi bi-trash" style="font-size:.75rem"></i></a>
         </div>
     </div>
 

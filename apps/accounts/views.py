@@ -75,7 +75,7 @@ class HomeView(LoginRequiredMixin, TemplateView):
         from apps.rocks.models import Rock
         from apps.issues.models import Issue
         from apps.todos.models import ToDo
-        from apps.meetings.models import Meeting
+        from apps.meetings.models import Meeting, segment_names_for
         from apps.scorecards.models import ScorecardEntry, _current_week_start
 
         ctx = super().get_context_data(**kwargs)
@@ -105,10 +105,14 @@ class HomeView(LoginRequiredMixin, TemplateView):
                 models.Q(team__in=teams) | models.Q(owner=self.request.user)
             ).count()
 
-            ctx['next_meeting'] = Meeting.objects.filter(
+            next_meeting = Meeting.objects.filter(
                 team__in=teams,
                 status__in=[Meeting.STATUS_SCHEDULED, Meeting.STATUS_ACTIVE],
             ).order_by('scheduled_date').first()
+            ctx['next_meeting'] = next_meeting
+            if next_meeting:
+                segment_names = segment_names_for(get_terms(self.request))
+                ctx['next_meeting_segment'] = segment_names[next_meeting.current_segment]
 
             week_start = _current_week_start()
             total_entries = ScorecardEntry.objects.filter(

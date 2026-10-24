@@ -30,6 +30,23 @@ SEGMENT_TEMPLATES = [
 ]
 
 
+def segment_names_for(terms):
+    """SEGMENT_NAMES in one organisation's own words, for display.
+
+    ``SEGMENT_NAMES`` stays the canonical list (and the default); views pass
+    this per-request version to the templates.
+    """
+    return [
+        terms.segue,
+        f'{terms.scorecard} Review',
+        f'{terms.rock} Review',
+        terms.headlines,
+        f'{terms.todo} Review',
+        terms.ids,
+        'Conclude',
+    ]
+
+
 class Meeting(models.Model):
     STATUS_SCHEDULED = 'scheduled'
     STATUS_ACTIVE = 'active'

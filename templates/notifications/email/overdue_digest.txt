@@ -1,9 +1,9 @@
-Hi {{ user.first_name|default:user.username }},
+{% load terms %}Hi {{ user.first_name|default:user.username }},
 
-You have {{ todos|length }} overdue To-Do{{ todos|length|pluralize }}:
+You have {{ todos|length }} overdue {% term 'todo' count=todos|length %}:
 {% for todo in todos %}
 - {{ todo.title }} (due {{ todo.due_date|date:"N j, Y" }}, {{ todo.team.name }}, {{ todo.team.organization.name }})
 {% endfor %}
-View your To-Dos: {{ site_url }}{% url 'todos:list' %}
+View your {{ terms.todos }}: {{ site_url }}{% url 'todos:list' %}
 
 — {{ brand.name }}

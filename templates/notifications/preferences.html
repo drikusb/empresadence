@@ -17,21 +17,21 @@
                     <div class="form-check mb-3">
                         {{ form.overdue_todo_digest }}
                         <label class="form-check-label" for="{{ form.overdue_todo_digest.id_for_label }}">
-                            Overdue To-Do digest
+                            Overdue {{ terms.todo }} digest
                         </label>
                         <div class="text-muted small">{{ form.overdue_todo_digest.help_text }}</div>
                     </div>
                     <div class="form-check mb-3">
                         {{ form.meeting_reminders }}
                         <label class="form-check-label" for="{{ form.meeting_reminders.id_for_label }}">
-                            Meeting day reminders
+                            {{ terms.meeting }} day reminders
                         </label>
                         <div class="text-muted small">{{ form.meeting_reminders.help_text }}</div>
                     </div>
                     <div class="form-check mb-4">
                         {{ form.rock_off_track_alerts }}
                         <label class="form-check-label" for="{{ form.rock_off_track_alerts.id_for_label }}">
-                            Rock off-track alerts
+                            {{ terms.rock }} off-track alerts
                         </label>
                         <div class="text-muted small">{{ form.rock_off_track_alerts.help_text }}</div>
                     </div>
