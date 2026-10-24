@@ -111,9 +111,9 @@
                                 <span title="{{ cell.notes|default:'' }}">
                                     {{ row.metric.format_value|default:'' }}
                                     {# Render value through metric's formatter #}
-                                    {% if row.metric.metric_type == 'integer' %}{{ cell.value|floatformat:0 }}
+                                    {% if row.metric.metric_type == 'integer' %}{{ cell.value|floatformat:"0g" }}
                                     {% elif row.metric.metric_type == 'percentage' %}{{ cell.value|floatformat:1 }}%
-                                    {% else %}{{ cell.value|floatformat:2 }}
+                                    {% else %}{{ cell.value|floatformat:"2g" }}
                                     {% endif %}
                                 </span>
                                 {% if not cell.on_track %}

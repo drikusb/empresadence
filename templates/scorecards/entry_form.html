@@ -65,9 +65,9 @@
                                 <td class="text-center">
                                     {% if row.entry %}
                                     <span class="badge {% if row.entry.on_track %}bg-success{% else %}bg-danger{% endif %}">
-                                        {% if row.metric.metric_type == 'integer' %}{{ row.entry.value|floatformat:0 }}
+                                        {% if row.metric.metric_type == 'integer' %}{{ row.entry.value|floatformat:"0g" }}
                                         {% elif row.metric.metric_type == 'percentage' %}{{ row.entry.value|floatformat:1 }}%
-                                        {% else %}{{ row.entry.value|floatformat:2 }}
+                                        {% else %}{{ row.entry.value|floatformat:"2g" }}
                                         {% endif %}
                                     </span>
                                     {% else %}

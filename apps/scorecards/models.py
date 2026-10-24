@@ -94,11 +94,12 @@ class ScorecardMetric(models.Model):
     def format_value(self, value):
         if value is None:
             return '—'
+        # Thousands separators: 10000.00 reads as a hundred thousand at a glance.
         if self.metric_type == self.TYPE_INTEGER:
-            return str(int(value))
+            return f'{int(value):,}'
         if self.metric_type == self.TYPE_PERCENTAGE:
             return f'{value:.1f}%'
-        return f'{value:.2f}'
+        return f'{value:,.2f}'
 
     def format_goal(self):
         label = {self.DIR_ABOVE: '≥', self.DIR_BELOW: '≤', self.DIR_EQUAL: '='}[self.goal_direction]
