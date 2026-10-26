@@ -85,6 +85,16 @@ class RockTerminologyTest(TestCase):
         self.assertContains(resp, f'No Priorities for {self.quarter_label}')
         self.assertContains(resp, 'Create first Priority')
 
+    def test_empty_list_across_all_teams_uses_the_organisations_words(self):
+        Rock.objects.filter(team=self.team).delete()
+        self.client.force_login(self.user)
+        resp = self.get('/rocks/?scope=all')
+        self.assertContains(
+            resp, f'No Priorities for {self.quarter_label} on any of your teams.'
+        )
+        self.assertContains(resp, 'Create first Priority')
+        self.assertNotContains(resp, 'No Rocks')
+
     def test_archive_page_uses_the_organisations_words(self):
         self.client.force_login(self.user)
         resp = self.get('/rocks/archive/')

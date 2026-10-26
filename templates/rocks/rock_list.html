@@ -233,9 +233,9 @@
 {% elif scope == 'all' %}
 <div class="text-center py-5 text-muted">
     <i class="bi bi-gem display-3 d-block mb-3 text-success opacity-25"></i>
-    <h4>No Rocks for {{ quarter_label }} on any of your teams.</h4>
+    <h4>No {{ terms.rocks }} for {{ quarter_label }} on any of your teams.</h4>
     <a href="{% url 'rocks:create' %}" class="btn btn-dark">
-        <i class="bi bi-plus-lg me-1"></i>Create first Rock
+        <i class="bi bi-plus-lg me-1"></i>Create first {{ terms.rock }}
     </a>
 </div>
 {% else %}
