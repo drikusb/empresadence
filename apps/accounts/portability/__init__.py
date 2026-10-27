@@ -1,4 +1,4 @@
-"""Move one organisation's data in and out of an OpenEOS instance.
+"""Move one organisation's data in and out of an Empresadence instance.
 
 :mod:`.export` decides what belongs to an organisation and writes the archive;
 the importer that reads it back lives alongside it. ``FORMAT_VERSION`` is

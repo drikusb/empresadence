@@ -322,7 +322,7 @@ class BuildArchiveTest(MediaRootMixin, TestCase):
             'id': self.a['org'].pk, 'name': 'Alpha Org', 'slug': 'alpha-org',
         })
         self.assertIn('django', manifest['app'])
-        self.assertIsNone(manifest['app']['openeos_build'])
+        self.assertIsNone(manifest['app']['empresadence_build'])
         collected = collect(self.a['org'])
         self.assertEqual(list(manifest['record_counts']), list(collected))
         self.assertTrue(POPULATED_MODELS <= set(manifest['record_counts']))
@@ -341,7 +341,7 @@ class BuildArchiveTest(MediaRootMixin, TestCase):
         self.assertEqual(export._build_id(), '2026.10.09-abc123')
         self.assertEqual(export._build_id(Path(self.media_root, 'nope')), None)
         _, manifest = export_to_bytes(self.a['org'])
-        self.assertEqual(manifest['app']['openeos_build'], '2026.10.09-abc123')
+        self.assertEqual(manifest['app']['empresadence_build'], '2026.10.09-abc123')
         self.build_info.write_text('  \n', encoding='utf-8')
         self.assertIsNone(export._build_id())
 
@@ -491,7 +491,7 @@ class OrganizationExportViewTest(MediaRootMixin, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp['Content-Type'], 'application/zip')
         disposition = resp['Content-Disposition']
-        self.assertTrue(disposition.startswith('attachment; filename="openeos-export-alpha-org-'))
+        self.assertTrue(disposition.startswith('attachment; filename="empresadence-export-alpha-org-'))
         self.assertTrue(disposition.endswith('Z.zip"'))
         blob = b''.join(resp.streaming_content)
         archive = zipfile.ZipFile(io.BytesIO(blob))
@@ -560,7 +560,7 @@ class ExportOrganizationCommandTest(MediaRootMixin, TestCase):
         call_command('export_organization', 'alpha-org', '--out', self.out, stdout=stdout)
         files = sorted(Path(self.out).iterdir())
         self.assertEqual(len(files), 1)
-        self.assertTrue(files[0].name.startswith('openeos-export-alpha-org-'))
+        self.assertTrue(files[0].name.startswith('empresadence-export-alpha-org-'))
         self.assertEqual(stdout.getvalue().strip(), str(files[0]))
         manifest = json.loads(zipfile.ZipFile(files[0]).read('manifest.json'))
         self.assertEqual(manifest['via'], 'command')
@@ -577,7 +577,7 @@ class ExportOrganizationCommandTest(MediaRootMixin, TestCase):
     def test_all(self):
         stdout = StringIO()
         call_command('export_organization', '--all', '--out', self.out, stdout=stdout)
-        archives = sorted(Path(self.out).glob('openeos-export-*.zip'))
+        archives = sorted(Path(self.out).glob('empresadence-export-*.zip'))
         self.assertEqual(len(archives), 2)
         index = json.loads(Path(self.out, 'instance-manifest.json').read_text())
         self.assertEqual(index['format_version'], FORMAT_VERSION)

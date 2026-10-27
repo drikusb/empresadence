@@ -1,4 +1,4 @@
-# OpenEOS Roadmap
+# Empresadence Roadmap
 
 A living checklist of what's been built and what's coming next. PRs welcome for any item marked `[ ]`.
 

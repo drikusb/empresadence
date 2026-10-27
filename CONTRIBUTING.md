@@ -1,6 +1,6 @@
-# Contributing to OpenEOS
+# Contributing to Empresadence
 
-Thanks for your interest in contributing! OpenEOS is an open-source Django implementation of the EOS (Entrepreneurial Operating System) framework. All contributions — bug fixes, new features, docs, and tests — are welcome.
+Thanks for your interest in contributing! Empresadence is an open-source Django implementation of the EOS (Entrepreneurial Operating System) framework. All contributions — bug fixes, new features, docs, and tests — are welcome.
 
 ---
 
@@ -28,8 +28,8 @@ Thanks for your interest in contributing! OpenEOS is an open-source Django imple
 
 ```bash
 # 1. Fork and clone
-git clone https://github.com/YOUR_USERNAME/openeos.git
-cd openeos
+git clone https://github.com/YOUR_USERNAME/empresadence.git
+cd empresadence
 
 # 2. Copy the example env file
 cp .env.example .env
@@ -152,4 +152,4 @@ Every record reachable by primary key must be limited to the active organisation
 
 ## Questions?
 
-Open a [GitHub Discussion](https://github.com/drikusb/openeos/discussions) or file an issue. We're happy to help.
+Open a [GitHub Discussion](https://github.com/drikusb/empresadence/discussions) or file an issue. We're happy to help.
