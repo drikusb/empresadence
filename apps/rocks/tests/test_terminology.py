@@ -67,7 +67,7 @@ class RockTerminologyTest(TestCase):
         )
         self.assertContains(resp, '2 Priorities')
         self.assertContains(resp, 'New Priority')
-        self.assertContains(resp, 'EOS recommends 3–7 Priorities per team')
+        self.assertContains(resp, 'We recommend 3–7 Priorities per team')
         self.assertNotContains(resp, 'Rocks')
         self.assertNotContains(resp, 'New Rock')
 

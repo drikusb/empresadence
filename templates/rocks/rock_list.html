@@ -79,11 +79,11 @@
             <h5 class="mb-0 me-2">{{ team.name }}</h5>
             <span class="badge bg-light text-dark border">{{ team_rocks|length }} {% term 'rock' count=team_rocks|length %}</span>
             {% if team_rocks|length < 3 %}
-            <span class="badge bg-warning text-dark ms-2" title="EOS recommends 3–7 {{ terms.rocks }} per team">
+            <span class="badge bg-warning text-dark ms-2" title="We recommend 3–7 {{ terms.rocks }} per team">
                 <i class="bi bi-exclamation-triangle me-1"></i>Below minimum
             </span>
             {% elif team_rocks|length > 7 %}
-            <span class="badge bg-danger ms-2" title="EOS recommends 3–7 {{ terms.rocks }} per team">
+            <span class="badge bg-danger ms-2" title="We recommend 3–7 {{ terms.rocks }} per team">
                 <i class="bi bi-exclamation-triangle me-1"></i>Above maximum
             </span>
             {% endif %}
@@ -202,7 +202,7 @@
 <div class="text-center py-5 text-muted">
     <i class="bi bi-gem display-3 d-block mb-3 text-success opacity-25"></i>
     <h4>No {{ terms.rocks }} for {{ quarter_label }}</h4>
-    <p class="mb-4">EOS recommends 3–7 {{ terms.rocks }} per team each quarter.</p>
+    <p class="mb-4">We recommend 3–7 {{ terms.rocks }} per team each quarter.</p>
     <a href="{% url 'rocks:create' %}" class="btn btn-dark">
         <i class="bi bi-plus-lg me-1"></i>Create first {{ terms.rock }}
     </a>
