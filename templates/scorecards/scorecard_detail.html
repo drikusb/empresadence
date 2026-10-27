@@ -11,7 +11,7 @@
         <h1 class="h3 mb-0">{{ scorecard.name }}</h1>
         <div class="text-muted small">{{ scorecard.team.name }} · {{ scorecard.metric_count }} active metric{{ scorecard.metric_count|pluralize }}
             {% if not scorecard.count_ok %}
-            <span class="badge bg-warning text-dark ms-1" title="EOS recommends 5–15 metrics">
+            <span class="badge bg-warning text-dark ms-1" title="We recommend 5–15 metrics">
                 <i class="bi bi-exclamation-triangle me-1"></i>
                 {% if scorecard.metric_count < 5 %}Below minimum{% else %}Above maximum{% endif %}
             </span>

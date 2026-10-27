@@ -44,7 +44,7 @@
                         <input type="text" name="{{ form.name.html_name }}" id="{{ form.name.id_for_label }}"
                                value="{{ form.name.value|default:'' }}"
                                class="form-control {% if form.name.errors %}is-invalid{% endif %}"
-                               placeholder="e.g. Visionary, Integrator, Marketing Lead">
+                               placeholder="e.g. CEO, COO, Marketing Lead">
                         {% for e in form.name.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
                     </div>
 

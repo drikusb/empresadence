@@ -144,7 +144,7 @@ if EMAIL_HOST:
     EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='EOS App <noreply@example.com>')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='Empresadence <noreply@example.com>')
 
 # Base URL used to build absolute links in emails (no trailing slash).
 SITE_URL = config('SITE_URL', default='http://localhost:8000')

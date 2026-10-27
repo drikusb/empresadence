@@ -11,7 +11,7 @@ class NodeForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'e.g. Visionary, Marketing Lead, Operations Manager',
+                'placeholder': 'e.g. CEO, Marketing Lead, Operations Manager',
             }),
             'node_type': forms.Select(attrs={'class': 'form-select'}),
             'owner': forms.Select(attrs={'class': 'form-select'}),
