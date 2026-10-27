@@ -262,7 +262,7 @@ def _referenced_user_pks(querysets):
 
 def archive_filename(organization, when):
     stamp = when.astimezone(dt_timezone.utc).strftime('%Y%m%dT%H%MZ')
-    return f'openeos-export-{organization.slug}-{stamp}.zip'
+    return f'empresadence-export-{organization.slug}-{stamp}.zip'
 
 
 def build_archive(organization, *, fileobj, exported_by=None, via='web', max_bytes=None,
@@ -301,7 +301,7 @@ def build_archive(organization, *, fileobj, exported_by=None, via='web', max_byt
             ('organization', {
                 'id': organization.pk, 'name': organization.name, 'slug': organization.slug,
             }),
-            ('app', {'django': django.get_version(), 'openeos_build': _build_id()}),
+            ('app', {'django': django.get_version(), 'empresadence_build': _build_id()}),
             ('record_counts', record_counts),
             ('files', media),
         ])
@@ -462,15 +462,15 @@ def _readme(manifest):
         f'  {label:<42} {count:>7}' for label, count in manifest['record_counts'].items()
     )
     files = '\n'.join(f'  media/{name}' for name in manifest['files']) or '  (none)'
-    return f"""OpenEOS organisation export
-===========================
+    return f"""Empresadence organisation export
+================================
 
 Organisation : {org['name']} (slug: {org['slug']}, id {org['id']})
 Exported at  : {manifest['exported_at']}
 Exported by  : {manifest['exported_by'] or '(management command)'}
 Format       : {manifest['format_version']}
 Django       : {manifest['app']['django']}
-Build        : {manifest['app']['openeos_build'] or '(unknown)'}
+Build        : {manifest['app']['empresadence_build'] or '(unknown)'}
 
 What this archive contains
 --------------------------
@@ -504,7 +504,7 @@ Files
 
 Importing
 ---------
-On another OpenEOS instance run:
+On another Empresadence instance run:
 
   python manage.py import_organization <this archive>
 

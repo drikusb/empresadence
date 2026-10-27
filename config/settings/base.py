@@ -131,7 +131,7 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # Shown as the account label in authenticator apps.
-OTP_TOTP_ISSUER = config('OTP_TOTP_ISSUER', default='OpenEOS')
+OTP_TOTP_ISSUER = config('OTP_TOTP_ISSUER', default='Empresadence')
 
 # ── Email ────────────────────────────────────────────────────────────────────
 # Set EMAIL_HOST to enable SMTP; otherwise emails print to the console (dev-friendly default).
