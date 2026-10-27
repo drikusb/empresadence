@@ -31,8 +31,9 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# Claude Code local settings
-.claude/settings.local.json
+# Local AI-tooling config — development-environment metadata, not project source
+.claude/
+.braintree/
 
 # IDE
 .idea/
