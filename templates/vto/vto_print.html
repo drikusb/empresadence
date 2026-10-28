@@ -8,7 +8,10 @@
     .container-fluid { padding: 0 !important; }
     .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
     body { font-size: 10pt; }
-    .row { page-break-inside: avoid; }
+    /* Keep each card whole. Applying this to the outer .row instead, which is
+       taller than a page, pushed the entire VTO off the title page. */
+    .card { break-inside: avoid; page-break-inside: avoid; }
+    .page-traction { break-before: page; page-break-before: always; }
     /* Browsers drop background colours when printing by default, which strips
        the colour straight off the Rock and Issue status badges. Force it on. */
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -144,7 +147,7 @@
 </div>
 
 {# ═══════════════ PAGE 2 — TRACTION ═══════════════ #}
-<div class="col-lg-6">
+<div class="col-lg-6 page-traction">
     <p class="text-uppercase fw-bold text-muted mb-2" style="font-size:.68rem;letter-spacing:.08em">
         Page 2 — Traction
     </p>
