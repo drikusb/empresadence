@@ -4,14 +4,16 @@ Every record is created afresh with a new primary key; the old keys are
 remembered per model so foreign keys and many-to-many lists can be rewritten
 as they are met. Files are loaded in the order the archive lists them, which
 is the dependency order :func:`.export.collect` wrote them in, so a parent
-always exists before its children. A reference to anything the archive does
-not carry is an error, not a null.
+always exists before its children.
 
 A row that would break a unique constraint this database already satisfies
-(a hostname taken by another organisation, say) is skipped rather than
-stopping the import, along with any row that refers to it; the result lists
-every skipped row with the reason. The organisation itself is never skipped:
-its slug is checked before anything is written.
+(a hostname taken by another organisation, say), or that refers to something
+the archive does not carry (a cross-organisation link made through the
+admin, say — :mod:`.export` keeps the id but drops the name on exactly this
+kind of reference, by design), is skipped rather than stopping the import,
+along with any row that refers to it in turn; the result lists every skipped
+row with the reason. The organisation itself is never skipped: its slug is
+checked before anything is written.
 """
 import json
 import zipfile
@@ -90,11 +92,11 @@ def _read_manifest(archive):
     try:
         manifest = json.loads(archive.read('manifest.json'))
     except KeyError:
-        raise PortabilityError('This is not an OpenEOS export: it has no manifest.json.')
+        raise PortabilityError('This is not an Empresadence export: it has no manifest.json.')
     version = manifest.get('format_version')
     if version != FORMAT_VERSION:
         raise PortabilityError(
-            f'This archive is format version {version!r}; this version of OpenEOS reads '
+            f'This archive is format version {version!r}; this version of Empresadence reads '
             f'version {FORMAT_VERSION}.'
         )
     for key in ('organization', 'record_counts'):
@@ -179,7 +181,7 @@ class _Loader:
             if unknown:
                 raise PortabilityError(
                     f'{label} has no field called {sorted(unknown)[0]}; the archive comes '
-                    f'from a different version of OpenEOS.'
+                    f'from a different version of Empresadence.'
                 )
 
     # ── the organisation, users, and the two one-to-one models ────────────
@@ -264,9 +266,10 @@ class _Loader:
             if old is None or old in self.maps[label] or old in self.skipped.get(label, {}):
                 continue
             if old not in self.old_pks[label]:
-                raise PortabilityError(
-                    f'{label} #{row["pk"]} refers to {label} #{old}, which is not in the archive.'
-                )
+                # Points outside the archive entirely (a cross-organisation parent
+                # Rock set through the admin, say) — waiting will never resolve it;
+                # _create's own check skips the row instead.
+                continue
             return True
         return False
 
@@ -277,7 +280,7 @@ class _Loader:
         that was skipped, or it would break a unique constraint.
         """
         fields = row['fields']
-        reason = self._skipped_parent(model, fields)
+        reason = self._unresolvable_reference(model, fields)
         if reason:
             return self._skip(label, row, reason)
         many = {}
@@ -286,7 +289,8 @@ class _Loader:
                 target = label_for(field.related_model)
                 many[field.name] = [
                     self._map(target, pk, f'{label}.{field.name}')
-                    for pk in fields[field.name] if pk not in self.skipped.get(target, {})
+                    for pk in fields[field.name]
+                    if pk not in self.skipped.get(target, {}) and pk in self.old_pks.get(target, set())
                 ]
         obj = model()
         self._apply_fields(obj, label, fields, skip=set(many))
@@ -300,8 +304,12 @@ class _Loader:
         self.maps[label][row['pk']] = obj.pk
         return obj
 
-    def _skipped_parent(self, model, fields):
-        """Why this row cannot be created because of a skipped row it points at, or None."""
+    def _unresolvable_reference(self, model, fields):
+        """Why this row cannot be created because of what one of its fields points
+        at, or None. Either that row was itself skipped (a unique violation, say),
+        or it was never in the archive at all — a cross-organisation link made
+        through the admin, for instance. Either way the row is skipped rather than
+        stopping the whole import or silently nulling the field."""
         for field in model._meta.concrete_fields:
             old = fields.get(field.name) if field.is_relation else None
             if old is None:
@@ -309,6 +317,8 @@ class _Loader:
             target = label_for(field.related_model)
             if old in self.skipped.get(target, {}):
                 return f'its {field.name} ({target} #{old}) was skipped'
+            if old not in self.old_pks.get(target, set()):
+                return f'its {field.name} ({target} #{old}) is not in the archive'
         return None
 
     @staticmethod

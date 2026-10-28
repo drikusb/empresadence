@@ -71,7 +71,8 @@ class Command(BaseCommand):
         if result.skipped:
             write(self.style.WARNING(
                 f'  Skipped {len(result.skipped)} record(s) that would clash with what is '
-                f'already here (or depend on one that would):'
+                f'already here, refer to something outside the archive, or depend on one '
+                f'that would:'
             ))
             for label, pk, reason in result.skipped:
                 write(f'    {label} #{pk}: {reason}')

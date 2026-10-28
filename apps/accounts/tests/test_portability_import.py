@@ -17,6 +17,7 @@ from apps.accountability.models import AccountabilityNode
 from apps.accounts.models import Organization
 from apps.accounts.portability import collect
 from apps.audit.models import AuditEvent
+from apps.issues.models import Issue
 from apps.meetings.models import Headline
 from apps.rocks.models import Rock, RockDependency
 from apps.scorecards.models import Scorecard
@@ -270,20 +271,24 @@ class ImportOptionsTest(ImportTestBase):
             self.run_import(archive=bad)
         self.assertEqual(self.snapshot(), before)
 
-    def test_refuses_a_dangling_reference(self):
+    def test_a_dangling_reference_skips_just_that_row(self):
+        """A reference to something the archive doesn't carry — whether a
+        legitimate cross-organisation link or a corrupted archive like this one —
+        skips the one row rather than failing the whole import."""
         with zipfile.ZipFile(self.archive) as src:
             todos = json.loads(src.read('data/todos.todo.json'))
         todos[0]['fields']['linked_rock'] = 999999
         bad = Path(self.out, 'dangling.zip')
         rewrite_zip(self.archive, bad, {'data/todos.todo.json': json.dumps(todos).encode()})
-        before = self.snapshot()
-        with self.assertRaisesMessage(
-            CommandError, 'todos.todo.linked_rock refers to rocks.rock #999999'
-        ):
-            self.run_import(archive=bad)
-        # Rolled back: no organisation, no users, and the logo copied before the
-        # failure has been removed again.
-        self.assertEqual(self.snapshot(), before)
+
+        output = self.run_import(archive=bad)
+        org = Organization.objects.get(slug='alpha-copy')
+        self.assertIn(
+            'its linked_rock (rocks.rock #999999) is not in the archive', output,
+        )
+        self.assertFalse(ToDo.objects.filter(team__organization=org).exists())
+        # Everything else still imports normally.
+        self.assertTrue(Rock.objects.filter(team__organization=org).exists())
 
     def test_refuses_something_that_is_not_an_export(self):
         with self.assertRaisesMessage(CommandError, 'is not a file'):
@@ -371,3 +376,78 @@ class SkippedRowsTest(ImportTestBase):
         self.assertIn('Dry run', output)
         self.assertIn('vto.vto #999999: Vto with this Organization already exists.', output)
         self.assertFalse(Organization.objects.filter(slug='alpha-copy').exists())
+
+
+class CrossOrganisationReferenceImportTest(MediaRootMixin, TestCase):
+    """A reference an admin created across organisations through the raw-id fields
+    in the Django admin — the one case #51's own export deliberately keeps a
+    dangling id for, rather than nulling it, so a reader can see the link existed —
+    must not fail the whole import. Just the row that carries it is skipped, the
+    same way a unique violation is."""
+
+    def setUp(self):
+        super().setUp()
+        self.a = populate_org('Alpha')
+        self.b = populate_org('Beta')
+        RockDependency.objects.create(
+            rock=self.a['rock'], depends_on_rock=self.b['rock'], description='crosses orgs',
+        )
+        self.a['issue'].delegated_to_team = self.b['team2']
+        self.a['issue'].save()
+        self.out = tempfile.mkdtemp(prefix='empresadence-import-')
+        self.addCleanup(shutil.rmtree, self.out, ignore_errors=True)
+        self.archive = Path(self.out, 'alpha-crossing.zip')
+        blob, self.manifest = export_to_bytes(self.a['org'], exported_by=self.a['admin'])
+        self.archive.write_bytes(blob)
+
+    def run_import(self, *args):
+        out = StringIO()
+        call_command(
+            'import_organization', str(self.archive), '--slug', 'alpha-crossing-copy', *args,
+            stdout=out,
+        )
+        return out.getvalue()
+
+    def test_the_crossing_rows_are_skipped_but_the_rest_imports(self):
+        output = self.run_import()
+        org = Organization.objects.get(slug='alpha-crossing-copy')
+
+        # The dependency pointing at another organisation's Rock is skipped;
+        # the Rock that carries it is not.
+        self.assertFalse(
+            RockDependency.objects.filter(
+                description='crosses orgs', rock__team__organization=org,
+            ).exists()
+        )
+        self.assertTrue(
+            Rock.objects.filter(team__organization=org, title='Alpha Rock').exists()
+        )
+        self.assertIn('its depends_on_rock (rocks.rock #', output)
+
+        # The issue delegated to another organisation's team is skipped, and so
+        # is everything that refers to it — cascading, the same as a unique
+        # violation does.
+        self.assertFalse(Issue.objects.filter(originating_team__organization=org).exists())
+        self.assertFalse(
+            Headline.objects.filter(
+                text='Alpha headline', meeting__team__organization=org,
+            ).exists()
+        )
+        self.assertFalse(ToDo.objects.filter(team__organization=org).exists())
+        self.assertIn('its delegated_to_team (accounts.team #', output)
+        self.assertIn('is not in the archive', output)
+
+        # Nothing unrelated was held up by either of them.
+        self.assertTrue(VTO.objects.filter(organization=org).exists())
+        self.assertTrue(Scorecard.objects.filter(team__organization=org).exists())
+
+        event = AuditEvent.objects.get(action='organization.imported', organization=org)
+        reasons = {s['model'] for s in event.details['skipped']}
+        self.assertIn('rocks.rockdependency', reasons)
+        self.assertIn('issues.issue', reasons)
+
+    def test_dry_run_reports_the_same_skips_without_writing_anything(self):
+        output = self.run_import('--dry-run')
+        self.assertFalse(Organization.objects.filter(slug='alpha-crossing-copy').exists())
+        self.assertIn('its depends_on_rock (rocks.rock #', output)
+        self.assertIn('its delegated_to_team (accounts.team #', output)
