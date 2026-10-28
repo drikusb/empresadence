@@ -23,10 +23,12 @@ RENAMED = {
     'headline': 'Update', 'headlines': 'Updates',
     'seat': 'Role', 'seats': 'Roles',
     'todo': 'Action', 'todos': 'Actions',
-    'rock': 'Priority', 'rocks': 'Priorities',
+    # Distinct from the shipped default ('Priority') so the default-host test
+    # below can tell "customised" apart from "just happens to match the default."
+    'rock': 'Objective', 'rocks': 'Objectives',
 }
 RENAMED_SEGMENTS = [
-    'Segue', 'Scorecard Review', 'Priority Review', 'Updates', 'Action Review', 'IDS', 'Conclude',
+    'Check-in', 'Metrics Board Review', 'Objective Review', 'Updates', 'Action Review', 'PRS', 'Conclude',
 ]
 
 
@@ -120,7 +122,7 @@ class MeetingTerminologyTest(TestCase):
     def test_list_shows_the_renamed_current_segment(self):
         self.start_at_segment(self.meeting, 2)
         resp = self.client.get('/meetings/', HTTP_HOST=MERCURY)
-        self.assertContains(resp, 'Priority Review')
+        self.assertContains(resp, 'Objective Review')
         self.assertNotContains(resp, 'Rock Review')
 
     def test_create_page_and_message_use_the_organisations_meeting_name(self):
@@ -141,7 +143,7 @@ class MeetingTerminologyTest(TestCase):
         self.assertContains(resp, 'bi-play-fill me-1"></i>Start Weekly Meeting')
         self.assertNotContains(resp, 'Start Meeting')
         self.assertEqual(resp.context['segment_names'], RENAMED_SEGMENTS)
-        for name in ['Priority Review', 'Updates', 'Action Review']:
+        for name in ['Objective Review', 'Updates', 'Action Review']:
             with self.subTest(name=name):
                 self.assertContains(resp, name)
         for name in ['Rock Review', 'Headlines', 'To-Do Review', 'Level 10']:
@@ -208,8 +210,8 @@ class MeetingTerminologyTest(TestCase):
     def test_rock_segment_uses_the_organisations_words(self):
         self.start_at_segment(self.meeting, 2)
         resp = self.client.get(f'/meetings/{self.meeting.pk}/', HTTP_HOST=MERCURY)
-        self.assertContains(resp, 'Each Priority owner')
-        self.assertContains(resp, 'No active Priorities for')
+        self.assertContains(resp, 'Each Objective owner')
+        self.assertContains(resp, 'No active Objectives for')
 
     def test_todo_segment_uses_the_organisations_words(self):
         self.start_at_segment(self.meeting, 4)
@@ -237,7 +239,7 @@ class MeetingTerminologyTest(TestCase):
             f'/meetings/{self.meeting.pk}/headlines/{headline.pk}/escalate/',
             HTTP_HOST=MERCURY, follow=True,
         )
-        self.assertContains(resp, 'Update escalated to Issues.')
+        self.assertContains(resp, 'Update escalated to Blockers.')
         activity = IssueActivity.objects.get()
         self.assertIn('Escalated from Level 10 Meeting headline', activity.notes)
 
@@ -248,7 +250,7 @@ class MeetingTerminologyTest(TestCase):
             {'personal_best': 'Ran a 5K', 'business_best': 'Shipped it'},
             HTTP_HOST=MERCURY, follow=True,
         )
-        self.assertContains(resp, 'Segue entry saved.')
+        self.assertContains(resp, 'Check-in entry saved.')
 
     def test_completed_meeting_and_print_use_the_organisations_words(self):
         self.meeting.start()
@@ -257,7 +259,7 @@ class MeetingTerminologyTest(TestCase):
         self.meeting.complete(cascading_messages='Tell everyone.')
 
         resp = self.client.get(f'/meetings/{self.meeting.pk}/', HTTP_HOST=MERCURY)
-        self.assertContains(resp, 'Priority Review')
+        self.assertContains(resp, 'Objective Review')
         self.assertContains(resp, 'Actions Created This Meeting')
         self.assertContains(resp, 'bi-journal-text me-1"></i>Weekly Meeting Notes')
         self.assertNotContains(resp, 'Rock Review')
@@ -283,33 +285,33 @@ class MeetingTerminologyTest(TestCase):
         self.assertIn('<span class="fw-semibold small">Weekly Meeting Notes</span>', html)
         self.assertIn('average weekly meeting rating', html)
         self.assertNotIn('>Meeting Notes<', html)
-        self.assertIn('Priority Review', html)
+        self.assertIn('Objective Review', html)
         self.assertIn('Actions Created This Meeting', html)
         self.assertNotIn('Level 10', html)
 
-    def test_default_host_shows_the_eos_words(self):
+    def test_default_host_shows_the_generic_words(self):
         meeting = Meeting.objects.create(
             team=self.silavapi_team, scheduled_date=date(2026, 1, 5), created_by=self.user,
         )
         resp = self.client.get('/meetings/', HTTP_HOST=SILAVAPI)
-        self.assertContains(resp, '<title>Level 10 Meetings — Silavapi Org</title>', html=True)
-        self.assertContains(resp, 'Level 10 Meetings</h1>')
-        self.assertContains(resp, 'bi-plus-lg me-1"></i>Schedule Level 10 Meeting')
+        self.assertContains(resp, '<title>Weekly Meetings — Silavapi Org</title>', html=True)
+        self.assertContains(resp, 'Weekly Meetings</h1>')
+        self.assertContains(resp, 'bi-plus-lg me-1"></i>Schedule Weekly Meeting')
 
         resp = self.client.get(f'/meetings/{meeting.pk}/', HTTP_HOST=SILAVAPI)
-        self.assertContains(resp, 'bi-play-fill me-1"></i>Start Level 10 Meeting')
+        self.assertContains(resp, 'bi-play-fill me-1"></i>Start Weekly Meeting')
         self.assertEqual(resp.context['segment_names'], SEGMENT_NAMES)
-        for name in ['Rock Review', 'Headlines', 'To-Do Review']:
+        for name in ['Priority Review', 'Updates', 'Action Review']:
             with self.subTest(name=name):
                 self.assertContains(resp, name)
-        self.assertNotContains(resp, 'Priority')
+        self.assertNotContains(resp, 'Objective')
 
         resp = self.client.post(f'/meetings/{meeting.pk}/start/', HTTP_HOST=SILAVAPI, follow=True)
         self.assertEqual(
             [str(m) for m in resp.context['messages']],
-            ["Level 10 Meeting started! Good luck — you've got 90 minutes."],
+            ["Weekly Meeting started! Good luck — you've got 90 minutes."],
         )
         self.start_at_segment(meeting, 6)
         resp = self.client.get(f'/meetings/{meeting.pk}/', HTTP_HOST=SILAVAPI)
-        self.assertContains(resp, 'Rate This Level 10 Meeting')
-        self.assertContains(resp, 'bi-flag-fill me-1"></i>Complete Level 10 Meeting')
+        self.assertContains(resp, 'Rate This Weekly Meeting')
+        self.assertContains(resp, 'bi-flag-fill me-1"></i>Complete Weekly Meeting')

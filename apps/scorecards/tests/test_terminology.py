@@ -9,8 +9,11 @@ from apps.scorecards.models import Scorecard, ScorecardEntry, ScorecardMetric, _
 METRICS_HOST = 'metrics.example.test'
 PLAIN_HOST = 'plain.example.test'
 
+# 'scorecard' is distinct from the shipped default ('Metrics Board') so the
+# default-host test below can tell "customised" apart from "just happens to
+# match the default."
 METRICS_WORDS = {
-    'scorecard': 'Metrics Board', 'scorecards': 'Metrics Boards',
+    'scorecard': 'Scoreboard', 'scorecards': 'Scoreboards',
     'core_value': 'Value', 'core_values': 'Values',
     'rock': 'Priority', 'rocks': 'Priorities',
     'issue': 'Blocker', 'issues': 'Blockers',
@@ -53,40 +56,40 @@ class ScorecardTerminologyTest(TestCase):
     def test_list_uses_the_organisation_words(self):
         resp = self.client.get('/scorecards/', HTTP_HOST=METRICS_HOST)
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, '<title>Metrics Boards — Metrics Org</title>', html=True)
-        self.assertContains(resp, 'Metrics Boards</h1>')
-        self.assertContains(resp, 'New Metrics Board')
-        self.assertContains(resp, 'metrics per metrics board.')
-        self.assertContains(resp, 'Edit metrics board')
+        self.assertContains(resp, '<title>Scoreboards — Metrics Org</title>', html=True)
+        self.assertContains(resp, 'Scoreboards</h1>')
+        self.assertContains(resp, 'New Scoreboard')
+        self.assertContains(resp, 'metrics per scoreboard.')
+        self.assertContains(resp, 'Edit scoreboard')
         self.assertNotContains(resp, 'New Scorecard')
         self.assertNotContains(resp, 'Edit scorecard')
 
     def test_empty_list_uses_the_organisation_words(self):
         self.metrics_board.delete()
         resp = self.client.get('/scorecards/', HTTP_HOST=METRICS_HOST)
-        self.assertContains(resp, 'No Metrics Boards yet')
-        self.assertContains(resp, 'Create first Metrics Board')
+        self.assertContains(resp, 'No Scoreboards yet')
+        self.assertContains(resp, 'Create first Scoreboard')
 
     def test_detail_uses_the_organisation_words(self):
         self.add_off_track_entry(self.metrics_board)
         resp = self.client.get(f'/scorecards/{self.metrics_board.pk}/', HTTP_HOST=METRICS_HOST)
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, '<title>Weekly Numbers — Metrics Board — Metrics Org</title>', html=True)
-        self.assertContains(resp, 'Edit metrics board')
+        self.assertContains(resp, '<title>Weekly Numbers — Scoreboard — Metrics Org</title>', html=True)
+        self.assertContains(resp, 'Edit scoreboard')
         self.assertContains(resp, 'title="Escalate to Blocker"')
         self.assertContains(resp, 'to escalate to Blockers')
         self.assertNotContains(resp, 'Escalate to Issue')
 
     def test_form_and_delete_pages_use_the_organisation_words(self):
         resp = self.client.get('/scorecards/new/', HTTP_HOST=METRICS_HOST)
-        self.assertContains(resp, '<title>Create Metrics Board — Metrics Org</title>', html=True)
-        self.assertContains(resp, 'Create Metrics Board</h1>')
-        self.assertContains(resp, 'placeholder="e.g. Leadership Team Metrics Board"')
-        self.assertContains(resp, 'placeholder="What does this metrics board measure?"')
+        self.assertContains(resp, '<title>Create Scoreboard — Metrics Org</title>', html=True)
+        self.assertContains(resp, 'Create Scoreboard</h1>')
+        self.assertContains(resp, 'placeholder="e.g. Leadership Team Scoreboard"')
+        self.assertContains(resp, 'placeholder="What does this scoreboard measure?"')
 
         resp = self.client.get(f'/scorecards/{self.metrics_board.pk}/delete/', HTTP_HOST=METRICS_HOST)
-        self.assertContains(resp, '<title>Delete Metrics Board — Metrics Org</title>', html=True)
-        self.assertContains(resp, 'Delete Metrics Board?')
+        self.assertContains(resp, '<title>Delete Scoreboard — Metrics Org</title>', html=True)
+        self.assertContains(resp, 'Delete Scoreboard?')
 
     def test_create_message_uses_the_organisation_word(self):
         resp = self.client.post(
@@ -95,7 +98,7 @@ class ScorecardTerminologyTest(TestCase):
             HTTP_HOST=METRICS_HOST, follow=True,
         )
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, 'Metrics Board &quot;Sales Numbers&quot; created.')
+        self.assertContains(resp, 'Scoreboard &quot;Sales Numbers&quot; created.')
         self.assertTrue(Scorecard.objects.filter(name='Sales Numbers', team=self.metrics_team).exists())
 
     def test_update_and_delete_messages_use_the_organisation_word(self):
@@ -104,12 +107,12 @@ class ScorecardTerminologyTest(TestCase):
             {'name': 'Renamed', 'team': self.metrics_team.pk, 'is_active': 'on'},
             HTTP_HOST=METRICS_HOST, follow=True,
         )
-        self.assertContains(resp, 'Metrics Board &quot;Renamed&quot; updated.')
+        self.assertContains(resp, 'Scoreboard &quot;Renamed&quot; updated.')
 
         resp = self.client.post(
             f'/scorecards/{self.metrics_board.pk}/delete/', HTTP_HOST=METRICS_HOST, follow=True
         )
-        self.assertContains(resp, 'Metrics Board &quot;Renamed&quot; deleted.')
+        self.assertContains(resp, 'Scoreboard &quot;Renamed&quot; deleted.')
 
     def test_escalate_message_uses_the_organisation_word(self):
         entry = self.add_off_track_entry(self.metrics_board)
@@ -119,17 +122,17 @@ class ScorecardTerminologyTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'Blocker created for off-track metric &quot;Revenue&quot;.')
 
-    def test_default_host_shows_the_eos_words(self):
+    def test_default_host_shows_the_generic_words(self):
         resp = self.client.get('/scorecards/', HTTP_HOST=PLAIN_HOST)
-        self.assertContains(resp, '<title>Scorecards — Plain Org</title>', html=True)
-        self.assertContains(resp, 'Scorecards</h1>')
-        self.assertContains(resp, 'New Scorecard')
-        self.assertContains(resp, 'Edit scorecard')
-        self.assertNotContains(resp, 'Metrics Board')
+        self.assertContains(resp, '<title>Metrics Boards — Plain Org</title>', html=True)
+        self.assertContains(resp, 'Metrics Boards</h1>')
+        self.assertContains(resp, 'New Metrics Board')
+        self.assertContains(resp, 'Edit metrics board')
+        self.assertNotContains(resp, 'Scoreboard')
 
         resp = self.client.post(
             '/scorecards/new/',
             {'name': 'Sales Numbers', 'team': self.plain_team.pk, 'is_active': 'on'},
             HTTP_HOST=PLAIN_HOST, follow=True,
         )
-        self.assertContains(resp, 'Scorecard &quot;Sales Numbers&quot; created.')
+        self.assertContains(resp, 'Metrics Board &quot;Sales Numbers&quot; created.')

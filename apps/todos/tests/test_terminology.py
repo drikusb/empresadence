@@ -13,15 +13,17 @@ ACME = 'acme.example.test'
 GLOBEX = 'globex.example.test'
 HOSTS = ['testserver', ACME, GLOBEX]
 
-ACTIONS = {'todo': 'Action', 'todos': 'Actions'}
+# Distinct from the shipped default ('Action') so the default-host test below
+# can tell "customised" apart from "just happens to match the default."
+ACTIONS = {'todo': 'Task', 'todos': 'Tasks'}
 
 
 @override_settings(ALLOWED_HOSTS=HOSTS)
 class ToDoTerminologyTest(TestCase):
     """The To-Dos pages use the organisation's own word for a To-Do.
 
-    Acme calls them Actions and is reached on its own hostname; Globex keeps
-    the EOS defaults on another hostname. One user belongs to both.
+    Acme calls them Tasks and is reached on its own hostname; Globex keeps
+    the shipped defaults on another hostname. One user belongs to both.
     """
 
     def setUp(self):
@@ -49,20 +51,20 @@ class ToDoTerminologyTest(TestCase):
     def test_list_page_uses_the_organisations_word(self):
         resp = self.client.get('/todos/', HTTP_HOST=ACME)
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, '<title>Actions — Acme</title>', html=True)
-        self.assertContains(resp, 'New Action')
-        self.assertContains(resp, 'My Actions')
-        self.assertContains(resp, 'Team Actions')
-        self.assertContains(resp, 'No open Actions')
-        self.assertContains(resp, 'Create first Action')
+        self.assertContains(resp, '<title>Tasks — Acme</title>', html=True)
+        self.assertContains(resp, 'New Task')
+        self.assertContains(resp, 'My Tasks')
+        self.assertContains(resp, 'Team Tasks')
+        self.assertContains(resp, 'No open Tasks')
+        self.assertContains(resp, 'Create first Task')
         self.assertNotContains(resp, 'To-Do')
 
     def test_empty_states_use_the_organisations_word(self):
         resp = self.client.get('/todos/?status=complete', HTTP_HOST=ACME)
-        self.assertContains(resp, 'No completed Actions')
-        self.assertContains(resp, 'Completed Actions will appear here.')
+        self.assertContains(resp, 'No completed Tasks')
+        self.assertContains(resp, 'Completed Tasks will appear here.')
         resp = self.client.get('/todos/?status=overdue', HTTP_HOST=ACME)
-        self.assertContains(resp, 'No overdue Actions')
+        self.assertContains(resp, 'No overdue Tasks')
 
     def test_escalate_menu_uses_the_organisations_word_for_an_issue(self):
         self.acme.terminology = {**ACTIONS, 'issue': 'Problem'}
@@ -78,8 +80,8 @@ class ToDoTerminologyTest(TestCase):
     def test_create_page_uses_the_organisations_word(self):
         resp = self.client.get('/todos/new/', HTTP_HOST=ACME)
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, '<title>Create Action — Acme</title>', html=True)
-        self.assertContains(resp, 'Create Action')
+        self.assertContains(resp, '<title>Create Task — Acme</title>', html=True)
+        self.assertContains(resp, 'Create Task')
         self.assertNotContains(resp, 'To-Do')
 
     def test_create_page_labels_linked_rock_and_issue_with_the_organisations_words(self):
@@ -110,7 +112,7 @@ class ToDoTerminologyTest(TestCase):
             'linked_issue': '',
         }, HTTP_HOST=ACME, follow=True)
         self.assertRedirects(resp, '/todos/')
-        self.assertIn('Action "Send proposal" created.', self.message_texts(resp))
+        self.assertIn('Task "Send proposal" created.', self.message_texts(resp))
         self.assertEqual(ToDo.objects.get(title='Send proposal').team, self.acme_team)
 
     # ── Update and delete ────────────────────────────────────────────────────
@@ -118,8 +120,8 @@ class ToDoTerminologyTest(TestCase):
     def test_edit_page_and_update_message_use_the_organisations_word(self):
         todo = self.make_todo()
         resp = self.client.get(f'/todos/{todo.pk}/edit/', HTTP_HOST=ACME)
-        self.assertContains(resp, '<title>Edit Action — Acme</title>', html=True)
-        self.assertContains(resp, 'Edit Action')
+        self.assertContains(resp, '<title>Edit Task — Acme</title>', html=True)
+        self.assertContains(resp, 'Edit Task')
         self.assertNotContains(resp, 'To-Do')
 
         resp = self.client.post(f'/todos/{todo.pk}/edit/', {
@@ -130,7 +132,7 @@ class ToDoTerminologyTest(TestCase):
             'linked_rock': '',
             'linked_issue': '',
         }, HTTP_HOST=ACME, follow=True)
-        self.assertIn('Action "Send revised proposal" updated.', self.message_texts(resp))
+        self.assertIn('Task "Send revised proposal" updated.', self.message_texts(resp))
 
     def test_delete_page_and_delete_message_use_the_organisations_word(self):
         self.acme.terminology = {**ACTIONS, 'rock': 'Priority', 'rocks': 'Priorities'}
@@ -144,16 +146,16 @@ class ToDoTerminologyTest(TestCase):
         todo.save()
 
         resp = self.client.get(f'/todos/{todo.pk}/delete/', HTTP_HOST=ACME)
-        self.assertContains(resp, '<title>Delete Action — Acme</title>', html=True)
-        self.assertContains(resp, 'Delete Action?')
-        self.assertContains(resp, 'This Action is linked to Priority')
+        self.assertContains(resp, '<title>Delete Task — Acme</title>', html=True)
+        self.assertContains(resp, 'Delete Task?')
+        self.assertContains(resp, 'This Task is linked to Priority')
         self.assertContains(resp, 'The Priority will not be affected.')
         self.assertNotContains(resp, 'To-Do')
         self.assertNotContains(resp, 'Rock')
 
         resp = self.client.post(f'/todos/{todo.pk}/delete/', HTTP_HOST=ACME, follow=True)
         self.assertRedirects(resp, '/todos/')
-        self.assertIn('Action "Send proposal" deleted.', self.message_texts(resp))
+        self.assertIn('Task "Send proposal" deleted.', self.message_texts(resp))
         self.assertFalse(ToDo.objects.filter(pk=todo.pk).exists())
 
     # ── Escalate ─────────────────────────────────────────────────────────────
@@ -178,13 +180,13 @@ class ToDoTerminologyTest(TestCase):
     def test_other_organisations_host_keeps_the_default_words(self):
         resp = self.client.get('/todos/', HTTP_HOST=GLOBEX)
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, '<title>To-Dos — Globex</title>', html=True)
-        self.assertContains(resp, 'New To-Do')
-        self.assertContains(resp, 'My To-Dos')
-        self.assertContains(resp, 'No open To-Dos')
-        self.assertNotContains(resp, 'Actions')
-        self.assertNotContains(resp, 'New Action')
+        self.assertContains(resp, '<title>Actions — Globex</title>', html=True)
+        self.assertContains(resp, 'New Action')
+        self.assertContains(resp, 'My Actions')
+        self.assertContains(resp, 'No open Actions')
+        self.assertNotContains(resp, 'Tasks')
+        self.assertNotContains(resp, 'New Task')
 
         resp = self.client.get('/todos/new/', HTTP_HOST=GLOBEX)
-        self.assertContains(resp, 'Create To-Do')
-        self.assertNotContains(resp, 'Create Action')
+        self.assertContains(resp, 'Create Action')
+        self.assertNotContains(resp, 'Create Task')

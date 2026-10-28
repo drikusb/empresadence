@@ -197,7 +197,7 @@ class RockCompanyRockParentValidationTest(TestCase):
         ))
         self.assertEqual(resp.status_code, 200)
         self.assertFormError(resp.context['form'], 'parent_rock',
-                              'A company-wide Rock needs a company-wide parent, or no parent at all.')
+                              'A company-wide Priority needs a company-wide parent, or no parent at all.')
         self.assertFalse(Rock.objects.filter(title='Child Rock').exists())
 
     def test_redisplayed_form_after_validation_error_keeps_the_submitted_due_date(self):
@@ -250,9 +250,9 @@ class RockCompanyRockParentValidationTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertFormError(
             resp.context['form'], None,
-            'Demoting this Rock will also remove company-wide status from '
-            '1 child Rock: Company Child. Check "Also remove company-wide status '
-            'from this Rock’s company-wide child Rocks" below and save again to confirm.'
+            'Demoting this Priority will also remove company-wide status from '
+            '1 child Priority: Company Child. Check "Also remove company-wide status '
+            'from this Priority’s company-wide child Priorities" below and save again to confirm.'
         )
         self.company_parent.refresh_from_db()
         child.refresh_from_db()

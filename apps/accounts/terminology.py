@@ -1,6 +1,6 @@
-"""What one organisation calls the EOS building blocks.
+"""What one organisation calls the standard building blocks of its operating rhythm.
 
-The standard vocabulary (Rocks, Level 10 Meeting, ...) is the default. An
+The generic vocabulary (Priorities, Weekly Meeting, ...) is the default. An
 organisation stores only the words it changes, so the defaults can evolve in
 code without a data migration. Templates read ``terms`` (see the context
 processor) or use ``{% term %}``; Python code calls ``get_terms(request)``.
@@ -8,20 +8,20 @@ processor) or use ``{% term %}``; Python code calls ``get_terms(request)``.
 from .scoping import get_active_org
 
 TERMS = [
-    ('rock', 'Rock', 'Rocks', 'Quarterly priorities'),
-    ('issue', 'Issue', 'Issues', ''),
-    ('todo', 'To-Do', 'To-Dos', ''),
-    ('scorecard', 'Scorecard', 'Scorecards', ''),
-    ('meeting', 'Level 10 Meeting', 'Level 10 Meetings', 'The weekly leadership meeting'),
-    ('vto', 'VTO', 'VTOs', 'Vision/Traction Organizer'),
-    ('accountability_chart', 'Accountability Chart', 'Accountability Charts', ''),
-    ('seat', 'Seat', 'Seats', ''),
-    ('core_value', 'Core Value', 'Core Values', ''),
-    ('milestone', 'Milestone', 'Milestones', ''),
-    ('headline', 'Headline', 'Headlines', ''),
-    ('segue', 'Segue', 'Segues', ''),
-    ('ids', 'IDS', 'IDS', 'Identify, Discuss, Solve'),
-    ('cascading_message', 'Cascading Message', 'Cascading Messages', ''),
+    ('rock', 'Priority', 'Priorities', 'Quarterly priorities'),
+    ('issue', 'Blocker', 'Blockers', ''),
+    ('todo', 'Action', 'Actions', ''),
+    ('scorecard', 'Metrics Board', 'Metrics Boards', ''),
+    ('meeting', 'Weekly Meeting', 'Weekly Meetings', 'The weekly leadership meeting'),
+    ('vto', 'Vision Plan', 'Vision Plans', 'The organisation\'s long-term vision and plan'),
+    ('accountability_chart', 'Org Chart', 'Org Charts', ''),
+    ('seat', 'Role', 'Roles', ''),
+    ('core_value', 'Value', 'Values', ''),
+    ('milestone', 'Step', 'Steps', ''),
+    ('headline', 'Update', 'Updates', ''),
+    ('segue', 'Check-in', 'Check-ins', ''),
+    ('ids', 'PRS', 'PRS', 'Problem, Solve, Resolve'),
+    ('cascading_message', 'Key Message', 'Key Messages', ''),
 ]
 
 TERM_KEYS = [key for key, *_ in TERMS]

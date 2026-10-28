@@ -48,7 +48,7 @@ class BrandedEmailTest(TestCase):
 
     def test_digest_subject_uses_the_display_name(self):
         send_overdue_todo_digest(self.user, [self.todo], organization=self.org)
-        self.assertEqual(mail.outbox[0].subject, '1 overdue To-Do — Mercury Consortium')
+        self.assertEqual(mail.outbox[0].subject, '1 overdue Action — Mercury Consortium')
 
     def test_invite_uses_the_display_name_and_still_names_the_organisation(self):
         send_user_invite_email(self.user, self.org, 'https://example.com/reset/a/b/')
@@ -84,7 +84,7 @@ class BrandedEmailTest(TestCase):
         send_overdue_todo_digest(self.user, [self.todo])
         message = mail.outbox[0]
         self.assertEqual(message.from_email, 'EOS App <noreply@example.com>')
-        self.assertEqual(message.subject, '1 overdue To-Do — EOS App')
+        self.assertEqual(message.subject, '1 overdue Action — EOS App')
         self.assertTrue(message.body.rstrip().endswith('— EOS App'))
         self.assertNotIn('Mercury Consortium', message.body)
 

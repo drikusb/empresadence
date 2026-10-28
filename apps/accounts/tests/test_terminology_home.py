@@ -17,7 +17,9 @@ RENAMED = {
     'headline': 'Update', 'headlines': 'Updates',
     'seat': 'Role', 'seats': 'Roles',
     'todo': 'Action', 'todos': 'Actions',
-    'rock': 'Priority', 'rocks': 'Priorities',
+    # Distinct from the shipped default ('Priority') so the default-host test
+    # below can tell "customised" apart from "just happens to match the default."
+    'rock': 'Objective', 'rocks': 'Objectives',
 }
 
 
@@ -41,9 +43,9 @@ class HomeAndSearchTerminologyTest(TestCase):
     def test_dashboard_cards_use_the_organisations_words(self):
         resp = self.client.get('/', HTTP_HOST=MERCURY)
         for label in [
-            'Weekly Meetings</h5>', 'Priorities</h5>', 'Actions</h5>',
-            'View Priorities', 'View Actions', 'Open actions',
-            '1-Year Plan, Priorities, and Issues List.',
+            'Weekly Meetings</h5>', 'Objectives</h5>', 'Actions</h5>',
+            'View Objectives', 'View Actions', 'Open actions',
+            '1-Year Plan, Objectives, and Blockers List.',
         ]:
             with self.subTest(label=label):
                 self.assertContains(resp, label)
@@ -84,7 +86,7 @@ class HomeAndSearchTerminologyTest(TestCase):
         meeting.current_segment = 2
         meeting.save(update_fields=['current_segment'])
         resp = self.client.get('/', HTTP_HOST=MERCURY)
-        self.assertContains(resp, 'Segment: Priority Review')
+        self.assertContains(resp, 'Segment: Objective Review')
         self.assertContains(resp, 'bi-play-fill me-1"></i>Rejoin Weekly Meeting')
         self.assertNotContains(resp, 'Rock Review')
         self.assertNotContains(resp, 'Rejoin Meeting')
@@ -96,27 +98,28 @@ class HomeAndSearchTerminologyTest(TestCase):
         )
         ToDo.objects.create(title='Mercury follow-up', owner=self.user, team=self.mercury_team)
         resp = self.client.get('/search/?q=Mercury', HTTP_HOST=MERCURY)
-        self.assertContains(resp, 'placeholder="Search priorities, issues, actions…"')
-        self.assertContains(resp, 'Priorities (1)')
+        self.assertContains(resp, 'placeholder="Search objectives, blockers, actions…"')
+        self.assertContains(resp, 'Objectives (1)')
         self.assertContains(resp, 'Actions (1)')
         self.assertNotContains(resp, 'Rocks (')
         self.assertNotContains(resp, 'To-Dos (')
 
-    def test_default_host_shows_the_eos_words(self):
+    def test_default_host_shows_the_generic_words(self):
         resp = self.client.get('/', HTTP_HOST=SILAVAPI)
         for label in [
-            'Level 10 Meetings</h5>', 'Rocks</h5>', 'To-Dos</h5>', 'View Rocks', 'View To-Dos',
-            'No upcoming level 10 meetings scheduled.', 'Schedule Level 10 Meeting',
-            '1-Year Plan, Rocks, and Issues List.',
+            'Weekly Meetings</h5>', 'Priorities</h5>', 'Actions</h5>',
+            'View Priorities', 'View Actions',
+            'No upcoming weekly meetings scheduled.', 'Schedule Weekly Meeting',
+            '1-Year Plan, Priorities, and Blockers List.',
         ]:
             with self.subTest(label=label):
                 self.assertContains(resp, label)
-        self.assertNotContains(resp, 'Priorit')
+        self.assertNotContains(resp, 'Objective')
 
         Rock.objects.create(
             title='Silavapi launch', owner=self.user, team=self.silavapi_team,
             quarter=1, year=2026, due_date=date(2026, 3, 31),
         )
         resp = self.client.get('/search/?q=Silavapi', HTTP_HOST=SILAVAPI)
-        self.assertContains(resp, 'placeholder="Search rocks, issues, to-dos…"')
-        self.assertContains(resp, 'Rocks (1)')
+        self.assertContains(resp, 'placeholder="Search priorities, blockers, actions…"')
+        self.assertContains(resp, 'Priorities (1)')

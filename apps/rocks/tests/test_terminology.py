@@ -8,9 +8,11 @@ from apps.rocks.models import Rock
 MERCURY = 'mercury.example.test'
 SILAVAPI = 'silavapi.example.test'
 
+# Distinct from the shipped defaults ('Priority', 'Step') so the default-host
+# test below can tell "customised" apart from "just happens to match the default."
 PRIORITIES = {
-    'rock': 'Priority', 'rocks': 'Priorities',
-    'milestone': 'Step', 'milestones': 'Steps',
+    'rock': 'Objective', 'rocks': 'Objectives',
+    'milestone': 'Phase', 'milestones': 'Phases',
 }
 
 
@@ -57,17 +59,17 @@ class RockTerminologyTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(
             resp,
-            '<h1 class="h3 mb-0"><i class="bi bi-gem me-2 text-success"></i>Priorities</h1>',
+            '<h1 class="h3 mb-0"><i class="bi bi-gem me-2 text-success"></i>Objectives</h1>',
             html=True,
         )
         self.assertContains(
             resp,
-            f'<title>Priorities — {self.quarter_label} — {self.org.get_display_name()}</title>',
+            f'<title>Objectives — {self.quarter_label} — {self.org.get_display_name()}</title>',
             html=True,
         )
-        self.assertContains(resp, '2 Priorities')
-        self.assertContains(resp, 'New Priority')
-        self.assertContains(resp, 'We recommend 3–7 Priorities per team')
+        self.assertContains(resp, '2 Objectives')
+        self.assertContains(resp, 'New Objective')
+        self.assertContains(resp, 'We recommend 3–7 Objectives per team')
         self.assertNotContains(resp, 'Rocks')
         self.assertNotContains(resp, 'New Rock')
 
@@ -75,45 +77,45 @@ class RockTerminologyTest(TestCase):
         self.other_rock.delete()
         self.client.force_login(self.user)
         resp = self.get('/rocks/')
-        self.assertContains(resp, '1 Priority')
-        self.assertNotContains(resp, '1 Priorities')
+        self.assertContains(resp, '1 Objective')
+        self.assertNotContains(resp, '1 Objectives')
 
     def test_empty_list_uses_the_organisations_words(self):
         Rock.objects.filter(team=self.team).delete()
         self.client.force_login(self.user)
         resp = self.get('/rocks/')
-        self.assertContains(resp, f'No Priorities for {self.quarter_label}')
-        self.assertContains(resp, 'Create first Priority')
+        self.assertContains(resp, f'No Objectives for {self.quarter_label}')
+        self.assertContains(resp, 'Create first Objective')
 
     def test_empty_list_across_all_teams_uses_the_organisations_words(self):
         Rock.objects.filter(team=self.team).delete()
         self.client.force_login(self.user)
         resp = self.get('/rocks/?scope=all')
         self.assertContains(
-            resp, f'No Priorities for {self.quarter_label} on any of your teams.'
+            resp, f'No Objectives for {self.quarter_label} on any of your teams.'
         )
-        self.assertContains(resp, 'Create first Priority')
+        self.assertContains(resp, 'Create first Objective')
         self.assertNotContains(resp, 'No Rocks')
 
     def test_archive_page_uses_the_organisations_words(self):
         self.client.force_login(self.user)
         resp = self.get('/rocks/archive/')
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, 'Total Priorities')
-        self.assertContains(resp, '0 of 2 Priorities completed')
-        self.assertContains(resp, '2 Priorities')
+        self.assertContains(resp, 'Total Objectives')
+        self.assertContains(resp, '0 of 2 Objectives completed')
+        self.assertContains(resp, '2 Objectives')
         self.assertNotContains(resp, 'Rocks')
 
     def test_create_page_uses_the_organisations_words(self):
         self.client.force_login(self.user)
         resp = self.get('/rocks/new/')
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, 'New Priority')
-        self.assertContains(resp, 'Create Priority')
-        self.assertContains(resp, 'Parent Priority')
-        self.assertContains(resp, '— None (top-level Priority) —')
+        self.assertContains(resp, 'New Objective')
+        self.assertContains(resp, 'Create Objective')
+        self.assertContains(resp, 'Parent Objective')
+        self.assertContains(resp, '— None (top-level Objective) —')
         self.assertContains(
-            resp, f'<title>Create Priority — {self.org.get_display_name()}</title>', html=True
+            resp, f'<title>Create Objective — {self.org.get_display_name()}</title>', html=True
         )
         self.assertNotContains(resp, 'Create Rock')
 
@@ -128,16 +130,16 @@ class RockTerminologyTest(TestCase):
             'due_date': Rock.quarter_end_date(Rock.current_quarter(), Rock.current_year()),
         }, HTTP_HOST=MERCURY, follow=True)
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, 'Priority &quot;Ship the thing&quot; created.')
+        self.assertContains(resp, 'Objective &quot;Ship the thing&quot; created.')
         self.assertNotContains(resp, 'Rock &quot;Ship the thing&quot; created.')
 
     def test_detail_page_milestone_section_uses_the_organisations_words(self):
         self.client.force_login(self.user)
         resp = self.get(f'/rocks/{self.rock.pk}/')
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, '<i class="bi bi-flag me-1"></i>Steps')
-        self.assertContains(resp, 'placeholder="Add a step…"')
-        self.assertContains(resp, '— Select a Priority —')
+        self.assertContains(resp, '<i class="bi bi-flag me-1"></i>Phases')
+        self.assertContains(resp, 'placeholder="Add a phase…"')
+        self.assertContains(resp, '— Select a Objective —')
         self.assertNotContains(resp, 'Milestone')
         self.assertNotContains(resp, 'Add a milestone')
 
@@ -147,38 +149,38 @@ class RockTerminologyTest(TestCase):
             f'/rocks/{self.rock.pk}/milestones/add/', {'title': 'Write the brief'},
             HTTP_HOST=MERCURY, follow=True,
         )
-        self.assertContains(resp, 'Step added.')
+        self.assertContains(resp, 'Phase added.')
         self.assertNotContains(resp, 'Milestone added.')
         resp = self.client.post(
             f'/rocks/{self.rock.pk}/milestones/add/', {'title': ''},
             HTTP_HOST=MERCURY, follow=True,
         )
-        self.assertContains(resp, 'Step title is required.')
+        self.assertContains(resp, 'Phase title is required.')
 
     def test_delete_page_uses_the_organisations_words(self):
         self.client.force_login(self.user)
         resp = self.get(f'/rocks/{self.rock.pk}/delete/')
-        self.assertContains(resp, 'Delete Priority?')
+        self.assertContains(resp, 'Delete Objective?')
         self.assertContains(
-            resp, f'<title>Delete Priority — {self.org.get_display_name()}</title>', html=True
+            resp, f'<title>Delete Objective — {self.org.get_display_name()}</title>', html=True
         )
         resp = self.client.post(f'/rocks/{self.rock.pk}/delete/', HTTP_HOST=MERCURY, follow=True)
-        self.assertContains(resp, 'Priority &quot;Launch the beta&quot; deleted.')
+        self.assertContains(resp, 'Objective &quot;Launch the beta&quot; deleted.')
 
-    def test_default_host_still_says_rocks(self):
+    def test_default_host_shows_the_generic_words(self):
         self.client.force_login(self.default_user)
         resp = self.get('/rocks/', host=SILAVAPI)
         self.assertEqual(resp.status_code, 200)
         self.assertContains(
             resp,
-            '<h1 class="h3 mb-0"><i class="bi bi-gem me-2 text-success"></i>Rocks</h1>',
+            '<h1 class="h3 mb-0"><i class="bi bi-gem me-2 text-success"></i>Priorities</h1>',
             html=True,
         )
-        self.assertContains(resp, '2 Rocks')
-        self.assertContains(resp, 'New Rock')
-        self.assertNotContains(resp, 'Priorit')
+        self.assertContains(resp, '2 Priorities')
+        self.assertContains(resp, 'New Priority')
+        self.assertNotContains(resp, 'Objectiv')
         resp = self.get(f'/rocks/{Rock.objects.filter(team=self.default_team).first().pk}/', host=SILAVAPI)
-        self.assertContains(resp, '<i class="bi bi-flag me-1"></i>Milestones')
+        self.assertContains(resp, '<i class="bi bi-flag me-1"></i>Steps')
 
     def test_company_wide_lines_use_the_organisations_words(self):
         Membership.objects.filter(user=self.user).update(role=Membership.ROLE_ADMIN)
@@ -187,13 +189,13 @@ class RockTerminologyTest(TestCase):
         self.client.force_login(self.user)
 
         resp = self.get('/rocks/')
-        self.assertContains(resp, 'title="Company Priority, shown on the VTO"')
+        self.assertContains(resp, 'title="Company Objective, shown on the Vision Plan"')
         resp = self.get(f'/rocks/{self.rock.pk}/')
-        self.assertContains(resp, 'Company Priority')
+        self.assertContains(resp, 'Company Objective')
         self.assertNotContains(resp, 'Company Rock')
         resp = self.get('/rocks/new/')
-        self.assertContains(resp, 'Company-wide Priority')
-        self.assertContains(resp, "Shows this Priority on the VTO, instead of just this team's Priority list.")
+        self.assertContains(resp, 'Company-wide Objective')
+        self.assertContains(resp, "Shows this Objective on the Vision Plan, instead of just this team's Objective list.")
         self.assertNotContains(resp, 'Company-wide Rock')
 
     def test_child_rock_tooltip_uses_the_organisations_words(self):
@@ -203,7 +205,7 @@ class RockTerminologyTest(TestCase):
         self.client.force_login(self.user)
 
         resp = self.get('/rocks/')
-        self.assertContains(resp, 'title="Has child Priorities"')
+        self.assertContains(resp, 'title="Has child Objectives"')
         self.assertNotContains(resp, 'Has child Rocks')
 
 
@@ -218,16 +220,16 @@ class RockFormTerminologyTest(TestCase):
         form = RockForm(team=self.team)
         self.assertEqual(
             form.fields['title'].widget.attrs['placeholder'],
-            'What is this Priority? Keep it concise.',
+            'What is this Objective? Keep it concise.',
         )
-        self.assertEqual(form.fields['parent_rock'].empty_label, '— None (top-level Priority) —')
+        self.assertEqual(form.fields['parent_rock'].empty_label, '— None (top-level Objective) —')
 
     def test_company_wide_form_messages_use_the_organisations_words(self):
         Membership.objects.filter(user=self.user).update(role=Membership.ROLE_ADMIN)
         form = RockForm(team=self.team, user=self.user)
         self.assertEqual(
             form.fields['confirm_demote_children'].label,
-            "Also remove company-wide status from this Priority's company-wide child Priorities",
+            "Also remove company-wide status from this Objective's company-wide child Objectives",
         )
 
         self.rock.is_company_rock = True
@@ -245,9 +247,9 @@ class RockFormTerminologyTest(TestCase):
         )
         self.assertFalse(form.is_valid())
         self.assertIn(
-            'Demoting this Priority will also remove company-wide status from 1 child Priority: '
-            'Ship the beta. Check "Also remove company-wide status from this Priority’s '
-            'company-wide child Priorities" below and save again to confirm.',
+            'Demoting this Objective will also remove company-wide status from 1 child Objective: '
+            'Ship the beta. Check "Also remove company-wide status from this Objective’s '
+            'company-wide child Objectives" below and save again to confirm.',
             form.non_field_errors(),
         )
 
@@ -262,7 +264,7 @@ class RockFormTerminologyTest(TestCase):
         )
         self.assertFalse(form.is_valid())
         self.assertIn(
-            'A company-wide Priority needs a company-wide parent, or no parent at all.',
+            'A company-wide Objective needs a company-wide parent, or no parent at all.',
             form.errors['parent_rock'],
         )
 
@@ -270,17 +272,17 @@ class RockFormTerminologyTest(TestCase):
         form = RockForm()
         self.assertEqual(
             form.fields['title'].widget.attrs['placeholder'],
-            'What is this Rock? Keep it concise.',
+            'What is this Priority? Keep it concise.',
         )
-        self.assertEqual(form.fields['parent_rock'].empty_label, '— None (top-level Rock) —')
+        self.assertEqual(form.fields['parent_rock'].empty_label, '— None (top-level Priority) —')
 
     def test_dependency_form_uses_the_rocks_organisation_words(self):
         form = RockDependencyForm(rock=self.rock)
         self.assertEqual(
             form.fields['description'].widget.attrs['placeholder'],
-            'Why does this Priority depend on the other? (optional)',
+            'Why does this Objective depend on the other? (optional)',
         )
         self.assertEqual(
             RockDependencyForm().fields['description'].widget.attrs['placeholder'],
-            'Why does this Rock depend on the other? (optional)',
+            'Why does this Priority depend on the other? (optional)',
         )

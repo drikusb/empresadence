@@ -228,7 +228,7 @@ class BrandingContextTest(TestCase):
         self.client.force_login(self.user)
         for path, title in [
             ('/', 'Dashboard — Mercury Consortium'),
-            ('/rocks/?quarter=1&year=2026', 'Rocks — Q1 2026 — Mercury Consortium'),
+            ('/rocks/?quarter=1&year=2026', 'Priorities — Q1 2026 — Mercury Consortium'),
         ]:
             with self.subTest(path=path):
                 resp = self.client.get(path, HTTP_HOST=MERCURY)

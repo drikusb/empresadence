@@ -46,11 +46,11 @@ class BrandedPageTitleTest(TestCase):
         self.client.force_login(self.user)
         for path, title in [
             ('/', 'Dashboard — Mercury Consortium'),
-            ('/issues/', 'Issues — Mercury Consortium'),
-            ('/todos/', 'To-Dos — Mercury Consortium'),
-            ('/scorecards/', 'Scorecards — Mercury Consortium'),
-            ('/meetings/', 'Level 10 Meetings — Mercury Consortium'),
-            ('/vto/', 'VTO — Mercury Consortium'),
+            ('/issues/', 'Blockers — Mercury Consortium'),
+            ('/todos/', 'Actions — Mercury Consortium'),
+            ('/scorecards/', 'Metrics Boards — Mercury Consortium'),
+            ('/meetings/', 'Weekly Meetings — Mercury Consortium'),
+            ('/vto/', 'Vision Plan — Mercury Consortium'),
         ]:
             with self.subTest(path=path):
                 resp = self.client.get(path, HTTP_HOST=MERCURY)
