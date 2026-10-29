@@ -8,12 +8,12 @@ from apps.accounts.models import Team
 
 
 SEGMENT_NAMES = [
-    'Segue',
-    'Scorecard Review',
-    'Rock Review',
-    'Headlines',
-    'To-Do Review',
-    'IDS',
+    'Check-in',
+    'Metrics Board Review',
+    'Priority Review',
+    'Updates',
+    'Action Review',
+    'PRS',
     'Conclude',
 ]
 

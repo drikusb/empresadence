@@ -68,7 +68,7 @@ class IssueTerminologyViewTest(TestCase):
         self.assertContains(resp, 'Blocker Type')
         self.assertContains(resp, 'The presenting blocker')
         self.assertContains(resp, 'The team that raised this blocker.')
-        self.assertContains(resp, 'added to the VTO Blockers List.')
+        self.assertContains(resp, 'added to the Vision Plan Blockers List.')
         self.assertNotContains(resp, 'Create Issue')
         self.assertNotContains(resp, 'Issue Type')
 
@@ -106,7 +106,7 @@ class IssueTerminologyViewTest(TestCase):
         resp = self.client.post('/issues/new/', {
             'title': 'Strategic gap', 'issue_type': Issue.TYPE_LONG_TERM, 'target_quarter': 2,
         }, HTTP_HOST=PLAIN)
-        self.assertContains(resp, 'Required for long-term issues.')
+        self.assertContains(resp, 'Required for long-term blockers.')
 
     def test_detail_and_delete_pages_use_the_organisations_word(self):
         self.client.force_login(self.blockers['user'])
@@ -129,31 +129,30 @@ class IssueTerminologyViewTest(TestCase):
         self.client.force_login(self.blockers['user'])
 
         resp = self.client.get('/issues/', HTTP_HOST=BLOCKERS)
-        self.assertContains(resp, 'title="Company Blocker, shown on the VTO"')
+        self.assertContains(resp, 'title="Company Blocker, shown on the Vision Plan"')
         resp = self.client.get(f'/issues/{issue.pk}/', HTTP_HOST=BLOCKERS)
         self.assertContains(resp, 'Company Blocker')
         self.assertNotContains(resp, 'Company Issue')
         resp = self.client.get('/issues/new/', HTTP_HOST=BLOCKERS)
         self.assertContains(resp, 'Company-wide Blocker')
-        self.assertContains(resp, "Shows this long-term Blocker on the VTO, instead of just this team's Blockers list.")
+        self.assertContains(resp, "Shows this long-term Blocker on the Vision Plan, instead of just this team's Blockers list.")
         self.assertNotContains(resp, 'Company-wide Issue')
 
-    def test_default_host_keeps_the_eos_words(self):
+    def test_default_host_shows_the_generic_words(self):
         self.client.force_login(self.plain['user'])
         resp = self.client.get('/issues/', HTTP_HOST=PLAIN)
-        self.assertContains(resp, 'Issues</h1>')
-        self.assertContains(resp, 'New Issue')
-        self.assertContains(resp, '2 Issues')
-        self.assertNotContains(resp, 'Blocker')
+        self.assertContains(resp, 'Blockers</h1>')
+        self.assertContains(resp, 'New Blocker')
+        self.assertContains(resp, '2 Blockers')
 
         resp = self.client.get('/issues/new/', HTTP_HOST=PLAIN)
-        self.assertContains(resp, 'Create Issue')
-        self.assertContains(resp, 'Issue Type')
+        self.assertContains(resp, 'Create Blocker')
+        self.assertContains(resp, 'Blocker Type')
 
         resp = self.client.post('/issues/new/', {
             'title': 'Strategic gap', 'issue_type': Issue.TYPE_LONG_TERM, 'target_year': 2027,
         }, HTTP_HOST=PLAIN)
-        self.assertContains(resp, 'Required for long-term issues.')
+        self.assertContains(resp, 'Required for long-term blockers.')
 
 
 class IssueFormTerminologyTest(TestCase):
@@ -169,7 +168,7 @@ class IssueFormTerminologyTest(TestCase):
     def test_issue_form_falls_back_to_the_defaults_without_a_team(self):
         form = IssueForm(data={'title': 'x', 'issue_type': Issue.TYPE_LONG_TERM, 'target_year': 2027})
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['target_quarter'], ['Required for long-term issues.'])
+        self.assertEqual(form.errors['target_quarter'], ['Required for long-term blockers.'])
 
     def test_status_form_uses_the_given_terms(self):
         form = IssueStatusForm(
@@ -184,5 +183,5 @@ class IssueFormTerminologyTest(TestCase):
         form = IssueStatusForm({'status': Issue.STATUS_RESOLVED, 'resolution_notes': ''})
         self.assertFalse(form.is_valid())
         self.assertEqual(
-            form.errors['resolution_notes'], ['Please describe how this issue was resolved.']
+            form.errors['resolution_notes'], ['Please describe how this blocker was resolved.']
         )

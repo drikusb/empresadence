@@ -163,7 +163,7 @@ class AllScopeTest(AllTeamsScopeTestBase):
         self.client.force_login(self.member)
         resp = self.client.get(LIST_URL, {'quarter': 3, 'year': 2026, 'scope': 'all'})
         self.assertEqual(resp.context['teams_rocks'], [])
-        self.assertContains(resp, 'No Rocks for Q3 2026 on any of your teams.')
+        self.assertContains(resp, 'No Priorities for Q3 2026 on any of your teams.')
 
     def test_user_with_no_teams_gets_an_empty_list(self):
         self.client.force_login(self.loner)

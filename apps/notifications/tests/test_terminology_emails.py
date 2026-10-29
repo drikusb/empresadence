@@ -81,27 +81,27 @@ class TerminologyEmailTest(TestCase):
         self.assertIn('View the Priority:', message.body)
         self.assertNotIn('Rock', message.body)
 
-    def test_organisation_without_overrides_uses_the_eos_words(self):
+    def test_organisation_without_overrides_uses_the_generic_words(self):
         send_overdue_todo_digest(self.user, [self.todo(self.plain_team, 'Late')], organization=self.plain)
         meeting = Meeting.objects.create(team=self.plain_team, scheduled_date=date.today())
         send_meeting_reminder(self.user, meeting)
         send_rock_off_track_alert(self.rock(self.plain_team, 'Launch'))
         digest, reminder, alert = mail.outbox
-        self.assertEqual(digest.subject, '1 overdue To-Do — Plain Org')
-        self.assertIn('You have 1 overdue To-Do:', digest.body)
-        self.assertIn('View your To-Dos:', digest.body)
-        self.assertEqual(reminder.subject, 'Level 10 Meeting today — Plain Team')
-        self.assertIn('has a Level 10 Meeting scheduled', reminder.body)
-        self.assertIn('View the Level 10 Meeting:', reminder.body)
-        self.assertEqual(alert.subject, 'Rock marked off track: Launch')
-        self.assertIn('Your Rock "Launch"', alert.body)
+        self.assertEqual(digest.subject, '1 overdue Action — Plain Org')
+        self.assertIn('You have 1 overdue Action:', digest.body)
+        self.assertIn('View your Actions:', digest.body)
+        self.assertEqual(reminder.subject, 'Weekly Meeting today — Plain Team')
+        self.assertIn('has a Weekly Meeting scheduled', reminder.body)
+        self.assertIn('View the Weekly Meeting:', reminder.body)
+        self.assertEqual(alert.subject, 'Priority marked off track: Launch')
+        self.assertIn('Your Priority "Launch"', alert.body)
 
-    def test_digest_without_an_organisation_uses_the_eos_words(self):
+    def test_digest_without_an_organisation_uses_the_generic_words(self):
         todos = [self.todo(self.plain_team, 'Late one'), self.todo(self.plain_team, 'Late two')]
         send_overdue_todo_digest(self.user, todos)
         message = mail.outbox[0]
-        self.assertEqual(message.subject, '2 overdue To-Dos — EOS App')
-        self.assertIn('You have 2 overdue To-Dos:', message.body)
+        self.assertEqual(message.subject, '2 overdue Actions — EOS App')
+        self.assertIn('You have 2 overdue Actions:', message.body)
 
     @override_settings(ALLOWED_HOSTS=['testserver', 'mercury.example.test'])
     def test_preferences_page_labels_use_the_organisations_words(self):
@@ -114,10 +114,10 @@ class TerminologyEmailTest(TestCase):
         self.assertNotContains(resp, 'Rock off-track alerts')
 
     @override_settings(ALLOWED_HOSTS=['testserver', 'plain.example.test'])
-    def test_preferences_page_on_a_default_host_keeps_the_eos_words(self):
+    def test_preferences_page_on_a_default_host_shows_the_generic_words(self):
         OrganizationDomain.objects.create(organization=self.plain, hostname='plain.example.test')
         self.client.force_login(self.user)
         resp = self.client.get('/notifications/preferences/', HTTP_HOST='plain.example.test')
-        self.assertContains(resp, 'Overdue To-Do digest')
-        self.assertContains(resp, 'Level 10 Meeting day reminders')
-        self.assertContains(resp, 'Rock off-track alerts')
+        self.assertContains(resp, 'Overdue Action digest')
+        self.assertContains(resp, 'Weekly Meeting day reminders')
+        self.assertContains(resp, 'Priority off-track alerts')

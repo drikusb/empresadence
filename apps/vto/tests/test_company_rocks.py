@@ -66,4 +66,4 @@ class VTOCompanyRocksTest(TestCase):
         self.company_rock_b.delete()
         self.client.force_login(self.user)
         resp = self.client.get('/vto/')
-        self.assertContains(resp, 'No company-wide Rocks')
+        self.assertContains(resp, 'No company-wide Priorities')
