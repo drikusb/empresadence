@@ -80,18 +80,32 @@ Quick collision checks run so far (not a substitute for a real trademark search)
 
 **Still outstanding:** the full check proposed earlier — GitHub, PyPI, domain availability, and a UK/EU/US trademark search for Empresadence/EPD specifically. The repo and code now carry the name ahead of that check clearing; worth prioritising if there's any risk it doesn't.
 
+## Naming the renamed `apps/vto` app — up for discussion
+
+Step 4 below renames the `apps/vto` Django app. Note this is a different decision from the per-organisation terminology word (already flipped to the generic default "Vision Plan" in #90, and still configurable per org) — like `apps.rocks` or `apps.issues`, the Python package name doesn't need to track whatever an organisation currently calls the thing; it's an internal identifier. The actual reason to rename it is narrower: **`VTO`/`V/TO®`** is itself a registered mark, so the acronym shouldn't appear in the codebase, import paths, or URLs at all — unlike "rock"/"issue"/"todo"/etc., which are just ordinary English words nobody owns.
+
+The rename touches the Python package path (`apps.vto` → `apps.X`), the URL prefix (`/vto/` → `/X/`), and the URL namespace (`vto:` → `X:`). All of these are at least somewhat user-visible (bookmarks, shared links) and permanent once shipped, so this is worth a second opinion before landing. Three candidates, each a single lowercase noun to match the sibling apps' style:
+
+| Candidate | Reads as | Notes |
+|---|---|---|
+| `vision` | `apps.vision`, `/vision/`, `vision:` | Shortest; echoes the default term "Vision Plan" directly without being tied to it. |
+| `strategy` | `apps.strategy`, `/strategy/`, `strategy:` | Leans on the long-term planning angle rather than the document itself. |
+| `playbook` | `apps.playbook`, `/playbook/`, `playbook:` | Generic business-document framing; the most distance from the original V/TO concept. |
+
+No code changes in this PR — it's purely to get @RCheesley's (and anyone else's) input on the name before the actual rename PR, same as how #58 opened the overall plan for discussion before any area-specific work started. See the ongoing thread on #17.
+
 ## What's actually left, in order
 
 1. Pick generic default words for every `Terms` entry and flip `DEFAULTS` in `apps/accounts/terminology.py` — this is the step that makes a fresh install trademark-clean, and nothing else matters as much until it's done. Also flip the `vto` term's `description` field away from "Vision/Traction Organizer."
 2. Reword the "EOS recommends" lines, and the "Page 2 — Traction" VTO print/detail heading.
 3. Replace "Visionary" / "Integrator" in the Accountability Chart's example placeholder text with vendor-neutral examples.
-4. Rename `apps/vto` (the Django app itself) and clear the remaining "EOS App" occurrences (email sender name, LICENSE copyright line) and the `eos_`-prefixed infra defaults.
+4. Rename `apps/vto` (the Django app itself — name still open, see above) and clear the remaining "EOS App" occurrences (email sender name, LICENSE copyright line) and the `eos_`-prefixed infra defaults.
 5. Turn the V/TO's section list and the meeting's segment timings into admin-configurable structures instead of fixed copies.
 6. Sweep README, CONTRIBUTING, repo description and GitHub topics.
 7. Fix the README's broken diff-block rendering and take the "on hold" banner down once 1–6 land.
 
 ## Open questions
 
-- Who picks the generic default words — a short naming pass here, or does each area's original PR author propose theirs?
+- Who picks the generic default words — a short naming pass here, or does each area's original PR author propose theirs? (Resolved for the `Terms` defaults themselves, landed in #90. Still open for the renamed `apps/vto` package/URL name — see above.)
 - Does the structural-copy fix (step 5 above) want its own design discussion before a PR, given it's the one area that's still genuinely unscoped?
 - Is a trademark/non-affiliation statement wanted in the README once the above lands, or is removal alone sufficient?
