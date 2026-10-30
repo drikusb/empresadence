@@ -1,6 +1,7 @@
 import csv
 from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
+from itertools import groupby
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
@@ -15,7 +16,12 @@ from .forms import ScorecardForm, ScorecardMetricForm
 from apps.accounts.scoping import (
     OrgScopedMixin, get_active_org, get_active_team, get_org_object_or_404,
 )
+from apps.accounts.team_scope import (
+    SCOPE_ALL, count_other_teams, get_scope, get_visible_teams, summarise_other_teams,
+)
 from apps.accounts.terminology import get_terms
+
+SCOPE_SESSION_KEY = 'scorecards_scope'
 
 
 def _build_periods(n=13, frequency='weekly'):
@@ -65,20 +71,55 @@ def _build_scorecard_table(scorecard):
 # ---------------------------------------------------------------------------
 
 class ScorecardListView(LoginRequiredMixin, ListView):
+    """The active team's Scorecards, or every visible team's with ``?scope=all``.
+
+    The scope works as on the Rocks list (see ``apps.accounts.team_scope``) and
+    is kept in the session under its own key, so the two lists are switched
+    independently. The default is the active team, as before.
+    """
     model = Scorecard
     template_name = 'scorecards/scorecard_list.html'
     context_object_name = 'scorecards'
 
     def get_queryset(self):
-        team = get_active_team(self.request)
-        if not team:
-            return Scorecard.objects.none()
+        if get_scope(self.request, SCOPE_SESSION_KEY) == SCOPE_ALL:
+            team_filter = {'team__in': get_visible_teams(self.request)}
+        else:
+            team = get_active_team(self.request)
+            if not team:
+                return Scorecard.objects.none()
+            team_filter = {'team': team}
         return (
             Scorecard.objects
-            .filter(team=team, is_active=True)
+            .filter(is_active=True, **team_filter)
             .select_related('team')
             .prefetch_related('metrics')
+            .order_by('team__name', 'name')
         )
+
+    def _scope_context(self):
+        """Which teams the list covers, and how many Scorecards the others have."""
+        scope = get_scope(self.request, SCOPE_SESSION_KEY)
+        active_team = get_active_team(self.request)
+        visible_teams = list(get_visible_teams(self.request))
+        other_team_counts = []
+        if scope == SCOPE_ALL:
+            scoped_teams = visible_teams
+        else:
+            scoped_teams = [active_team] if active_team else []
+            if active_team:
+                other_team_counts = count_other_teams(
+                    Scorecard.objects.filter(is_active=True), active_team, visible_teams
+                )
+        return {
+            'scope': scope,
+            'active_team': active_team,
+            'visible_teams': visible_teams,
+            'scoped_teams': scoped_teams,
+            'other_team_counts': other_team_counts,
+            'other_scorecards_total': sum(n for _, n in other_team_counts),
+            'other_teams_summary': summarise_other_teams(other_team_counts),
+        }
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -108,7 +149,13 @@ class ScorecardListView(LoginRequiredMixin, ListView):
                 'total': len(metrics),
             })
         ctx['summaries'] = summaries
+        # One group per team, in team-name order, for the all-teams view's headings.
+        ctx['teams_summaries'] = [
+            (team, list(team_summaries))
+            for team, team_summaries in groupby(summaries, key=lambda s: s['scorecard'].team)
+        ]
         ctx['current_week'] = current_week
+        ctx.update(self._scope_context())
         return ctx
 
 

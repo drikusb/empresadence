@@ -13,14 +13,59 @@
     </div>
 </div>
 
+{# ── Scope hint: which teams this list covers ── #}
+{% if scope == 'all' %}
+<p class="text-muted small mb-3">
+    Showing all your teams ({{ scoped_teams|length }})
+    {% if active_team %}
+    · <a href="?scope=team">Back to {{ active_team.name }}</a>
+    {% endif %}
+</p>
+{% elif other_scorecards_total %}
+<p class="text-muted small mb-3">
+    Showing {{ active_team.name }}
+    · <a href="?scope=all" title="{{ other_teams_summary }}">
+        {{ other_scorecards_total }} more on other teams</a>
+</p>
+{% endif %}
+
 <p class="text-muted small mb-4">
     Week of <strong>{{ current_week|date:"N j, Y" }}</strong>
     &nbsp;·&nbsp; We recommend 5–15 metrics per {{ terms.scorecard|lower }}.
 </p>
 
+{# ── Scope toggle: the active team, or every team the user may see ── #}
+{% if visible_teams|length > 1 %}
+<div class="d-flex gap-2 mb-4 flex-wrap">
+    <div class="btn-group btn-group-sm" role="group" aria-label="Which teams to show">
+        <a href="?scope=team"
+           class="btn {% if scope == 'team' %}btn-dark{% else %}btn-outline-secondary{% endif %}"
+           {% if scope == 'team' %}aria-current="true"{% endif %}>
+            This team
+        </a>
+        <a href="?scope=all"
+           class="btn {% if scope == 'all' %}btn-dark{% else %}btn-outline-secondary{% endif %}"
+           {% if scope == 'all' %}aria-current="true"{% endif %}>
+            All teams
+        </a>
+    </div>
+</div>
+{% endif %}
+
 {% if summaries %}
-<div class="row g-4">
-    {% for s in summaries %}
+{% for team, team_summaries in teams_summaries %}
+{# ── Team heading, only when the list spans several teams ── #}
+{% if scope == 'all' %}
+<div class="d-flex align-items-center mb-2">
+    <h5 class="mb-0 me-2">{{ team.name }}</h5>
+    <span class="badge bg-light text-dark border">
+        {{ team_summaries|length }}
+        {% if team_summaries|length == 1 %}{{ terms.scorecard }}{% else %}{{ terms.scorecards }}{% endif %}
+    </span>
+</div>
+{% endif %}
+<div class="row g-4 mb-4">
+    {% for s in team_summaries %}
     <div class="col-md-6 col-xl-4">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-transparent d-flex align-items-center justify-content-between py-2">
@@ -98,7 +143,16 @@
     </div>
     {% endfor %}
 </div>
+{% endfor %}
 
+{% elif scope == 'all' %}
+<div class="text-center py-5 text-muted">
+    <i class="bi bi-bar-chart-line display-3 d-block mb-3 text-info opacity-25"></i>
+    <h4>No {{ terms.scorecards }} on any of your teams yet.</h4>
+    <a href="{% url 'scorecards:create' %}" class="btn btn-dark">
+        <i class="bi bi-plus-lg me-1"></i>Create first {{ terms.scorecard }}
+    </a>
+</div>
 {% else %}
 <div class="text-center py-5 text-muted">
     <i class="bi bi-bar-chart-line display-3 d-block mb-3 text-info opacity-25"></i>

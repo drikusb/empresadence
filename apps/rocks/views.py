@@ -10,22 +10,20 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy, reverse
 from django.utils.http import urlencode
 from django.contrib import messages
-from django.db.models import Count
 from django.http import HttpResponseForbidden, HttpResponse
 
 from .models import Rock, RockCheckin, RockDependency, RockMilestone
 from .forms import RockForm, RockStatusForm, RockDependencyForm
+from apps.accounts.team_scope import (
+    SCOPE_ALL, count_other_teams, get_scope, get_visible_teams, summarise_other_teams,
+)
 from apps.accounts.scoping import (
-    OrgScopedMixin, get_active_org, get_active_team, get_assignable_teams,
-    get_org_object_or_404, is_org_admin,
+    OrgScopedMixin, get_active_team, get_org_object_or_404, is_org_admin,
 )
 from apps.accounts.terminology import get_terms
 from apps.issues.models import Issue, IssueActivity
 
 SCOPE_SESSION_KEY = 'rocks_scope'
-SCOPE_TEAM = 'team'
-SCOPE_ALL = 'all'
-SCOPES = (SCOPE_TEAM, SCOPE_ALL)
 
 
 def get_quarter_year_from_request(request):
@@ -60,19 +58,9 @@ def get_rocks_scope(request):
 
     ``?scope=`` switches it and the choice is kept in the session, so the
     quarter and status links, which carry no scope, keep showing the same
-    teams. Anything else in ``?scope=`` is ignored in favour of the session.
+    teams. The Scorecards list shares the helpers in ``apps.accounts.team_scope``.
     """
-    scope = request.GET.get('scope')
-    if scope in SCOPES:
-        request.session[SCOPE_SESSION_KEY] = scope
-        return scope
-    scope = request.session.get(SCOPE_SESSION_KEY)
-    return scope if scope in SCOPES else SCOPE_TEAM
-
-
-def get_visible_teams(request):
-    """Teams whose Rocks the user may list: their own, or every team for an org admin."""
-    return get_assignable_teams(request.user, get_active_org(request))
+    return get_scope(request, SCOPE_SESSION_KEY)
 
 
 def scoped_rocks(request, quarter, year):
@@ -120,16 +108,11 @@ class RockListView(LoginRequiredMixin, ListView):
 
     def _other_team_counts(self, team, visible_teams, quarter, year):
         """How many matching Rocks the user's other visible teams have this quarter."""
-        others = (
-            Rock.objects
-            .filter(quarter=quarter, year=year, team__in=visible_teams)
-            .exclude(team=team)
-        )
+        others = Rock.objects.filter(quarter=quarter, year=year)
         status = self._status_filter()
         if status:
             others = others.filter(status=status)
-        counts = dict(others.values('team').annotate(n=Count('id')).values_list('team', 'n'))
-        return [(t, counts[t.pk]) for t in visible_teams if t.pk in counts]
+        return count_other_teams(others, team, visible_teams)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -167,7 +150,7 @@ class RockListView(LoginRequiredMixin, ListView):
             'scoped_teams': scoped_teams,
             'other_team_counts': other_team_counts,
             'other_rocks_total': sum(n for _, n in other_team_counts),
-            'other_teams_summary': ', '.join(f'{t.name}: {n}' for t, n in other_team_counts),
+            'other_teams_summary': summarise_other_teams(other_team_counts),
         })
         rocks = list(ctx['rocks'])
         ctx['teams_rocks'] = [
