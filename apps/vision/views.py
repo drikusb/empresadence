@@ -61,7 +61,7 @@ def _build_context(vto, org):
 # ---------------------------------------------------------------------------
 
 class VTODetailView(LoginRequiredMixin, View):
-    template_name = 'vto/vto_detail.html'
+    template_name = 'vision/vision_detail.html'
 
     def get(self, request):
         org = get_active_org(request)
@@ -74,7 +74,7 @@ class VTODetailView(LoginRequiredMixin, View):
 
 
 class VTOPrintView(LoginRequiredMixin, View):
-    template_name = 'vto/vto_print.html'
+    template_name = 'vision/vision_print.html'
 
     def get(self, request):
         org = get_active_org(request)
@@ -90,7 +90,7 @@ class VTOPrintView(LoginRequiredMixin, View):
 # ---------------------------------------------------------------------------
 
 class VTOSectionEditView(LoginRequiredMixin, View):
-    template_name = 'vto/section_edit.html'
+    template_name = 'vision/section_edit.html'
 
     def _get_or_create_section(self, vto, key):
         section, _ = VTOSection.objects.get_or_create(vto=vto, key=key)
@@ -99,7 +99,7 @@ class VTOSectionEditView(LoginRequiredMixin, View):
     def get(self, request, key):
         if key not in SectionKey.ALL:
             messages.error(request, 'Unknown section.')
-            return redirect('vto:detail')
+            return redirect('vision:detail')
         vto = _get_vto(request)
         if not vto:
             return redirect('accounts:org_setup')
@@ -114,7 +114,7 @@ class VTOSectionEditView(LoginRequiredMixin, View):
 
     def post(self, request, key):
         if key not in SectionKey.ALL:
-            return redirect('vto:detail')
+            return redirect('vision:detail')
         vto = _get_vto(request)
         if not vto:
             return redirect('accounts:org_setup')
@@ -123,7 +123,7 @@ class VTOSectionEditView(LoginRequiredMixin, View):
         if form.is_valid():
             section.save_content(form.cleaned_data['content'], request.user)
             messages.success(request, f'"{SectionKey.LABELS.get(key)}" updated.')
-            return redirect('vto:detail')
+            return redirect('vision:detail')
         history = section.history.select_related('edited_by')[:5]
         return render(request, self.template_name, {
             'vto': vto, 'section': section, 'form': form,
@@ -137,7 +137,7 @@ class VTOSectionEditView(LoginRequiredMixin, View):
 # ---------------------------------------------------------------------------
 
 class CoreValueCreateView(LoginRequiredMixin, View):
-    template_name = 'vto/core_value_form.html'
+    template_name = 'vision/core_value_form.html'
 
     def get(self, request):
         return render(request, self.template_name, {
@@ -156,7 +156,7 @@ class CoreValueCreateView(LoginRequiredMixin, View):
             cv.save()
             terms = get_terms(request)
             messages.success(request, f'{terms.core_value} "{cv.name}" added.')
-            return redirect('vto:detail')
+            return redirect('vision:detail')
         return render(request, self.template_name, {'form': form, 'action': 'Add'})
 
 
@@ -164,8 +164,8 @@ class CoreValueUpdateView(LoginRequiredMixin, OrgScopedMixin, UpdateView):
     model = VTOCoreValue
     org_lookup = 'vto__organization'
     form_class = VTOCoreValueForm
-    template_name = 'vto/core_value_form.html'
-    success_url = reverse_lazy('vto:detail')
+    template_name = 'vision/core_value_form.html'
+    success_url = reverse_lazy('vision:detail')
 
     def form_valid(self, form):
         terms = get_terms(self.request)
@@ -181,8 +181,8 @@ class CoreValueUpdateView(LoginRequiredMixin, OrgScopedMixin, UpdateView):
 class CoreValueDeleteView(LoginRequiredMixin, OrgScopedMixin, DeleteView):
     model = VTOCoreValue
     org_lookup = 'vto__organization'
-    template_name = 'vto/core_value_confirm_delete.html'
-    success_url = reverse_lazy('vto:detail')
+    template_name = 'vision/core_value_confirm_delete.html'
+    success_url = reverse_lazy('vision:detail')
 
     def form_valid(self, form):
         terms = get_terms(self.request)

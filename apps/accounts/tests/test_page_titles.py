@@ -37,7 +37,7 @@ class BrandedPageTitleTest(TestCase):
 
     def test_logged_in_pages_across_apps(self):
         self.client.force_login(self.user)
-        for path in ['/', '/rocks/', '/issues/', '/todos/', '/scorecards/', '/vto/', '/meetings/', '/accountability/']:
+        for path in ['/', '/rocks/', '/issues/', '/todos/', '/scorecards/', '/vision/', '/meetings/', '/accountability/']:
             with self.subTest(path=path):
                 resp = self.client.get(path, HTTP_HOST=MERCURY)
                 self.assertBrandedTitle(resp, path)
@@ -50,7 +50,7 @@ class BrandedPageTitleTest(TestCase):
             ('/todos/', 'Actions — Mercury Consortium'),
             ('/scorecards/', 'Metrics Boards — Mercury Consortium'),
             ('/meetings/', 'Weekly Meetings — Mercury Consortium'),
-            ('/vto/', 'Vision Plan — Mercury Consortium'),
+            ('/vision/', 'Vision and Delivery Board — Mercury Consortium'),
         ]:
             with self.subTest(path=path):
                 resp = self.client.get(path, HTTP_HOST=MERCURY)
@@ -78,8 +78,8 @@ class DefaultBrandNeverLeaksTest(TestCase):
 
     LIST_PATHS = [
         '/', '/rocks/', '/rocks/new/', '/rocks/archive/', '/issues/', '/issues/new/',
-        '/todos/', '/todos/new/', '/scorecards/', '/scorecards/new/', '/vto/',
-        '/vto/core-values/add/', '/meetings/', '/meetings/create/', '/accountability/',
+        '/todos/', '/todos/new/', '/scorecards/', '/scorecards/new/', '/vision/',
+        '/vision/core-values/add/', '/meetings/', '/meetings/create/', '/accountability/',
         '/accountability/nodes/add/', '/teams/', '/teams/new/', '/org/', '/org/settings/',
         '/profile/', '/profile/edit/', '/users/', '/users/invite/',
         '/notifications/preferences/', '/search/?q=probe', '/accounts/2fa/setup/', '/org/audit/',
