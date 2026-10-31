@@ -1,6 +1,6 @@
 # Contributing to Empresadence
 
-Thanks for your interest in contributing! Empresadence is an open-source Django implementation of the EOS (Entrepreneurial Operating System) framework. All contributions — bug fixes, new features, docs, and tests — are welcome.
+Thanks for your interest in contributing! Empresadence is an open-source, self-hosted platform for running a leadership team's operating rhythm — weekly meetings, quarterly priorities, issue-solving, a vision document and a roles chart, with every module's vocabulary configurable per organisation. All contributions — bug fixes, new features, docs, and tests — are welcome.
 
 ---
 
@@ -126,12 +126,12 @@ Common prefixes:
 apps/
   accounts/       # Organisations, memberships, teams, user profiles
   rocks/          # Quarterly priorities (Rocks), milestones
-  issues/         # Issues with IDS workflow and delegation
-  todos/          # Weekly To-Dos
+  issues/         # Blockers with PRS workflow and delegation
+  todos/          # Weekly Actions (To-Dos)
   scorecards/     # Weekly metrics and 13-week history
-  vto/            # Vision/Traction Organiser (8 sections)
-  accountability/ # Accountability Chart (org tree)
-  meetings/       # Level 10 Meeting runner
+  vision/         # Vision and Delivery Board (8 sections)
+  accountability/ # Org Chart (org tree)
+  meetings/       # Weekly Meeting runner
 
 config/
   settings/
@@ -144,7 +144,7 @@ static/           # CSS and JS
 nginx/            # Nginx config for production
 ```
 
-Each EOS module lives in its own Django app. Views are class-based. Forms receive a `team=` kwarg so querysets are always scoped to the active team — do not pass `team` as a form field.
+Each module lives in its own Django app. Views are class-based. Forms receive a `team=` kwarg so querysets are always scoped to the active team — do not pass `team` as a form field.
 
 Every record reachable by primary key must be limited to the active organisation. Use `OrgScopedMixin` on generic detail, update and delete views and `get_org_object_or_404()` in plain `View` classes (both in `apps/accounts/scoping.py`), and add the new URL to `apps/accounts/tests/test_isolation.py`.
 
