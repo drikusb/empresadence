@@ -19,9 +19,9 @@ jobs:
       postgres:
         image: postgres:15-alpine
         env:
-          POSTGRES_DB: eos_test
-          POSTGRES_USER: eos_user
-          POSTGRES_PASSWORD: eos_password
+          POSTGRES_DB: epd_test
+          POSTGRES_USER: epd_user
+          POSTGRES_PASSWORD: epd_password
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -53,9 +53,9 @@ jobs:
           DJANGO_SETTINGS_MODULE: config.settings.development
           DB_HOST: localhost
           DB_PORT: 5432
-          DB_NAME: eos_test
-          DB_USER: eos_user
-          DB_PASSWORD: eos_password
+          DB_NAME: epd_test
+          DB_USER: epd_user
+          DB_PASSWORD: epd_password
           SECRET_KEY: ci-secret-key-not-used-in-production
           ALLOWED_HOSTS: localhost,127.0.0.1
         run: |
@@ -78,9 +78,9 @@ jobs:
       postgres:
         image: postgres:15-alpine
         env:
-          POSTGRES_DB: eos_test
-          POSTGRES_USER: eos_user
-          POSTGRES_PASSWORD: eos_password
+          POSTGRES_DB: epd_test
+          POSTGRES_USER: epd_user
+          POSTGRES_PASSWORD: epd_password
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -106,9 +106,9 @@ jobs:
           DJANGO_SETTINGS_MODULE: config.settings.development
           DB_HOST: localhost
           DB_PORT: 5432
-          DB_NAME: eos_test
-          DB_USER: eos_user
-          DB_PASSWORD: eos_password
+          DB_NAME: epd_test
+          DB_USER: epd_user
+          DB_PASSWORD: epd_password
           SECRET_KEY: ci-secret-key-not-used-in-production
           ALLOWED_HOSTS: localhost,127.0.0.1
         run: python manage.py check --deploy 2>&1 | grep -v "^System check" || true
@@ -118,9 +118,9 @@ jobs:
           DJANGO_SETTINGS_MODULE: config.settings.development
           DB_HOST: localhost
           DB_PORT: 5432
-          DB_NAME: eos_test
-          DB_USER: eos_user
-          DB_PASSWORD: eos_password
+          DB_NAME: epd_test
+          DB_USER: epd_user
+          DB_PASSWORD: epd_password
           SECRET_KEY: ci-secret-key-not-used-in-production
           ALLOWED_HOSTS: localhost,127.0.0.1
         run: python manage.py makemigrations --check --dry-run
@@ -138,14 +138,14 @@ jobs:
           SECRET_KEY=ci-smoke-test-secret-key-not-used-in-production
           DEBUG=False
           ALLOWED_HOSTS=localhost,127.0.0.1
-          DB_NAME=eos_db
-          DB_USER=eos_user
-          DB_PASSWORD=eos_password
+          DB_NAME=epd_db
+          DB_USER=epd_user
+          DB_PASSWORD=epd_password
           DB_HOST=db
           DB_PORT=5432
-          POSTGRES_DB=eos_db
-          POSTGRES_USER=eos_user
-          POSTGRES_PASSWORD=eos_password
+          POSTGRES_DB=epd_db
+          POSTGRES_USER=epd_user
+          POSTGRES_PASSWORD=epd_password
           EOF
 
       - name: Build and start prod stack

@@ -85,9 +85,9 @@ cp .env.example .env
 | `SECRET_KEY` | *(dev key)* | Django secret key — **must** be changed in production |
 | `DEBUG` | `True` | Set to `False` in production |
 | `ALLOWED_HOSTS` | `localhost,127.0.0.1` | Comma-separated list of valid hostnames |
-| `DB_NAME` | `eos_db` | PostgreSQL database name |
-| `DB_USER` | `eos_user` | PostgreSQL username |
-| `DB_PASSWORD` | `eos_password` | PostgreSQL password |
+| `DB_NAME` | `epd_db` | PostgreSQL database name |
+| `DB_USER` | `epd_user` | PostgreSQL username |
+| `DB_PASSWORD` | `epd_password` | PostgreSQL password |
 | `DJANGO_SUPERUSER_USERNAME` | `admin` | Admin username created on first run |
 | `DJANGO_SUPERUSER_PASSWORD` | `adminpass` | Admin password created on first run |
 | `SECURE_SSL_REDIRECT` | `False` | Set `True` when TLS terminates at Nginx |
