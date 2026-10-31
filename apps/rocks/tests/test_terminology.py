@@ -189,13 +189,13 @@ class RockTerminologyTest(TestCase):
         self.client.force_login(self.user)
 
         resp = self.get('/rocks/')
-        self.assertContains(resp, 'title="Company Objective, shown on the Vision Plan"')
+        self.assertContains(resp, 'title="Company Objective, shown on the Vision and Delivery Board"')
         resp = self.get(f'/rocks/{self.rock.pk}/')
         self.assertContains(resp, 'Company Objective')
         self.assertNotContains(resp, 'Company Rock')
         resp = self.get('/rocks/new/')
         self.assertContains(resp, 'Company-wide Objective')
-        self.assertContains(resp, "Shows this Objective on the Vision Plan, instead of just this team's Objective list.")
+        self.assertContains(resp, "Shows this Objective on the Vision and Delivery Board, instead of just this team's Objective list.")
         self.assertNotContains(resp, 'Company-wide Rock')
 
     def test_child_rock_tooltip_uses_the_organisations_words(self):

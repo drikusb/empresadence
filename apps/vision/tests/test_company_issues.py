@@ -47,7 +47,7 @@ class VTOCompanyIssuesTest(TestCase):
 
     def test_vto_detail_lists_only_company_long_term_issues_for_the_active_org(self):
         self.client.force_login(self.user)
-        resp = self.client.get('/vto/')
+        resp = self.client.get('/vision/')
         issues = list(resp.context['long_term_issues'])
         self.assertIn(self.company_issue_a, issues)
         self.assertIn(self.company_issue_b, issues)
@@ -57,7 +57,7 @@ class VTOCompanyIssuesTest(TestCase):
 
     def test_vto_print_lists_only_company_long_term_issues_for_the_active_org(self):
         self.client.force_login(self.user)
-        resp = self.client.get('/vto/print/')
+        resp = self.client.get('/vision/print/')
         issues = list(resp.context['long_term_issues'])
         self.assertIn(self.company_issue_a, issues)
         self.assertIn(self.company_issue_b, issues)
@@ -71,5 +71,5 @@ class VTOCompanyIssuesTest(TestCase):
         self.team_only_long_term.delete()
         self.company_short_term.delete()
         self.client.force_login(self.user)
-        resp = self.client.get('/vto/')
+        resp = self.client.get('/vision/')
         self.assertContains(resp, 'No company-wide long-term issues')

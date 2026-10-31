@@ -15,7 +15,7 @@ class VTOPrintColourAdjustTest(TestCase):
 
     def test_print_colour_is_forced_on(self):
         self.client.force_login(self.user)
-        resp = self.client.get('/vto/print/')
+        resp = self.client.get('/vision/print/')
         self.assertContains(resp, 'print-color-adjust: exact')
 
 
@@ -30,12 +30,12 @@ class VTOPrintPageBreakTest(TestCase):
 
     def test_cards_stay_whole_and_the_row_may_break(self):
         self.client.force_login(self.user)
-        resp = self.client.get('/vto/print/')
+        resp = self.client.get('/vision/print/')
         self.assertContains(resp, '.card { break-inside: avoid; page-break-inside: avoid; }')
         self.assertNotContains(resp, '.row { page-break-inside: avoid; }')
 
     def test_traction_starts_on_a_new_page(self):
         self.client.force_login(self.user)
-        resp = self.client.get('/vto/print/')
+        resp = self.client.get('/vision/print/')
         self.assertContains(resp, '.page-traction { break-before: page; page-break-before: always; }')
         self.assertContains(resp, '<div class="col-lg-6 page-traction">')

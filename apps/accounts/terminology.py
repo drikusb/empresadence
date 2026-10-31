@@ -13,7 +13,7 @@ TERMS = [
     ('todo', 'Action', 'Actions', ''),
     ('scorecard', 'Metrics Board', 'Metrics Boards', ''),
     ('meeting', 'Weekly Meeting', 'Weekly Meetings', 'The weekly leadership meeting'),
-    ('vto', 'Vision Plan', 'Vision Plans', 'The organisation\'s long-term vision and plan'),
+    ('vto', 'Vision and Delivery Board', 'Vision and Delivery Boards', 'The organisation\'s long-term vision and plan'),
     ('accountability_chart', 'Org Chart', 'Org Charts', ''),
     ('seat', 'Role', 'Roles', ''),
     ('core_value', 'Value', 'Values', ''),

@@ -11,7 +11,7 @@ from apps.meetings.models import Meeting
 from apps.rocks.models import Rock, RockDependency, RockMilestone
 from apps.scorecards.models import Scorecard, ScorecardEntry, ScorecardMetric
 from apps.todos.models import ToDo
-from apps.vto.models import VTO, VTOCoreValue
+from apps.vision.models import VTO, VTOCoreValue
 
 
 def build_org(label):
@@ -75,8 +75,8 @@ def pk_urls(f):
         f'/scorecards/{f["scorecard"].pk}/enter/',
         f'/scorecards/{f["scorecard"].pk}/metrics/add/',
         f'/scorecards/metric/{f["metric"].pk}/edit/',
-        f'/vto/core-values/{f["core_value"].pk}/edit/',
-        f'/vto/core-values/{f["core_value"].pk}/delete/',
+        f'/vision/core-values/{f["core_value"].pk}/edit/',
+        f'/vision/core-values/{f["core_value"].pk}/delete/',
         f'/teams/{f["team"].pk}/',
         f'/teams/{f["team"].pk}/edit/',
         f'/meetings/{f["meeting"].pk}/',

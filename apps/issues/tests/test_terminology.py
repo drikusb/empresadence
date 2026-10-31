@@ -68,7 +68,7 @@ class IssueTerminologyViewTest(TestCase):
         self.assertContains(resp, 'Blocker Type')
         self.assertContains(resp, 'The presenting blocker')
         self.assertContains(resp, 'The team that raised this blocker.')
-        self.assertContains(resp, 'added to the Vision Plan Blockers List.')
+        self.assertContains(resp, 'added to the Vision and Delivery Board Blockers List.')
         self.assertNotContains(resp, 'Create Issue')
         self.assertNotContains(resp, 'Issue Type')
 
@@ -129,13 +129,13 @@ class IssueTerminologyViewTest(TestCase):
         self.client.force_login(self.blockers['user'])
 
         resp = self.client.get('/issues/', HTTP_HOST=BLOCKERS)
-        self.assertContains(resp, 'title="Company Blocker, shown on the Vision Plan"')
+        self.assertContains(resp, 'title="Company Blocker, shown on the Vision and Delivery Board"')
         resp = self.client.get(f'/issues/{issue.pk}/', HTTP_HOST=BLOCKERS)
         self.assertContains(resp, 'Company Blocker')
         self.assertNotContains(resp, 'Company Issue')
         resp = self.client.get('/issues/new/', HTTP_HOST=BLOCKERS)
         self.assertContains(resp, 'Company-wide Blocker')
-        self.assertContains(resp, "Shows this long-term Blocker on the Vision Plan, instead of just this team's Blockers list.")
+        self.assertContains(resp, "Shows this long-term Blocker on the Vision and Delivery Board, instead of just this team's Blockers list.")
         self.assertNotContains(resp, 'Company-wide Issue')
 
     def test_default_host_shows_the_generic_words(self):

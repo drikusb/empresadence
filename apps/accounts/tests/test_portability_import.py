@@ -22,7 +22,7 @@ from apps.meetings.models import Headline
 from apps.rocks.models import Rock, RockDependency
 from apps.scorecards.models import Scorecard
 from apps.todos.models import ToDo
-from apps.vto.models import VTO
+from apps.vision.models import VTO
 
 from .test_portability import EDITED_AT, MediaRootMixin, export_to_bytes, populate_org
 

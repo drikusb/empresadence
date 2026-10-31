@@ -2,14 +2,14 @@ from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
 
 from apps.accounts.models import Membership, Organization, OrganizationDomain, Team
-from apps.vto.models import VTO, VTOCoreValue
+from apps.vision.models import VTO, VTOCoreValue
 
 METRICS_HOST = 'metrics.example.test'
 PLAIN_HOST = 'plain.example.test'
 
-# 'vto' is distinct from the shipped default ('Vision Plan') so the
-# default-host test below can tell "customised" apart from "just happens to
-# match the default."
+# 'vto' is distinct from the shipped default ('Vision and Delivery Board') so
+# the default-host test below can tell "customised" apart from "just happens
+# to match the default."
 METRICS_WORDS = {
     'scorecard': 'Metrics Board', 'scorecards': 'Metrics Boards',
     'core_value': 'Value', 'core_values': 'Values',
@@ -37,7 +37,7 @@ class VTOTerminologyTest(TestCase):
         self.client.force_login(self.user)
 
     def test_detail_headings_use_the_organisation_words(self):
-        resp = self.client.get('/vto/', HTTP_HOST=METRICS_HOST)
+        resp = self.client.get('/vision/', HTTP_HOST=METRICS_HOST)
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, '<title>Blueprint — Metrics Org</title>', html=True)
         self.assertContains(resp, 'Blueprint</h1>')
@@ -54,7 +54,7 @@ class VTOTerminologyTest(TestCase):
         self.assertNotContains(resp, 'Company Issues')
 
     def test_print_view_uses_the_organisation_words(self):
-        resp = self.client.get('/vto/print/', HTTP_HOST=METRICS_HOST)
+        resp = self.client.get('/vision/print/', HTTP_HOST=METRICS_HOST)
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, '<title>Blueprint — Metrics Org — Print</title>', html=True)
         self.assertContains(resp, '<div class="text-muted small">Blueprint</div>', html=False)
@@ -67,7 +67,7 @@ class VTOTerminologyTest(TestCase):
         self.assertNotContains(resp, 'Company Issues')
 
     def test_core_value_form_uses_the_organisation_words(self):
-        resp = self.client.get('/vto/core-values/add/', HTTP_HOST=METRICS_HOST)
+        resp = self.client.get('/vision/core-values/add/', HTTP_HOST=METRICS_HOST)
         self.assertContains(resp, '<title>Add Value — Blueprint — Metrics Org</title>', html=True)
         self.assertContains(resp, 'Add Value</h1>')
         self.assertContains(resp, '<div class="text-muted small">Blueprint</div>', html=False)
@@ -75,13 +75,13 @@ class VTOTerminologyTest(TestCase):
         self.assertNotContains(resp, 'Core Value')
 
     def test_section_edit_title_uses_the_organisation_word(self):
-        resp = self.client.get('/vto/edit/ten_year_target/', HTTP_HOST=METRICS_HOST)
+        resp = self.client.get('/vision/edit/ten_year_target/', HTTP_HOST=METRICS_HOST)
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, '<title>Edit 10-Year Target — Blueprint — Metrics Org</title>', html=True)
 
     def test_add_core_value_message_uses_the_organisation_word(self):
         resp = self.client.post(
-            '/vto/core-values/add/',
+            '/vision/core-values/add/',
             {'name': 'Integrity', 'description': 'Do what you say.', 'order': 1},
             HTTP_HOST=METRICS_HOST, follow=True,
         )
@@ -94,25 +94,25 @@ class VTOTerminologyTest(TestCase):
         cv = VTOCoreValue.objects.create(vto=VTO.for_org(self.metrics_org), name='Integrity')
 
         resp = self.client.post(
-            f'/vto/core-values/{cv.pk}/edit/',
+            f'/vision/core-values/{cv.pk}/edit/',
             {'name': 'Candour', 'description': '', 'order': 1},
             HTTP_HOST=METRICS_HOST, follow=True,
         )
         self.assertContains(resp, 'Value &quot;Candour&quot; updated.')
 
-        resp = self.client.get(f'/vto/core-values/{cv.pk}/delete/', HTTP_HOST=METRICS_HOST)
+        resp = self.client.get(f'/vision/core-values/{cv.pk}/delete/', HTTP_HOST=METRICS_HOST)
         self.assertContains(resp, '<title>Remove Value — Blueprint — Metrics Org</title>', html=True)
         self.assertContains(resp, 'Remove Value</h1>')
         self.assertContains(resp, 'This value will be permanently removed from your Blueprint.')
 
-        resp = self.client.post(f'/vto/core-values/{cv.pk}/delete/', HTTP_HOST=METRICS_HOST, follow=True)
+        resp = self.client.post(f'/vision/core-values/{cv.pk}/delete/', HTTP_HOST=METRICS_HOST, follow=True)
         self.assertContains(resp, 'Value &quot;Candour&quot; removed.')
 
     def test_default_host_shows_the_generic_words(self):
-        resp = self.client.get('/vto/', HTTP_HOST=PLAIN_HOST)
+        resp = self.client.get('/vision/', HTTP_HOST=PLAIN_HOST)
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, '<title>Vision Plan — Plain Org</title>', html=True)
-        self.assertContains(resp, 'Vision Plan</h1>')
+        self.assertContains(resp, '<title>Vision and Delivery Board — Plain Org</title>', html=True)
+        self.assertContains(resp, 'Vision and Delivery Board</h1>')
         self.assertContains(resp, '<span class="fw-semibold small">Values</span>', html=False)
         self.assertContains(resp, 'No values yet.')
         self.assertContains(resp, 'Company Priorities</span>', html=False)
@@ -120,7 +120,7 @@ class VTOTerminologyTest(TestCase):
         self.assertNotContains(resp, 'Blueprint')
 
         resp = self.client.post(
-            '/vto/core-values/add/',
+            '/vision/core-values/add/',
             {'name': 'Integrity', 'description': '', 'order': 1},
             HTTP_HOST=PLAIN_HOST, follow=True,
         )

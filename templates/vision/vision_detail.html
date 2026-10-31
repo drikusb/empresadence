@@ -7,7 +7,7 @@
         <h1 class="h3 mb-0"><i class="bi bi-map me-2 text-success"></i>{{ terms.vto }}</h1>
         <div class="text-muted small">{{ vto.organization.name }}</div>
     </div>
-    <a href="{% url 'vto:print' %}" class="btn btn-outline-secondary" target="_blank">
+    <a href="{% url 'vision:print' %}" class="btn btn-outline-secondary" target="_blank">
         <i class="bi bi-printer me-1"></i>Print view
     </a>
 </div>
@@ -27,7 +27,7 @@
                 <span class="fw-semibold small">{{ terms.core_values }}</span>
                 <div class="text-muted" style="font-size:.7rem">3–7 timeless guiding principles</div>
             </div>
-            <a href="{% url 'vto:cv_add' %}" class="btn btn-sm btn-outline-secondary border-0 py-0">
+            <a href="{% url 'vision:cv_add' %}" class="btn btn-sm btn-outline-secondary border-0 py-0">
                 <i class="bi bi-plus"></i>
             </a>
         </div>
@@ -41,14 +41,14 @@
                     <div class="text-muted" style="font-size:.72rem">{{ cv.description|truncatewords:12 }}</div>
                     {% endif %}
                     <div class="position-absolute top-0 end-0 p-1 d-flex gap-1">
-                        <a href="{% url 'vto:cv_edit' cv.pk %}" class="text-muted" style="font-size:.7rem"><i class="bi bi-pencil"></i></a>
-                        <a href="{% url 'vto:cv_delete' cv.pk %}" class="text-danger" style="font-size:.7rem"><i class="bi bi-x-lg"></i></a>
+                        <a href="{% url 'vision:cv_edit' cv.pk %}" class="text-muted" style="font-size:.7rem"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'vision:cv_delete' cv.pk %}" class="text-danger" style="font-size:.7rem"><i class="bi bi-x-lg"></i></a>
                     </div>
                 </div>
                 {% endfor %}
             </div>
             {% else %}
-            <p class="text-muted small fst-italic mb-0">No {{ terms.core_values|lower }} yet. <a href="{% url 'vto:cv_add' %}">Add the first one.</a></p>
+            <p class="text-muted small fst-italic mb-0">No {{ terms.core_values|lower }} yet. <a href="{% url 'vision:cv_add' %}">Add the first one.</a></p>
             {% endif %}
         </div>
     </div>
@@ -69,7 +69,7 @@
                             <span class="text-muted fst-italic">Not set.</span>
                         {% endif %}
                     </div>
-                    <a href="{% url 'vto:section_edit' 'core_focus_purpose' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
+                    <a href="{% url 'vision:section_edit' 'core_focus_purpose' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
                 </div>
                 {% if sections.core_focus_purpose.last_edited_by %}
                 <div class="text-muted mt-1" style="font-size:.65rem">
@@ -89,7 +89,7 @@
                             <span class="text-muted fst-italic">Not set.</span>
                         {% endif %}
                     </div>
-                    <a href="{% url 'vto:section_edit' 'core_focus_niche' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
+                    <a href="{% url 'vision:section_edit' 'core_focus_niche' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
                 </div>
             </div>
         </div>
@@ -102,7 +102,7 @@
                 <span class="fw-semibold small">10-Year Target</span>
                 <div class="text-muted" style="font-size:.7rem">One big, audacious, measurable goal</div>
             </div>
-            <a href="{% url 'vto:section_edit' 'ten_year_target' %}" class="btn btn-sm btn-outline-secondary border-0 py-0"><i class="bi bi-pencil"></i></a>
+            <a href="{% url 'vision:section_edit' 'ten_year_target' %}" class="btn btn-sm btn-outline-secondary border-0 py-0"><i class="bi bi-pencil"></i></a>
         </div>
         <div class="card-body py-3">
             {% if sections.ten_year_target and sections.ten_year_target.content %}
@@ -127,7 +127,7 @@
                 <div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Target Market</div>
                 <div class="d-flex gap-2">
                     <div class="flex-grow-1 small" style="white-space:pre-line">{% if sections.target_market and sections.target_market.content %}{{ sections.target_market.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-                    <a href="{% url 'vto:section_edit' 'target_market' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
+                    <a href="{% url 'vision:section_edit' 'target_market' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
                 </div>
             </div>
             <hr class="my-1">
@@ -138,17 +138,17 @@
                     <div class="d-flex gap-2 mb-1">
                         <div class="text-muted small fw-semibold flex-shrink-0" style="min-width:4.5rem">Unique 1.</div>
                         <div class="flex-grow-1 small" style="white-space:pre-line">{% if sections.three_uniques_1 and sections.three_uniques_1.content %}{{ sections.three_uniques_1.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-                        <a href="{% url 'vto:section_edit' 'three_uniques_1' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'vision:section_edit' 'three_uniques_1' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
                     </div>
                     <div class="d-flex gap-2 mb-1">
                         <div class="text-muted small fw-semibold flex-shrink-0" style="min-width:4.5rem">Unique 2.</div>
                         <div class="flex-grow-1 small" style="white-space:pre-line">{% if sections.three_uniques_2 and sections.three_uniques_2.content %}{{ sections.three_uniques_2.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-                        <a href="{% url 'vto:section_edit' 'three_uniques_2' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'vision:section_edit' 'three_uniques_2' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
                     </div>
                     <div class="d-flex gap-2">
                         <div class="text-muted small fw-semibold flex-shrink-0" style="min-width:4.5rem">Unique 3.</div>
                         <div class="flex-grow-1 small" style="white-space:pre-line">{% if sections.three_uniques_3 and sections.three_uniques_3.content %}{{ sections.three_uniques_3.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-                        <a href="{% url 'vto:section_edit' 'three_uniques_3' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'vision:section_edit' 'three_uniques_3' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
                     </div>
                 </div>
             </div>
@@ -158,7 +158,7 @@
                 <div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Proven Process</div>
                 <div class="d-flex gap-2">
                     <div class="flex-grow-1 small" style="white-space:pre-line">{% if sections.proven_process and sections.proven_process.content %}{{ sections.proven_process.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-                    <a href="{% url 'vto:section_edit' 'proven_process' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
+                    <a href="{% url 'vision:section_edit' 'proven_process' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
                 </div>
             </div>
             <hr class="my-1">
@@ -167,7 +167,7 @@
                 <div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Guarantee</div>
                 <div class="d-flex gap-2">
                     <div class="flex-grow-1 small" style="white-space:pre-line">{% if sections.guarantee and sections.guarantee.content %}{{ sections.guarantee.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-                    <a href="{% url 'vto:section_edit' 'guarantee' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
+                    <a href="{% url 'vision:section_edit' 'guarantee' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
                 </div>
             </div>
         </div>
@@ -177,7 +177,7 @@
 {# ═══════════════ PAGE 2 — TRACTION ═══════════════ #}
 <div class="col-lg-6">
     <p class="text-uppercase fw-bold text-muted mb-3" style="font-size:.7rem;letter-spacing:.08em">
-        <i class="bi bi-lightning me-1"></i>Page 2 — Traction
+        <i class="bi bi-lightning me-1"></i>Page 2 — Delivery
     </p>
 
     {# 3-Year Picture #}
@@ -193,7 +193,7 @@
                     <div class="flex-grow-1 small" style="white-space:pre-line">
                         {% if sections.three_year_picture and sections.three_year_picture.content %}{{ sections.three_year_picture.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}
                     </div>
-                    <a href="{% url 'vto:section_edit' 'three_year_picture' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
+                    <a href="{% url 'vision:section_edit' 'three_year_picture' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
                 </div>
             </div>
             <hr class="my-2">
@@ -204,7 +204,7 @@
                     <ul class="mb-0 ps-3 small">{% for line in sections.three_year_goals.content.splitlines %}{% if line.strip %}<li>{{ line }}</li>{% endif %}{% endfor %}</ul>
                     {% else %}<p class="text-muted small fst-italic mb-0">Not set.</p>{% endif %}
                 </div>
-                <a href="{% url 'vto:section_edit' 'three_year_goals' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
+                <a href="{% url 'vision:section_edit' 'three_year_goals' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
             </div>
         </div>
     </div>
@@ -220,14 +220,14 @@
                     <div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Revenue Target</div>
                     <div class="d-flex align-items-center gap-1">
                         <span class="small fw-semibold flex-grow-1">{% if sections.one_year_revenue and sections.one_year_revenue.content %}{{ sections.one_year_revenue.content }}{% else %}<span class="text-muted fst-italic">Not set</span>{% endif %}</span>
-                        <a href="{% url 'vto:section_edit' 'one_year_revenue' %}" class="btn btn-sm btn-outline-secondary border-0 py-0"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'vision:section_edit' 'one_year_revenue' %}" class="btn btn-sm btn-outline-secondary border-0 py-0"><i class="bi bi-pencil"></i></a>
                     </div>
                 </div>
                 <div class="col-6">
                     <div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Profit Target</div>
                     <div class="d-flex align-items-center gap-1">
                         <span class="small fw-semibold flex-grow-1">{% if sections.one_year_profit and sections.one_year_profit.content %}{{ sections.one_year_profit.content }}{% else %}<span class="text-muted fst-italic">Not set</span>{% endif %}</span>
-                        <a href="{% url 'vto:section_edit' 'one_year_profit' %}" class="btn btn-sm btn-outline-secondary border-0 py-0"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'vision:section_edit' 'one_year_profit' %}" class="btn btn-sm btn-outline-secondary border-0 py-0"><i class="bi bi-pencil"></i></a>
                     </div>
                 </div>
             </div>
@@ -239,7 +239,7 @@
                     <ul class="mb-0 ps-3 small">{% for line in sections.one_year_goals.content.splitlines %}{% if line.strip %}<li>{{ line }}</li>{% endif %}{% endfor %}</ul>
                     {% else %}<p class="text-muted small fst-italic mb-0">Not set.</p>{% endif %}
                 </div>
-                <a href="{% url 'vto:section_edit' 'one_year_goals' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
+                <a href="{% url 'vision:section_edit' 'one_year_goals' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
             </div>
             {% if sections.one_year_goals and sections.one_year_goals.last_edited_by %}
             <div class="text-muted mt-2" style="font-size:.65rem">Updated by {{ sections.one_year_goals.last_edited_by.get_full_name|default:sections.one_year_goals.last_edited_by.username }} on {{ sections.one_year_goals.last_edited_at|date:"N j" }}</div>

@@ -297,7 +297,7 @@ class NavigationTerminologyTest(TestCase):
         resp = self.client.get('/', HTTP_HOST=SILAVAPI)
         for label in [
             'Weekly Meetings', 'Weekly Meeting', 'Blockers List', 'New Blocker', 'My Actions',
-            'Team Actions', 'New Action', 'Metrics Boards', 'Vision Plan', 'Org Chart',
+            'Team Actions', 'New Action', 'Metrics Boards', 'Vision and Delivery Board', 'Org Chart',
         ]:
             with self.subTest(label=label):
                 self.assertContains(resp, label)
