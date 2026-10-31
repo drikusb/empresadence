@@ -14,8 +14,8 @@ Rather than swap EOS's names for different-but-equivalent names, make the projec
 
 ### 1. Project identity — in progress
 - The project name itself: **done**. Repo renamed from OpenEOS to **Empresadence** ("EPD" for short — see #58's discussion). Remaining literal "OpenEOS"/"openeos" strings in code and docs swept in #83.
-- "EOS App" — still the sender name on every outgoing email (`DEFAULT_FROM_EMAIL` in `.env.example`) and the copyright holder in `LICENSE` ("EOS App Contributors").
-- The "Open-source EOS framework" wording — still on the README and CONTRIBUTING.
+- ~~"EOS App" as the sender name (`DEFAULT_FROM_EMAIL`) and LICENSE copyright holder~~ — **done, #84 (merged).** Both now read Empresadence.
+- The "open-source EOS framework" wording, and the `EOS®`/`Entrepreneurial Operating System® (EOS®)`/`V/TO®`/`Level 10 Meeting®`/`IDS®`/`The Accountability Chart®` marks spelled out throughout — still on the README (including its Features table) and CONTRIBUTING. See item 6 below.
 - No statement of trademark ownership or non-affiliation yet.
 
 ### 2 & 3. Hardcoded trademarked and generic terms — defaults flipped
@@ -37,7 +37,7 @@ The per-organisation branding and terminology system landed (#59–#61), and eve
 
 The `vto` term's own default word has since moved again, in #96 (open, not yet merged): "Vision Plan" → **"Vision and Delivery Board"**, decided with @RCheesley's input on #91 (she proposed the Vision/Execution-or-Delivery split; "Vision and Delivery Board" was chosen over "Vision and Execution Board" as the less clichéd, more outcome-oriented option).
 
-The "EOS recommends ..." lines were swept for their noun but still say "EOS recommends" literally — **still open.**
+~~The "EOS recommends ..." lines were swept for their noun but still say "EOS recommends" literally~~ — **done, #84 (merged).** Reworded to "We recommend ...".
 
 One further hardcoded-term spot, already resolved:
 - `templates/vto/vto_detail.html` and `vto_print.html` (now `templates/vision/vision_detail.html` and `vision_print.html`) — the second printed page used to be headed literally "Page 2 — Traction." `Traction®` is its own standalone registered mark (the book), separate from `V/TO®`. **Resolved in #96 (open, not yet merged):** now headed "Page 2 — Delivery."
@@ -52,12 +52,12 @@ README.md's top-level framework description, the Features table, and CONTRIBUTIN
 ### 6. Found in a full sweep against EOS Worldwide's current trademark list — new, not previously tracked
 A pass through every file in the repo against [the live US trademark list](https://branding.eosworldwide.com/us-trademarks/) (not just the terms the original 2026-10-16 audit anticipated) turned up several items the area-by-area PRs never touched, because they aren't in `apps/` or `templates/` at all:
 
-- **`.braintree/brain.json` and `.claude/agents/*.md`** — AI development-tooling metadata, tracked in the repo by accident. One names "EOS One" and "Traction Tools" (both registered marks, owned by direct competitors) and states "we are an EOS implementation, not an EOS-inspired tool." Never read by the running app (already excluded from the Docker build via `.dockerignore`), but public on GitHub. **Being removed from tracking in a separate PR.**
-- **`static/css/eos.css`** — the stylesheet's own filename, loaded in `base.html` and `base_minimal.html`.
-- **`LICENSE`** — copyright line reads "EOS App Contributors."
-- **`apps/accounts/portability/export.py`** — the generated `README.txt` inside every export archive names "V/TO" directly (this landed with #51, after the original audit).
-- **`templates/accountability/chart.html`, `node_form.html`** — use "Visionary" and "Integrator" as the example seat-name placeholders; both are separately trademarked (`Integrator™`, `Visionary and Integrator™`), and the Accountability Chart's own trademark risk was only ever tracked for its own name, not its example content.
-- **`docker-compose.yml`, `.github/workflows/ci.yml`, `.env.example`** — default DB name/user/password all use an `eos_` prefix; lower risk (internal infra identifiers, not public-facing), but trivial to rename alongside everything else.
+- ~~**`.braintree/brain.json` and `.claude/agents/*.md`**~~ — **done.** Both removed from the repo.
+- ~~**`static/css/eos.css`**~~ — **done, #84 (merged).** Renamed to `app.css`.
+- ~~**`LICENSE`**~~ — **done, #84 (merged).** Copyright line now reads "Empresadence Contributors."
+- **`apps/accounts/portability/export.py`** — **still open.** The generated `README.txt` inside every export archive names "V/TO" directly (this landed with #51, after the original audit).
+- ~~**`templates/accountability/chart.html`, `node_form.html`**~~ — **done, #84 (merged).** The "typically Visionary and Integrator" example text and the form's placeholder attribute both reworded to CEO/COO.
+- **`docker-compose.yml`, `.github/workflows/ci.yml`, `.env.example`** — **still open.** Default DB name/user/password all use an `eos_` prefix; lower risk (internal infra identifiers, not public-facing), but trivial to rename alongside everything else.
 
 ## The project's new name — agreed and executed at the repo level
 
@@ -84,12 +84,14 @@ Quick collision checks run so far (not a substitute for a real trademark search)
 ## What's actually left, in order
 
 1. ~~Pick generic default words for every `Terms` entry and flip `DEFAULTS` in `apps/accounts/terminology.py`~~ — **done, #90 (merged).**
-2. Reword the "EOS recommends" lines — **still open.** ~~The "Page 2 — Traction" VTO print/detail heading~~ — **done, #96 (open, not yet merged).**
-3. Replace "Visionary" / "Integrator" in the Accountability Chart's example placeholder text with vendor-neutral examples — **still open, up next.**
-4. ~~Rename `apps/vto` (the Django app itself)~~ — **done, #96 (open, not yet merged); the package is now `apps.vision`, served at `/vision/`.** Clearing the remaining "EOS App" occurrences (email sender name, LICENSE copyright line) and the `eos_`-prefixed infra defaults is **still open.**
+2. ~~Reword the "EOS recommends" lines~~ — **done, #84 (merged).** ~~The "Page 2 — Traction" VTO print/detail heading~~ — **done, #96 (open, not yet merged).** **Item fully addressed.**
+3. ~~Replace "Visionary" / "Integrator" in the Accountability Chart's example placeholder text with vendor-neutral examples~~ — **done, #84 (merged).** This was already shipped before this round of work started; the tracking doc just hadn't caught up. **Item fully addressed.**
+4. ~~Rename `apps/vto` (the Django app itself)~~ — **done, #96 (open, not yet merged); the package is now `apps.vision`, served at `/vision/`.** ~~Clear the remaining "EOS App" occurrences (email sender name, LICENSE copyright line)~~ — **done, #84 (merged).** The `eos_`-prefixed infra defaults (`docker-compose.yml`, `.github/workflows/ci.yml`, `.env.example`) are **still open.**
 5. Turn the V/TO's section list and the meeting's segment timings into admin-configurable structures instead of fixed copies — not started.
 6. Sweep README, CONTRIBUTING, repo description and GitHub topics — not started.
 7. Fix the README's broken diff-block rendering and take the "on hold" banner down once 1–6 land — not started.
+
+**So what's genuinely still open, in order:** the `eos_`-prefixed infra defaults (small, part of item 4); the `export.py` README.txt's "V/TO" mention (small, from item 6's sweep); item 5 (the big one, needs its own design pass); item 6 (README/CONTRIBUTING/repo sweep); item 7 (blocked on 5 and 6).
 
 ## Open questions
 
