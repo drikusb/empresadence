@@ -18,7 +18,7 @@ Rather than swap EOS's names for different-but-equivalent names, make the projec
 - The "Open-source EOS framework" wording — still on the README and CONTRIBUTING.
 - No statement of trademark ownership or non-affiliation yet.
 
-### 2 & 3. Hardcoded trademarked and generic terms — infrastructure done, defaults not flipped
+### 2 & 3. Hardcoded trademarked and generic terms — defaults flipped
 The per-organisation branding and terminology system landed (#59–#61), and every area of the app now reads its vocabulary from it instead of hardcoding English words:
 
 | Area | PR | Status |
@@ -33,13 +33,14 @@ The per-organisation branding and terminology system landed (#59–#61), and eve
 | Meetings, home dashboard, search, notifications | #68 | Merged |
 | Team page module tiles | #72 | Merged |
 
-**The important catch, unchanged since last update: the shipped *defaults* in `Terms` are still EOS Worldwide's literal words** (Rock, Scorecard, Level 10 Meeting, VTO, IDS, Accountability Chart, Segue, Headlines, Cascading Messages, Seat, Core Value, Milestone). An organisation that never visits its Terminology settings sees the EOS vocabulary exactly as before — which is every organisation on a fresh install. **Flipping those defaults to generic words is the one step that actually satisfies EOS Worldwide's request, and it hasn't happened yet.**
+**Resolved in #90 (merged):** the shipped *defaults* in `Terms` used to be EOS Worldwide's literal words (Rock, Scorecard, Level 10 Meeting, VTO, IDS, Accountability Chart, Segue, Headlines, Cascading Messages, Seat, Core Value, Milestone) — meaning any organisation that never visited its Terminology settings saw the EOS vocabulary exactly as before, which was every organisation on a fresh install. #90 flipped every default to a generic word (Priority, Metrics Board, Weekly Meeting, PRS, Org Chart, Check-in, Headlines→Update, Cascading Messages→Key Message, Role, Value, Step), satisfying EOS Worldwide's core request. The `vto` term's `description` field was flipped in the same PR, away from the literal "Vision/Traction Organizer."
 
-The "EOS recommends ..." lines were swept for their noun but still say "EOS recommends" literally.
+The `vto` term's own default word has since moved again, in #96 (open, not yet merged): "Vision Plan" → **"Vision and Delivery Board"**, decided with @RCheesley's input on #91 (she proposed the Vision/Execution-or-Delivery split; "Vision and Delivery Board" was chosen over "Vision and Execution Board" as the less clichéd, more outcome-oriented option).
 
-Two further hardcoded-term spots found in a full sweep against EOS Worldwide's current list, not caught by the original per-area PRs because they're not plain UI copy:
-- `apps/accounts/terminology.py` — the `vto` term's own `description` field is the literal phrase `'Vision/Traction Organizer'`, which renders as UI hint text wherever that description is shown.
-- `templates/vto/vto_detail.html` and `vto_print.html` — the VTO's second printed page is headed literally **"Page 2 — Traction"**. `Traction®` is its own standalone registered mark (the book), separate from `V/TO®` — this wasn't on the radar because the audit tracked "VTO" as one area, not realizing one of its own pages carries a second, different mark.
+The "EOS recommends ..." lines were swept for their noun but still say "EOS recommends" literally — **still open.**
+
+One further hardcoded-term spot, already resolved:
+- `templates/vto/vto_detail.html` and `vto_print.html` (now `templates/vision/vision_detail.html` and `vision_print.html`) — the second printed page used to be headed literally "Page 2 — Traction." `Traction®` is its own standalone registered mark (the book), separate from `V/TO®`. **Resolved in #96 (open, not yet merged):** now headed "Page 2 — Delivery."
 
 ### 4. The two structural copies — not started
 - The V/TO's fixed section structure and two-page print layout: still fixed. `VTOSection`'s `SectionKey` choices are unchanged.
@@ -82,16 +83,16 @@ Quick collision checks run so far (not a substitute for a real trademark search)
 
 ## What's actually left, in order
 
-1. Pick generic default words for every `Terms` entry and flip `DEFAULTS` in `apps/accounts/terminology.py` — this is the step that makes a fresh install trademark-clean, and nothing else matters as much until it's done. Also flip the `vto` term's `description` field away from "Vision/Traction Organizer."
-2. Reword the "EOS recommends" lines, and the "Page 2 — Traction" VTO print/detail heading.
-3. Replace "Visionary" / "Integrator" in the Accountability Chart's example placeholder text with vendor-neutral examples.
-4. Rename `apps/vto` (the Django app itself) and clear the remaining "EOS App" occurrences (email sender name, LICENSE copyright line) and the `eos_`-prefixed infra defaults.
-5. Turn the V/TO's section list and the meeting's segment timings into admin-configurable structures instead of fixed copies.
-6. Sweep README, CONTRIBUTING, repo description and GitHub topics.
-7. Fix the README's broken diff-block rendering and take the "on hold" banner down once 1–6 land.
+1. ~~Pick generic default words for every `Terms` entry and flip `DEFAULTS` in `apps/accounts/terminology.py`~~ — **done, #90 (merged).**
+2. Reword the "EOS recommends" lines — **still open.** ~~The "Page 2 — Traction" VTO print/detail heading~~ — **done, #96 (open, not yet merged).**
+3. Replace "Visionary" / "Integrator" in the Accountability Chart's example placeholder text with vendor-neutral examples — **still open, up next.**
+4. ~~Rename `apps/vto` (the Django app itself)~~ — **done, #96 (open, not yet merged); the package is now `apps.vision`, served at `/vision/`.** Clearing the remaining "EOS App" occurrences (email sender name, LICENSE copyright line) and the `eos_`-prefixed infra defaults is **still open.**
+5. Turn the V/TO's section list and the meeting's segment timings into admin-configurable structures instead of fixed copies — not started.
+6. Sweep README, CONTRIBUTING, repo description and GitHub topics — not started.
+7. Fix the README's broken diff-block rendering and take the "on hold" banner down once 1–6 land — not started.
 
 ## Open questions
 
-- Who picks the generic default words — a short naming pass here, or does each area's original PR author propose theirs?
+- ~~Who picks the generic default words~~ — **resolved.** The `Terms` defaults themselves landed in #90. The renamed `apps/vto` package's name and the `vto` term's resulting default word were discussed on #91 with @RCheesley and decided there (see above).
 - Does the structural-copy fix (step 5 above) want its own design discussion before a PR, given it's the one area that's still genuinely unscoped?
 - Is a trademark/non-affiliation statement wanted in the README once the above lands, or is removal alone sufficient?
