@@ -15,8 +15,8 @@ Rather than swap EOS's names for different-but-equivalent names, make the projec
 ### 1. Project identity — in progress
 - The project name itself: **done**. Repo renamed from OpenEOS to **Empresadence** ("EPD" for short — see #58's discussion). Remaining literal "OpenEOS"/"openeos" strings in code and docs swept in #83.
 - ~~"EOS App" as the sender name (`DEFAULT_FROM_EMAIL`) and LICENSE copyright holder~~ — **done, #84 (merged).** Both now read Empresadence.
-- The "open-source EOS framework" wording, and the `EOS®`/`Entrepreneurial Operating System® (EOS®)`/`V/TO®`/`Level 10 Meeting®`/`IDS®`/`The Accountability Chart®` marks spelled out throughout — still on the README (including its Features table) and CONTRIBUTING. See item 6 below.
-- No statement of trademark ownership or non-affiliation yet.
+- ~~The "open-source EOS framework" wording, and the `EOS®`/`Entrepreneurial Operating System® (EOS®)`/`V/TO®`/`Level 10 Meeting®`/`IDS®`/`The Accountability Chart®` marks spelled out throughout~~ — **done, #100 (open, not yet merged).** See item 6 below.
+- No statement of trademark ownership or non-affiliation yet — still an open question (see below).
 
 ### 2 & 3. Hardcoded trademarked and generic terms — defaults flipped
 The per-organisation branding and terminology system landed (#59–#61), and every area of the app now reads its vocabulary from it instead of hardcoding English words:
@@ -35,19 +35,19 @@ The per-organisation branding and terminology system landed (#59–#61), and eve
 
 **Resolved in #90 (merged):** the shipped *defaults* in `Terms` used to be EOS Worldwide's literal words (Rock, Scorecard, Level 10 Meeting, VTO, IDS, Accountability Chart, Segue, Headlines, Cascading Messages, Seat, Core Value, Milestone) — meaning any organisation that never visited its Terminology settings saw the EOS vocabulary exactly as before, which was every organisation on a fresh install. #90 flipped every default to a generic word (Priority, Metrics Board, Weekly Meeting, PRS, Org Chart, Check-in, Headlines→Update, Cascading Messages→Key Message, Role, Value, Step), satisfying EOS Worldwide's core request. The `vto` term's `description` field was flipped in the same PR, away from the literal "Vision/Traction Organizer."
 
-The `vto` term's own default word has since moved again, in #96 (open, not yet merged): "Vision Plan" → **"Vision and Delivery Board"**, decided with @RCheesley's input on #91 (she proposed the Vision/Execution-or-Delivery split; "Vision and Delivery Board" was chosen over "Vision and Execution Board" as the less clichéd, more outcome-oriented option).
+The `vto` term's own default word has since moved again, in #96 (merged): "Vision Plan" → **"Vision and Delivery Board"**, decided with @RCheesley's input on #91 (she proposed the Vision/Execution-or-Delivery split; "Vision and Delivery Board" was chosen over "Vision and Execution Board" as the less clichéd, more outcome-oriented option). #91 itself is now superseded by #96/#97 and should be closed without merging.
 
 ~~The "EOS recommends ..." lines were swept for their noun but still say "EOS recommends" literally~~ — **done, #84 (merged).** Reworded to "We recommend ...".
 
 One further hardcoded-term spot, already resolved:
-- `templates/vto/vto_detail.html` and `vto_print.html` (now `templates/vision/vision_detail.html` and `vision_print.html`) — the second printed page used to be headed literally "Page 2 — Traction." `Traction®` is its own standalone registered mark (the book), separate from `V/TO®`. **Resolved in #96 (open, not yet merged):** now headed "Page 2 — Delivery."
+- `templates/vto/vto_detail.html` and `vto_print.html` (now `templates/vision/vision_detail.html` and `vision_print.html`) — the second printed page used to be headed literally "Page 2 — Traction." `Traction®` is its own standalone registered mark (the book), separate from `V/TO®`. **Resolved in #96 (merged):** now headed "Page 2 — Delivery."
 
 ### 4. The two structural copies — not started
 - The V/TO's fixed section structure and two-page print layout: still fixed. `VTOSection`'s `SectionKey` choices are unchanged.
 - The Level 10 Meeting agenda's exact segment timings (`[5, 5, 5, 5, 5, 60, 5]`): still fixed. `SEGMENT_NAMES`/`SEGMENT_DURATIONS` in `apps/meetings/models.py` are unchanged; only the *display* name per segment is configurable now, not the segment list or durations.
 
-### 5. README, docs, repo identity — not started
-README.md's top-level framework description, the Features table, and CONTRIBUTING.md all still read "the full **Entrepreneurial Operating System® (EOS®)** framework," with every module's registered mark (V/TO®, Level 10 Meeting®, IDS®, The Accountability Chart®) spelled out. The README also currently has a rendering bug unrelated to this effort — the "on hold" banner was pasted in as a raw diff block and needs fixing regardless.
+### 5. README, docs, repo identity — mostly done
+~~README.md's top-level framework description, the Features table, and CONTRIBUTING.md all still read "the full **Entrepreneurial Operating System® (EOS®)** framework," with every module's registered mark (V/TO®, Level 10 Meeting®, IDS®, The Accountability Chart®) spelled out.~~ **Done, #100 (open, not yet merged):** both files reworded with generic, vendor-neutral copy and the app's own default terminology words. The GitHub repo description is also updated (manual step, done directly in repo settings — not something this tooling can change). The README still has a rendering bug unrelated to this effort — the "on hold" banner was pasted in as a raw diff block and needs fixing regardless; left alone in #100 since it's gated on item 5 below (the structural-copy work) too, not just this sweep.
 
 ### 6. Found in a full sweep against EOS Worldwide's current trademark list — new, not previously tracked
 A pass through every file in the repo against [the live US trademark list](https://branding.eosworldwide.com/us-trademarks/) (not just the terms the original 2026-10-16 audit anticipated) turned up several items the area-by-area PRs never touched, because they aren't in `apps/` or `templates/` at all:
@@ -55,9 +55,9 @@ A pass through every file in the repo against [the live US trademark list](https
 - ~~**`.braintree/brain.json` and `.claude/agents/*.md`**~~ — **done.** Both removed from the repo.
 - ~~**`static/css/eos.css`**~~ — **done, #84 (merged).** Renamed to `app.css`.
 - ~~**`LICENSE`**~~ — **done, #84 (merged).** Copyright line now reads "Empresadence Contributors."
-- **`apps/accounts/portability/export.py`** — **still open.** The generated `README.txt` inside every export archive names "V/TO" directly (this landed with #51, after the original audit).
+- ~~**`apps/accounts/portability/export.py`**~~ — **done, #99 (open, not yet merged).** The generated `README.txt`'s record-type sentence named "V/TO" directly (landed with #51, after the original audit) and, found in the same sentence while fixing it, also spelled out "Accountability Chart" and "Level 10 Meeting" — both separately registered. All three replaced with the app's own generic words.
 - ~~**`templates/accountability/chart.html`, `node_form.html`**~~ — **done, #84 (merged).** The "typically Visionary and Integrator" example text and the form's placeholder attribute both reworded to CEO/COO.
-- **`docker-compose.yml`, `.github/workflows/ci.yml`, `.env.example`** — **still open.** Default DB name/user/password all use an `eos_` prefix; lower risk (internal infra identifiers, not public-facing), but trivial to rename alongside everything else.
+- ~~**`docker-compose.yml`, `.github/workflows/ci.yml`, `.env.example`**~~ — **done, #98 (merged).** Default DB name/user/password renamed from the `eos_` prefix to `epd_`; `config/settings/base.py`'s own fallback defaults and the README's env var table, found while fixing it, were also still on `eos_`.
 
 ## The project's new name — agreed and executed at the repo level
 
@@ -84,17 +84,17 @@ Quick collision checks run so far (not a substitute for a real trademark search)
 ## What's actually left, in order
 
 1. ~~Pick generic default words for every `Terms` entry and flip `DEFAULTS` in `apps/accounts/terminology.py`~~ — **done, #90 (merged).**
-2. ~~Reword the "EOS recommends" lines~~ — **done, #84 (merged).** ~~The "Page 2 — Traction" VTO print/detail heading~~ — **done, #96 (open, not yet merged).** **Item fully addressed.**
+2. ~~Reword the "EOS recommends" lines~~ — **done, #84 (merged).** ~~The "Page 2 — Traction" VTO print/detail heading~~ — **done, #96 (merged).** **Item fully addressed.**
 3. ~~Replace "Visionary" / "Integrator" in the Accountability Chart's example placeholder text with vendor-neutral examples~~ — **done, #84 (merged).** This was already shipped before this round of work started; the tracking doc just hadn't caught up. **Item fully addressed.**
-4. ~~Rename `apps/vto` (the Django app itself)~~ — **done, #96 (open, not yet merged); the package is now `apps.vision`, served at `/vision/`.** ~~Clear the remaining "EOS App" occurrences (email sender name, LICENSE copyright line)~~ — **done, #84 (merged).** The `eos_`-prefixed infra defaults (`docker-compose.yml`, `.github/workflows/ci.yml`, `.env.example`) are **still open.**
-5. Turn the V/TO's section list and the meeting's segment timings into admin-configurable structures instead of fixed copies — not started.
-6. Sweep README, CONTRIBUTING, repo description and GitHub topics — not started.
-7. Fix the README's broken diff-block rendering and take the "on hold" banner down once 1–6 land — not started.
+4. ~~Rename `apps/vto` (the Django app itself)~~ — **done, #96 (merged); the package is now `apps.vision`, served at `/vision/`.** ~~Clear the remaining "EOS App" occurrences (email sender name, LICENSE copyright line)~~ — **done, #84 (merged).** ~~The `eos_`-prefixed infra defaults~~ — **done, #98 (merged).** **Item fully addressed.**
+5. Turn the V/TO's section list and the meeting's segment timings into admin-configurable structures instead of fixed copies — not started. The one area still genuinely unscoped — see open questions below.
+6. ~~Sweep README, CONTRIBUTING, repo description and GitHub topics~~ — **done, #100 (open, not yet merged) plus the repo description, updated directly.** GitHub topics are still empty; adding some is purely additive (not a trademark fix), so left for whenever, not tracked here as a blocker.
+7. Fix the README's broken diff-block rendering and take the "on hold" banner down once 1–6 land — not started, blocked on item 5 above.
 
-**So what's genuinely still open, in order:** the `eos_`-prefixed infra defaults (small, part of item 4); the `export.py` README.txt's "V/TO" mention (small, from item 6's sweep); item 5 (the big one, needs its own design pass); item 6 (README/CONTRIBUTING/repo sweep); item 7 (blocked on 5 and 6).
+**So what's genuinely still open:** the `export.py` README.txt fix (#99) and the README/CONTRIBUTING sweep (#100) just need merging; after that, everything remaining is item 5 (the structural-copy work, the big one) and item 7 (blocked on item 5).
 
 ## Open questions
 
-- ~~Who picks the generic default words~~ — **resolved.** The `Terms` defaults themselves landed in #90. The renamed `apps/vto` package's name and the `vto` term's resulting default word were discussed on #91 with @RCheesley and decided there (see above).
-- Does the structural-copy fix (step 5 above) want its own design discussion before a PR, given it's the one area that's still genuinely unscoped?
-- Is a trademark/non-affiliation statement wanted in the README once the above lands, or is removal alone sufficient?
+- ~~Who picks the generic default words~~ — **resolved.** The `Terms` defaults themselves landed in #90. The renamed `apps/vto` package's name and the `vto` term's resulting default word were discussed on #91 with @RCheesley and decided there (see above). #91 was a discussion-only PR with no code; close it without merging once #96 is confirmed landed, since its draft text is now stale.
+- Does the structural-copy fix (step 5 above) want its own design discussion before a PR, given it's the one area that's still genuinely unscoped? **Still open — this is the next thing to resolve.**
+- Is a trademark/non-affiliation statement wanted in the README once the above lands, or is removal alone sufficient? **Still open.**
