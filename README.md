@@ -4,9 +4,9 @@
 -##                                     PLS CHECK BACK REAL SOON                                              ## 
 -###############################################################################################################
 ```
-# an open-source App that allows an org to implement and run the business using the EOS® framework.
+# Empresadence
 
-An open-source web application that implements the full **Entrepreneurial Operating System® (EOS®)** framework. Run Level 10 Meeting®, track Rocks, manage Issues and To-Dos, maintain a V/TO®, review Scorecards, and navigate the The Accountability Chart® — all from a single self-hosted platform.
+An open-source, self-hosted platform for running your leadership team's operating rhythm — a weekly meeting, quarterly priorities, issue-solving, weekly action items, a metrics board, a long-term vision document, and a roles chart. Every module's vocabulary is configurable per organisation, so you're not locked into any one framework's words for them.
 
 Built with Django, Bootstrap 5, PostgreSQL, and Docker. No JavaScript frameworks. No SaaS lock-in.
 
@@ -16,15 +16,15 @@ Built with Django, Bootstrap 5, PostgreSQL, and Docker. No JavaScript frameworks
 
 | Module | Description |
 |--------|-------------|
-| **V/TO®** | Vision/Traction Organizer® — Core Values, Core Focus, 10-Year Target, Marketing Strategy, 3-Year Picture, 1-Year Plan |
-| **The Accountability Chart®** | Org-chart builder with seat owners, vacant seat tracking, and department grouping |
-| **Rocks** | Quarterly priorities with on-track / off-track status, quarter labels, and dependency tracking |
-| **Scorecards** | Weekly measurables with above/below/equal goal directions and colour-coded status cells |
-| **Issues** | IDS® (Identify, Discuss, Solve) list with short-term / long-term types, cross-team delegation, and activity history |
-| **To-Dos** | Weekly action items with escalation levels, due dates, and Rock/Issue linking |
+| **Vision and Delivery Board** | Core Values, Core Focus, 10-Year Target, Marketing Strategy, 3-Year Picture, 1-Year Plan |
+| **Org Chart** | Org-chart builder with seat owners, vacant seat tracking, and department grouping |
+| **Priorities** | Quarterly priorities with on-track / off-track status, quarter labels, and dependency tracking |
+| **Metrics Boards** | Weekly measurables with above/below/equal goal directions and colour-coded status cells |
+| **Blockers** | PRS (Problem, Solve, Resolve) list with short-term / long-term types, cross-team delegation, and activity history |
+| **Actions** | Weekly action items with escalation levels, due dates, and Priority/Blocker linking |
 | **Audit log** | Logins, logouts, failed logins and administrative actions recorded per organisation; admins see their organisation's log, superusers see everything in the Django admin |
 | **Data export** | Organisation admins can download everything that belongs to their organisation as one archive (JSON for importing, CSV for spreadsheets, logo and avatars); operators can export one or every organisation from the command line. Every export is written to the audit log; an archive can be loaded into another instance with `import_organization` |
-| **Level 10 Meeting®** | Guided 90-minute meeting runner with timed segments, segue entries, headlines, IDS® integration, ratings, and cascading messages |
+| **Weekly Meeting** | Guided 90-minute meeting runner with timed segments, check-in entries, updates, PRS integration, ratings, and key messages |
 | **Two-factor authentication** | Optional per user: an authenticator app (TOTP) plus ten single-use backup codes, set up from **My Profile**. Set `OTP_TOTP_ISSUER` to change the name shown in authenticator apps; a later change lets an organisation require it for its members |
 
 ---
@@ -34,8 +34,8 @@ Built with Django, Bootstrap 5, PostgreSQL, and Docker. No JavaScript frameworks
 **Requirements:** Docker and Docker Compose v2.
 
 ```bash
-git clone https://github.com/drikusb/eos-app.git
-cd eos-app
+git clone https://github.com/drikusb/empresadence.git
+cd empresadence
 cp .env.example .env
 docker compose up
 ```
@@ -51,7 +51,7 @@ Log in at `/admin/` to set up your organisation, or visit the dashboard at `/` t
 
 ### Multiple organisations
 
-One deployment can host several organisations, each with its own teams, Rocks, Issues, To-Dos, Scorecards, VTO and Accountability Chart. This suits a consultancy running their own company alongside each client.
+One deployment can host several organisations, each with its own teams, Priorities, Blockers, Actions, Metrics Boards, Vision and Delivery Board and Org Chart. This suits a consultancy running their own company alongside each client.
 
 - A user belongs to an organisation through a **membership**, which carries their role (admin, team leader or member) in that organisation. The same user can be an admin of one organisation and a member of another.
 - Superusers create additional organisations from the navbar switcher (**New organisation**) or at `/org/setup/`. The creator becomes its first admin.
@@ -156,7 +156,7 @@ not a background worker — schedule it to run once a day (mornings work well) w
 host's cron:
 
 ```
-0 7 * * * cd /path/to/eos && docker compose -f docker-compose.prod.yml exec -T web python manage.py send_daily_notifications
+0 7 * * * cd /path/to/empresadence && docker compose -f docker-compose.prod.yml exec -T web python manage.py send_daily_notifications
 ```
 
 Rock off-track alerts and user-invite emails are sent immediately and need no scheduling.
@@ -189,13 +189,13 @@ docker compose exec web coverage report
 .
 ├── apps/
 │   ├── accounts/       # Organisations, Memberships, Teams, UserProfiles
-│   ├── accountability/ # The Accountability Chart® nodes and roles
-│   ├── issues/         # Issues with IDS® workflow
-│   ├── meetings/       # Level 10 Meeting® runner
-│   ├── rocks/          # Quarterly Rocks
-│   ├── scorecards/     # Weekly Scorecards
-│   ├── todos/          # To-Dos
-│   └── vto/            # Vision/Traction Organizer®
+│   ├── accountability/ # Org Chart nodes and roles
+│   ├── issues/         # Blockers with PRS workflow
+│   ├── meetings/       # Weekly Meeting runner
+│   ├── rocks/          # Quarterly Priorities
+│   ├── scorecards/     # Weekly Metrics Boards
+│   ├── todos/          # Actions
+│   └── vision/         # Vision and Delivery Board
 ├── config/
 │   ├── settings/
 │   │   ├── base.py
