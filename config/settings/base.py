@@ -82,9 +82,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='eos_db'),
-        'USER': config('DB_USER', default='eos_user'),
-        'PASSWORD': config('DB_PASSWORD', default='eos_password'),
+        'NAME': config('DB_NAME', default='epd_db'),
+        'USER': config('DB_USER', default='epd_user'),
+        'PASSWORD': config('DB_PASSWORD', default='epd_password'),
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),
     }
