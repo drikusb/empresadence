@@ -42,9 +42,10 @@ The `vto` term's own default word has since moved again, in #96 (merged): "Visio
 One further hardcoded-term spot, already resolved:
 - `templates/vto/vto_detail.html` and `vto_print.html` (now `templates/vision/vision_detail.html` and `vision_print.html`) — the second printed page used to be headed literally "Page 2 — Traction." `Traction®` is its own standalone registered mark (the book), separate from `V/TO®`. **Resolved in #96 (merged):** now headed "Page 2 — Delivery."
 
-### 4. The two structural copies — not started
+### 4. The two structural copies — proposal up for discussion
 - The V/TO's fixed section structure and two-page print layout: still fixed. `VTOSection`'s `SectionKey` choices are unchanged.
 - The Level 10 Meeting agenda's exact segment timings (`[5, 5, 5, 5, 5, 60, 5]`): still fixed. `SEGMENT_NAMES`/`SEGMENT_DURATIONS` in `apps/meetings/models.py` are unchanged; only the *display* name per segment is configurable now, not the segment list or durations.
+- A concrete design proposal for making both configurable is up for discussion: see [STRUCTURAL-CONFIGURABILITY.md](STRUCTURAL-CONFIGURABILITY.md).
 
 ### 5. README, docs, repo identity — mostly done
 ~~README.md's top-level framework description, the Features table, and CONTRIBUTING.md all still read "the full **Entrepreneurial Operating System® (EOS®)** framework," with every module's registered mark (V/TO®, Level 10 Meeting®, IDS®, The Accountability Chart®) spelled out.~~ **Done, #100 (merged):** both files reworded with generic, vendor-neutral copy and the app's own default terminology words. The GitHub repo description is also updated (manual step, done directly in repo settings — not something this tooling can change). The README still has a rendering bug unrelated to this effort — the "on hold" banner was pasted in as a raw diff block and needs fixing regardless; left alone in #100 since it's gated on item 5 below (the structural-copy work) too, not just this sweep.
