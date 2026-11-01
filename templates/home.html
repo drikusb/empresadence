@@ -12,6 +12,31 @@
     </div>
 </div>
 
+{# ── Scope: which teams the cards below count ── #}
+{% if scope == 'team' %}
+<div class="alert alert-info d-flex align-items-center mb-4" role="status">
+    <i class="bi bi-funnel-fill me-2 fs-5"></i>
+    <div>
+        {% if active_team %}
+        Showing <strong>{{ active_team.name }}</strong> only
+        {% else %}
+        Showing no team: pick one in the navbar
+        {% endif %}
+        · <a href="?scope=all" class="alert-link">Show all teams</a>
+    </div>
+</div>
+{% elif visible_teams %}
+<div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+    <p class="text-muted small mb-0">Showing all your teams ({{ visible_teams|length }})</p>
+    {% if active_team and visible_teams|length > 1 %}
+    <div class="btn-group btn-group-sm" role="group" aria-label="Which teams to show">
+        <a href="?scope=team" class="btn btn-outline-secondary">This team</a>
+        <a href="?scope=all" class="btn btn-dark" aria-current="true">All teams</a>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
 <div class="row g-4">
     <!-- Level 10 Meetings -->
     <div class="col-md-6 col-xl-4">

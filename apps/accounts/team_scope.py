@@ -1,8 +1,8 @@
-"""A list's team scope: the navbar's active team, or every team the user may see.
+"""A page's team scope: the navbar's active team, or every team the user may see.
 
-The Rocks and Scorecards lists offer the same switch, so they share the
-helpers here and behave alike. Each list keeps its choice under its own
-session key, so widening one list does not widen the other.
+The Rocks and Scorecards lists and the dashboard offer the same switch, so
+they share the helpers here and behave alike. Each page keeps its choice
+under its own session key, so widening one page does not widen another.
 """
 from django.db.models import Count
 
@@ -13,19 +13,21 @@ SCOPE_ALL = 'all'
 SCOPES = (SCOPE_TEAM, SCOPE_ALL)
 
 
-def get_scope(request, session_key):
-    """Return the list scope: ``'team'`` (the navbar's active team) or ``'all'``.
+def get_scope(request, session_key, default=SCOPE_TEAM):
+    """Return the page scope: ``'team'`` (the navbar's active team) or ``'all'``.
 
     ``?scope=`` switches it and the choice is kept in the session under
     ``session_key``, so links that carry no scope keep showing the same teams.
-    Anything else in ``?scope=`` is ignored in favour of the session.
+    Anything else in ``?scope=`` is ignored in favour of the session, and
+    ``default`` applies until the user has chosen. The lists start narrow;
+    the dashboard starts wide.
     """
     scope = request.GET.get('scope')
     if scope in SCOPES:
         request.session[session_key] = scope
         return scope
     scope = request.session.get(session_key)
-    return scope if scope in SCOPES else SCOPE_TEAM
+    return scope if scope in SCOPES else default
 
 
 def get_visible_teams(request):
