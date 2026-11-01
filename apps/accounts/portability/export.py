@@ -477,9 +477,9 @@ What this archive contains
 Everything that belongs to the organisation: the organisation record, its
 teams, the memberships, the member accounts (name, email, username and
 activity dates only; no password hashes or permissions), user profiles and
-notification preferences, and every V/TO, Accountability Chart, Rock, Issue,
-To-Do, Scorecard and Level 10 Meeting record, with the organisation logo and
-members' avatars where the files exist.
+notification preferences, and every Vision and Delivery Board, Org Chart,
+Rock, Issue, To-Do, Scorecard and Weekly Meeting record, with the
+organisation logo and members' avatars where the files exist.
 
 Layout
 ------

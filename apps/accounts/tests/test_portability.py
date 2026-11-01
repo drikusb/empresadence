@@ -35,7 +35,7 @@ from apps.notifications.models import NotificationPreference
 from apps.rocks.models import Rock, RockCheckin, RockDependency, RockMilestone
 from apps.scorecards.models import Scorecard, ScorecardEntry, ScorecardMetric
 from apps.todos.models import ToDo
-from apps.vto.models import VTO, VTOCoreValue, VTOSection, VTOSectionHistory, SectionKey
+from apps.vision.models import VTO, VTOCoreValue, VTOSection, VTOSectionHistory, SectionKey
 
 # The models populate_org() fills. collect() discovers what to export from the
 # app registry, so on a tree with more models the archive carries more than

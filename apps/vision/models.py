@@ -62,10 +62,10 @@ class VTO(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'VTO — {self.organization.name}'
+        return f'Vision — {self.organization.name}'
 
     def get_absolute_url(self):
-        return reverse('vto:detail')
+        return reverse('vision:detail')
 
     def get_section(self, key):
         """Return the VTOSection for this key, or None."""

@@ -125,7 +125,7 @@ class ActiveOrgScopingTest(TwoOrgMixin, TestCase):
 
     def test_vto_and_org_pages_follow_active_org(self):
         self.switch_to(self.beta)
-        self.assertContains(self.client.get('/vto/'), 'Beta Org')
+        self.assertContains(self.client.get('/vision/'), 'Beta Org')
         self.assertContains(self.client.get('/org/'), 'Beta Org')
         self.assertContains(self.client.get('/teams/'), 'Beta Team')
         self.assertNotContains(self.client.get('/teams/'), 'Alpha Team')

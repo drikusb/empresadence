@@ -44,7 +44,7 @@ class VTOCompanyRocksTest(TestCase):
 
     def test_vto_detail_lists_only_company_rocks_for_the_active_org(self):
         self.client.force_login(self.user)
-        resp = self.client.get('/vto/')
+        resp = self.client.get('/vision/')
         rocks = list(resp.context['rocks'])
         self.assertIn(self.company_rock_a, rocks)
         self.assertIn(self.company_rock_b, rocks)
@@ -53,7 +53,7 @@ class VTOCompanyRocksTest(TestCase):
 
     def test_vto_print_lists_only_company_rocks_for_the_active_org(self):
         self.client.force_login(self.user)
-        resp = self.client.get('/vto/print/')
+        resp = self.client.get('/vision/print/')
         rocks = list(resp.context['rocks'])
         self.assertIn(self.company_rock_a, rocks)
         self.assertIn(self.company_rock_b, rocks)
@@ -65,5 +65,5 @@ class VTOCompanyRocksTest(TestCase):
         self.company_rock_a.delete()
         self.company_rock_b.delete()
         self.client.force_login(self.user)
-        resp = self.client.get('/vto/')
+        resp = self.client.get('/vision/')
         self.assertContains(resp, 'No company-wide Priorities')

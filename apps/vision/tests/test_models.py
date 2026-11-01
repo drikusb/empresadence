@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from apps.accounts.models import Organization
-from apps.vto.models import VTO, VTOSection, VTOSectionHistory, VTOCoreValue, SectionKey
+from apps.vision.models import VTO, VTOSection, VTOSectionHistory, VTOCoreValue, SectionKey
 
 
 def make_org():
