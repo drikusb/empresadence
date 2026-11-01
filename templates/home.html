@@ -6,7 +6,7 @@
 <div class="row mb-4 align-items-center">
     <div class="col">
         <h1 class="h3 mb-0">
-            <i class="bi bi-diagram-3-fill me-2"></i>EOS Dashboard
+            <i class="bi bi-diagram-3-fill me-2"></i>Dashboard
         </h1>
         <p class="text-muted mt-1">Welcome back, {{ user.get_full_name|default:user.username }}{% if org %} · {{ org.name }}{% endif %}.</p>
     </div>
@@ -38,7 +38,7 @@
 {% endif %}
 
 <div class="row g-4">
-    <!-- Level 10 Meetings -->
+    <!-- Meetings -->
     <div class="col-md-6 col-xl-4">
         <div class="card h-100 border-0 shadow-sm">
             <div class="card-body">
@@ -123,7 +123,7 @@
                     </div>
                     <div>
                         <h5 class="card-title mb-0">{{ terms.issues }}</h5>
-                        <small class="text-muted">Identify, Discuss, Solve</small>
+                        <small class="text-muted">Problem, Solve, Resolve</small>
                     </div>
                 </div>
                 {% if open_issues is not None %}
@@ -177,7 +177,7 @@
                     </div>
                     <div>
                         <h5 class="card-title mb-0">{{ terms.vto }}</h5>
-                        <small class="text-muted">Vision/Traction Organizer</small>
+                        <small class="text-muted">Long-term vision and plan</small>
                     </div>
                 </div>
                 <p class="text-muted small mb-3">

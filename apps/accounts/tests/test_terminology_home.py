@@ -74,8 +74,8 @@ class HomeAndSearchTerminologyTest(TestCase):
     def test_dashboard_keeps_the_descriptive_subtitles(self):
         resp = self.client.get('/', HTTP_HOST=MERCURY)
         for text in [
-            'Quarterly priorities', 'Weekly 90-minute rhythm', 'Identify, Discuss, Solve',
-            'Weekly action items', 'Right people, right seats', 'Vision/Traction Organizer',
+            'Quarterly priorities', 'Weekly 90-minute rhythm', 'Problem, Solve, Resolve',
+            'Weekly action items', 'Right people, right seats', 'Long-term vision and plan',
         ]:
             with self.subTest(text=text):
                 self.assertContains(resp, text)
