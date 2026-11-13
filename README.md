@@ -1,9 +1,3 @@
-```diff
--###############################################################################################################
--## THIS PROJECT IS CURRENTLY ON HOLD UNTIL CHANGES TO CODE ARE IMPLEMENTED DUE TO TRADEMARK CONFLICTS        ##
--##                                     PLS CHECK BACK REAL SOON                                              ## 
--###############################################################################################################
-```
 # Empresadence
 
 An open-source, self-hosted platform for running your leadership team's operating rhythm — a weekly meeting, quarterly priorities, issue-solving, weekly action items, a metrics board, a long-term vision document, and a roles chart. Every module's vocabulary is configurable per organisation, so you're not locked into any one framework's words for them.
