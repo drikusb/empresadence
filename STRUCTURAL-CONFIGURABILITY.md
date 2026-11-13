@@ -15,29 +15,32 @@ The two have very different technical constraints, so this proposes different de
 
 ## The V/TO's section structure
 
-This one is close to a pure data problem. Every section already goes through identical, generic machinery: a `VTOSection` row with a `key` and free-text `content`, edited by one generic form (`VTOSectionForm`), with only a single-line/multi-line distinction (`SectionKey.SINGLE_LINE`) differentiating how any section renders. There's no per-section view logic. The only thing hardcoded is the *list itself*.
+**Correction (2026-11-13):** the first draft of this proposal claimed this was "close to a pure data problem — there's no per-section view logic; the only thing hardcoded is the list itself." That was wrong, and checking the templates before writing any code is what caught it. The *model and form* layer is indeed generic (a `VTOSection` row with a `key` and free-text `content`, edited by one generic `VTOSectionForm`). But **the two templates are entirely bespoke per section.** `vision_detail.html` (312 lines) and `vision_print.html` (249 lines) hardcode all 14 sections individually, and in particular they hardcode two things the first draft missed:
 
-**Proposal:**
+- **Sections are grouped into named cards**, not rendered as a flat list: "Core Focus" (purpose + niche), "10-Year Target", "Marketing Strategy" (target market, three uniques ×3, proven process, guarantee), "3-Year Picture", "1-Year Plan" (revenue + profit side by side, then goals) — spread across the two pages, with the page break driven by a `.page-traction` CSS class.
+- **Three different render styles** are baked into the markup, not the model: plain paragraph, single line (prominent, for the targets), and bulleted-list-via-`splitlines` (for the two "Goals" sections, which split their free text into `<li>` items).
 
-- A new org-scoped model, replacing `SectionKey` as the source of truth for an organisation's own structure:
+That grouping and page split *is* part of what the V/TO® template prescribes, so it has to become configurable too — it isn't incidental presentation. Which means the data model needs a **group** level and a **render style** per section, and both templates need rewriting to loop generically.
 
-  ```python
-  class VisionSectionDefinition(models.Model):
-      organization = models.ForeignKey(Organization, on_delete=models.CASCADE,
-                                         related_name='vision_section_definitions')
-      key = models.SlugField(max_length=40)
-      label = models.CharField(max_length=100)
-      order = models.PositiveSmallIntegerField()
-      single_line = models.BooleanField(default=False)
+**Revised proposal:** three small org-scoped models mirroring exactly what's on screen — a page has ordered groups, a group has ordered sections:
 
-      class Meta:
-          ordering = ['order']
-          unique_together = [['organization', 'key']]
-  ```
+```python
+class VisionPage(models.Model):          # "Vision", "Delivery"
+    organization, label, order
 
-- `SectionKey.CHOICES` stops being the *only* structure and becomes the *shipped default* — exactly the same pattern `Terms`/`DEFAULTS` already uses for wording. A helper, `sections_for(org)`, returns the org's own `VisionSectionDefinition` rows if it has any, or the default list otherwise. Every existing organisation keeps today's structure with zero migration, because they simply have no custom rows yet.
-- An org that wants to customize gets a "Customize sections" action (next to Organisation → Terminology) that clones the *current effective* list into editable rows for that org, then they rename, reorder, add, or remove sections from there — never starting from a blank slate.
-- `VTOSection.key` stops being constrained to `SectionKey.CHOICES` and instead validates against the org's own `sections_for(org)` — existing content keeps working unchanged since the keys themselves don't move.
+class VisionSectionGroup(models.Model):  # "Core Focus", "Marketing Strategy", ...
+    page (FK), label, order
+
+class VisionSectionDefinition(models.Model):
+    group (FK), key, label, order
+    render_as = ('text' | 'single_line' | 'list')
+```
+
+- Today's hardcoded layout becomes a code-level `DEFAULT_STRUCTURE` constant, and a `structure_for(org)` helper returns the org's own rows when it has any, or that default otherwise — **the same default-with-override pattern `Terms`/`DEFAULTS` already uses for wording.** No data migration, and no rows created for organisations that never customize. Both templates loop over whatever `structure_for()` returns, so they render identically either way.
+- `VTOSection.key` drops its `choices=SectionKey.CHOICES` constraint (an `AlterField` migration, no data change) so a custom section's key validates against the org's own structure instead. Existing content is untouched — the keys themselves don't move.
+- `SectionKey` survives as the default structure's key vocabulary and for the legacy `three_uniques` key that migration `0002` still depends on.
+
+**Scoped out of v1:** the bespoke org-facing editing UI. Registering these three models in the Django admin makes the structure editable immediately and for free, which is what actually resolves the trademark concern (the shape is no longer a code-level copy). A friendlier "Customize sections" screen alongside Organisation → Terminology is worth doing, but as a follow-up — it's UX polish on top of a resolved problem, and bundling it would make this PR much harder to review.
 
 ## The Level 10 Meeting's segment timings
 
@@ -62,17 +65,25 @@ This one is genuinely more constrained, and the proposal is scoped to that reali
 - **Durations become fully configurable**, same default-with-override pattern as above — trivial, since it's just numbers.
 - **Each built-in segment can be reordered or disabled.** An organisation that doesn't want a Headlines-style check-in just turns it off; the runner skips it.
 - **`custom_notes` is a genuinely new, generic segment type**: a plain free-text block with its own label and duration, reusing the existing `MeetingNote` mechanism (which already stores arbitrary per-segment notes) rather than inventing new storage. This is the one place an organisation gets to add something *beyond* the 7 built-ins — without the "live queue" richness those have, since that richness is inherently tied to real application data (Priorities, Issues, etc.) that a made-up segment type has no way to pull from.
-- `Meeting.current_segment` stays a plain integer index; it just indexes into `segments_for(org)` (DB-driven) instead of the global `SEGMENT_NAMES` list.
+**Correction (2026-11-13): positional segment indices are a data-integrity hazard here, and the first draft missed it.** That draft said "`Meeting.current_segment` stays a plain integer index; it just indexes into `segments_for(org)` instead of the global list." That is not safe. Both `Meeting.current_segment` *and* `MeetingNote.segment` are stored as bare `PositiveSmallIntegerField` positions into the global `SEGMENT_NAMES` list. The moment that list becomes per-organisation and *mutable*, every historical meeting's notes silently re-point to the wrong segment as soon as someone reorders or removes one — a completed meeting's PRS notes would start displaying under "Check-in", with no error and no way to tell from the data that it happened.
+
+So this piece additionally needs one of:
+
+- **an agenda snapshot per meeting** — copy the effective segment list onto the `Meeting` row when it is created, so a meeting always renders against the agenda it was actually run with (also the historically honest answer: the agenda *did* change afterwards); or
+- **an FK from `MeetingNote` to the segment definition** instead of a position, with definitions soft-deleted rather than removed.
+
+The snapshot is the better fit — it keeps completed meetings immutable and avoids soft-delete bookkeeping on definitions — but either way this is a migration with real data implications, which is why this piece is sequenced **after** the vision sections work rather than bundled with it.
 
 ## Explicitly out of scope for v1
 
-- No drag-and-drop UI — a simple ordered list with up/down controls, consistent with the rest of the admin UI's style.
+- No drag-and-drop UI, and for vision sections no bespoke org-facing editor at all in v1 — Django admin registration is enough to make the structure genuinely configurable, which is what resolves the trademark concern. A friendlier editing screen is a follow-up.
 - No way for an organisation to invent an entirely new segment *type* with its own bespoke logic — only the free-text `custom_notes` escape hatch above.
-- No change to the underlying print layout mechanics beyond what naturally follows from the section list no longer being fixed-length.
 
-## Open questions for @RCheesley
+## Decisions
 
-1. Is "custom segment = free text only" an acceptable scope for the meeting side, or is there a shape of "richer custom segment" worth designing for instead?
-2. For V/TO sections: when an organisation removes a section that already has content, should that be a hard delete or an archive (recoverable, in case of a change of mind)?
-3. Does this need its own generic-wording decision — e.g., what a "segment" or "section" is called generically — or is this purely structural, with no new vocabulary involved?
-4. Any objection to the "clone-then-edit" bootstrap UX for customizing either structure, versus starting from an empty list?
+These were originally open questions for @RCheesley. Her last activity on the repo was 2026-11-01 and this PR has had no comments, so rather than block the last item on the remediation list indefinitely, @drikusb and I settled them as follows. Happy to revisit any of them if she picks it back up.
+
+1. **Custom segments stay free-text-only.** The "live queue" richness of the seven built-ins is inherently tied to real application data (Priorities, Blockers, Actions) that an invented segment type has no way to pull from. Pretending otherwise would mean shipping a config option that can't deliver what its name implies.
+2. **Removing a vision section that has content archives it, rather than hard-deleting.** Structure editing is exactly the kind of thing someone does by trial and error, and silently destroying a 3-Year Picture someone spent an afternoon on is not a recoverable mistake. Archived content stays retrievable if the section comes back.
+3. **No new vocabulary needed.** "Page", "group", "section" and "segment" are ordinary English structural words — none appears on EOS Worldwide's mark list, and none needs a `Terms` entry. This item is purely structural.
+4. **Clone-then-edit for bootstrapping**, both structures. Customizing starts from a copy of the current effective layout, never a blank slate — nobody should have to rebuild a working vision document from nothing just to rename one card.
