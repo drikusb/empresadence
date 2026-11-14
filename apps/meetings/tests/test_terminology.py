@@ -8,9 +8,8 @@ from apps.accounts.models import Membership, Organization, OrganizationDomain, T
 from apps.accounts.terminology import Terms, get_terms
 from apps.issues.models import IssueActivity
 from apps.meetings.forms import CascadingMessagesForm, HeadlineForm, MeetingRatingForm
-from apps.meetings.models import (
-    SEGMENT_NAMES, Headline, Meeting, MeetingNote, MeetingRating, segment_names_for,
-)
+from apps.meetings.models import Headline, Meeting, MeetingNote, MeetingRating
+from apps.meetings.segments import resolve_agenda, segments_for
 from apps.meetings.views import _build_runner_context
 from apps.todos.models import ToDo
 
@@ -32,12 +31,20 @@ RENAMED_SEGMENTS = [
 ]
 
 
+def names_for(terms):
+    return [s['name'] for s in resolve_agenda(segments_for(None), terms)]
+
+
 class SegmentNamesTest(TestCase):
-    def test_defaults_match_the_segment_constant(self):
-        self.assertEqual(segment_names_for(Terms()), SEGMENT_NAMES)
+    def test_defaults_match_the_shipped_default_agenda(self):
+        self.assertEqual(
+            names_for(Terms()),
+            ['Check-in', 'Metrics Board Review', 'Priority Review', 'Updates',
+             'Action Review', 'PRS', 'Conclude'],
+        )
 
     def test_uses_the_organisations_words(self):
-        self.assertEqual(segment_names_for(Terms(RENAMED)), RENAMED_SEGMENTS)
+        self.assertEqual(names_for(Terms(RENAMED)), RENAMED_SEGMENTS)
 
 
 class HeadlineFormTest(TestCase):
@@ -300,7 +307,7 @@ class MeetingTerminologyTest(TestCase):
 
         resp = self.client.get(f'/meetings/{meeting.pk}/', HTTP_HOST=SILAVAPI)
         self.assertContains(resp, 'bi-play-fill me-1"></i>Start Weekly Meeting')
-        self.assertEqual(resp.context['segment_names'], SEGMENT_NAMES)
+        self.assertEqual(resp.context['segment_names'], names_for(Terms()))
         for name in ['Priority Review', 'Updates', 'Action Review']:
             with self.subTest(name=name):
                 self.assertContains(resp, name)
