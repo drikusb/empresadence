@@ -72,4 +72,4 @@ class VTOCompanyIssuesTest(TestCase):
         self.company_short_term.delete()
         self.client.force_login(self.user)
         resp = self.client.get('/vision/')
-        self.assertContains(resp, 'No company-wide long-term issues')
+        self.assertContains(resp, 'No company-wide long-term blockers')

@@ -9,11 +9,11 @@
     .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
     body { font-size: 10pt; }
     /* Keep each card whole. Applying this to the outer .row instead, which is
-       taller than a page, pushed the entire VTO off the title page. */
+       taller than a page, pushed the entire document off the title page. */
     .card { break-inside: avoid; page-break-inside: avoid; }
-    .page-traction { break-before: page; page-break-before: always; }
+    .page-break { break-before: page; page-break-before: always; }
     /* Browsers drop background colours when printing by default, which strips
-       the colour straight off the Rock and Issue status badges. Force it on. */
+       the colour straight off the Priority and Blocker status badges. Force it on. */
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
 </style>
@@ -37,15 +37,17 @@
     <div class="text-muted small">{{ terms.vto }}</div>
 </div>
 
+{# Same structure as the detail view (apps.vision.structure); every page after
+   the first starts on a fresh sheet. #}
 <div class="row g-3">
-
-{# ═══════════════ PAGE 1 — VISION ═══════════════ #}
-<div class="col-lg-6">
+{% for page in pages %}
+<div class="col-lg-6{% if not forloop.first %} page-break{% endif %}">
     <p class="text-uppercase fw-bold text-muted mb-2" style="font-size:.68rem;letter-spacing:.08em">
-        Page 1 — Vision
+        Page {{ forloop.counter }} — {{ page.label }}
     </p>
 
-    {# Core Values #}
+    {% if forloop.first %}
+    {# ── Core values (not a free-text section) ── #}
     <div class="card mb-2">
         <div class="card-header py-1 bg-light">
             <span class="fw-semibold small">{{ terms.core_values }}</span>
@@ -65,140 +67,35 @@
             {% endif %}
         </div>
     </div>
+    {% endif %}
 
-    {# Core Focus #}
+    {# ── The organisation's own cards and sections ── #}
+    {% for group in page.groups %}
     <div class="card mb-2">
         <div class="card-header py-1 bg-light">
-            <span class="fw-semibold small">Core Focus</span>
+            <span class="fw-semibold small">{{ group.label }}</span>
         </div>
         <div class="card-body py-2 small">
-            <div class="mb-1">
-                <div class="text-muted fw-semibold" style="font-size:.68rem">Purpose / Passion / Cause</div>
-                {% if sections.core_focus_purpose and sections.core_focus_purpose.content %}
-                    {{ sections.core_focus_purpose.content }}
-                {% else %}
-                    <span class="text-muted fst-italic">Not set.</span>
-                {% endif %}
+            {% for row in group.rows %}
+            {% if row|length > 1 %}
+            <div class="row g-2">
+                {% for entry in row %}
+                <div class="col-6">{% include "vision/_section_field_print.html" %}</div>
+                {% endfor %}
             </div>
-            <hr class="my-1">
-            <div>
-                <div class="text-muted fw-semibold" style="font-size:.68rem">Niche</div>
-                {% if sections.core_focus_niche and sections.core_focus_niche.content %}
-                    {{ sections.core_focus_niche.content }}
-                {% else %}
-                    <span class="text-muted fst-italic">Not set.</span>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    {# 10-Year Target #}
-    <div class="card mb-2">
-        <div class="card-header py-1 bg-light">
-            <span class="fw-semibold small">10-Year Target</span>
-        </div>
-        <div class="card-body py-2 small">
-            {% if sections.ten_year_target and sections.ten_year_target.content %}
-                <span class="fw-semibold">{{ sections.ten_year_target.content }}</span>
             {% else %}
-                <span class="text-muted fst-italic">Not set.</span>
+            {% for entry in row %}
+            <div>{% include "vision/_section_field_print.html" %}</div>
+            {% endfor %}
             {% endif %}
+            {% if not forloop.last %}<hr class="my-1">{% endif %}
+            {% endfor %}
         </div>
     </div>
+    {% endfor %}
 
-    {# Marketing Strategy #}
-    <div class="card mb-2">
-        <div class="card-header py-1 bg-light">
-            <span class="fw-semibold small">Marketing Strategy</span>
-        </div>
-        <div class="card-body py-2 small">
-            <div class="mb-1">
-                <div class="text-muted fw-semibold" style="font-size:.68rem">Target Market</div>
-                <div style="white-space:pre-line">{% if sections.target_market and sections.target_market.content %}{{ sections.target_market.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-            </div>
-            <hr class="my-1">
-            <div class="mb-1">
-                <div class="text-muted fw-semibold mb-1" style="font-size:.68rem">Three Uniques</div>
-                <div class="d-flex gap-1 mb-1">
-                    <span class="text-muted fw-semibold flex-shrink-0" style="min-width:4rem;font-size:.68rem">Unique 1.</span>
-                    <div style="white-space:pre-line">{% if sections.three_uniques_1 and sections.three_uniques_1.content %}{{ sections.three_uniques_1.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-                </div>
-                <div class="d-flex gap-1 mb-1">
-                    <span class="text-muted fw-semibold flex-shrink-0" style="min-width:4rem;font-size:.68rem">Unique 2.</span>
-                    <div style="white-space:pre-line">{% if sections.three_uniques_2 and sections.three_uniques_2.content %}{{ sections.three_uniques_2.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-                </div>
-                <div class="d-flex gap-1">
-                    <span class="text-muted fw-semibold flex-shrink-0" style="min-width:4rem;font-size:.68rem">Unique 3.</span>
-                    <div style="white-space:pre-line">{% if sections.three_uniques_3 and sections.three_uniques_3.content %}{{ sections.three_uniques_3.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-                </div>
-            </div>
-            <hr class="my-1">
-            <div class="mb-1">
-                <div class="text-muted fw-semibold" style="font-size:.68rem">Proven Process</div>
-                <div style="white-space:pre-line">{% if sections.proven_process and sections.proven_process.content %}{{ sections.proven_process.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-            </div>
-            <hr class="my-1">
-            <div>
-                <div class="text-muted fw-semibold" style="font-size:.68rem">Guarantee</div>
-                <div style="white-space:pre-line">{% if sections.guarantee and sections.guarantee.content %}{{ sections.guarantee.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-{# ═══════════════ PAGE 2 — TRACTION ═══════════════ #}
-<div class="col-lg-6 page-traction">
-    <p class="text-uppercase fw-bold text-muted mb-2" style="font-size:.68rem;letter-spacing:.08em">
-        Page 2 — Delivery
-    </p>
-
-    {# 3-Year Picture #}
-    <div class="card mb-2">
-        <div class="card-header py-1 bg-light">
-            <span class="fw-semibold small">3-Year Picture</span>
-        </div>
-        <div class="card-body py-2 small">
-            <div class="mb-1">
-                <div class="text-muted fw-semibold" style="font-size:.68rem">Description</div>
-                <div style="white-space:pre-line">{% if sections.three_year_picture and sections.three_year_picture.content %}{{ sections.three_year_picture.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-            </div>
-            <hr class="my-1">
-            <div class="text-muted fw-semibold mb-1" style="font-size:.68rem">Measurable Goals</div>
-            {% if sections.three_year_goals and sections.three_year_goals.content %}
-            <ul class="mb-0 ps-3">{% for line in sections.three_year_goals.content.splitlines %}{% if line.strip %}<li>{{ line }}</li>{% endif %}{% endfor %}</ul>
-            {% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}
-        </div>
-    </div>
-
-    {# 1-Year Plan #}
-    <div class="card mb-2">
-        <div class="card-header py-1 bg-light">
-            <span class="fw-semibold small">1-Year Plan</span>
-        </div>
-        <div class="card-body py-2 small">
-            <div class="row g-2 mb-2">
-                <div class="col-6">
-                    <div class="text-muted fw-semibold" style="font-size:.68rem">Revenue Target</div>
-                    {% if sections.one_year_revenue and sections.one_year_revenue.content %}
-                        <span class="fw-semibold">{{ sections.one_year_revenue.content }}</span>
-                    {% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}
-                </div>
-                <div class="col-6">
-                    <div class="text-muted fw-semibold" style="font-size:.68rem">Profit Target</div>
-                    {% if sections.one_year_profit and sections.one_year_profit.content %}
-                        <span class="fw-semibold">{{ sections.one_year_profit.content }}</span>
-                    {% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}
-                </div>
-            </div>
-            <hr class="my-1">
-            <div class="text-muted fw-semibold mb-1" style="font-size:.68rem">Critical Goals</div>
-            {% if sections.one_year_goals and sections.one_year_goals.content %}
-            <ul class="mb-0 ps-3">{% for line in sections.one_year_goals.content.splitlines %}{% if line.strip %}<li>{{ line }}</li>{% endif %}{% endfor %}</ul>
-            {% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}
-        </div>
-    </div>
-
-    {# Quarterly Rocks #}
+    {% if forloop.last %}
+    {# ── Company priorities, live from the Priorities module ── #}
     <div class="card mb-2">
         <div class="card-header py-1 bg-light">
             <span class="fw-semibold small">Company {{ terms.rocks }} — {{ rock_quarter }}</span>
@@ -220,7 +117,7 @@
         </div>
     </div>
 
-    {# Long-Term Issues #}
+    {# ── Company blockers list, live from the Blockers module ── #}
     <div class="card">
         <div class="card-header py-1 bg-light">
             <span class="fw-semibold small">Company {{ terms.issues }} List (Long-Term)</span>
@@ -239,11 +136,13 @@
                 {% endfor %}
             </ul>
             {% else %}
-            <span class="text-muted fst-italic">No company-wide long-term issues.</span>
+            <span class="text-muted fst-italic">No company-wide long-term {{ terms.issues|lower }}.</span>
             {% endif %}
         </div>
     </div>
+    {% endif %}
 
 </div>
+{% endfor %}
 </div><!-- /row -->
 {% endblock %}

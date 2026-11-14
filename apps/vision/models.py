@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -5,10 +6,20 @@ from django.utils import timezone
 
 from apps.accounts.models import Organization
 
+from . import structure
+
 
 # ── Section key constants ────────────────────────────────────────────────────
 
 class SectionKey:
+    """The keys the shipped default structure stores its content against.
+
+    These are identifiers, not a fixed list of what a vision document may
+    contain — an organisation's own structure can use any key it likes. The
+    labels, ordering, grouping and render style all live in
+    ``apps.vision.structure`` now.
+    """
+
     CORE_FOCUS_PURPOSE = 'core_focus_purpose'
     CORE_FOCUS_NICHE   = 'core_focus_niche'
     TEN_YEAR_TARGET    = 'ten_year_target'
@@ -24,34 +35,8 @@ class SectionKey:
     ONE_YEAR_PROFIT    = 'one_year_profit'
     ONE_YEAR_GOALS     = 'one_year_goals'
 
-    CHOICES = [
-        (CORE_FOCUS_PURPOSE, 'Core Focus — Purpose/Passion/Cause'),
-        (CORE_FOCUS_NICHE,   'Core Focus — Niche'),
-        (TEN_YEAR_TARGET,    '10-Year Target'),
-        (TARGET_MARKET,      'Marketing — Target Market'),
-        (THREE_UNIQUES_1,    'Marketing — Three Uniques — 1'),
-        (THREE_UNIQUES_2,    'Marketing — Three Uniques — 2'),
-        (THREE_UNIQUES_3,    'Marketing — Three Uniques — 3'),
-        (PROVEN_PROCESS,     'Marketing — Proven Process'),
-        (GUARANTEE,          'Marketing — Guarantee'),
-        (THREE_YEAR_PICTURE, '3-Year Picture'),
-        (THREE_YEAR_GOALS,   '3-Year Goals'),
-        (ONE_YEAR_REVENUE,   '1-Year Plan — Revenue Target'),
-        (ONE_YEAR_PROFIT,    '1-Year Plan — Profit Target'),
-        (ONE_YEAR_GOALS,     '1-Year Plan — Critical Goals'),
-    ]
-
     # Legacy key kept so existing DB rows and the data migration remain valid.
     THREE_UNIQUES = 'three_uniques'
-
-    ALL = [k for k, _ in CHOICES] + [THREE_UNIQUES]
-
-    LABELS = dict(CHOICES)
-    LABELS[THREE_UNIQUES] = 'Marketing — Three Uniques (legacy)'
-
-    # Which sections render as single-line vs. multi-line
-    SINGLE_LINE = {ONE_YEAR_REVENUE, ONE_YEAR_PROFIT, TEN_YEAR_TARGET,
-                   CORE_FOCUS_PURPOSE, CORE_FOCUS_NICHE}
 
 
 class VTO(models.Model):
@@ -97,7 +82,9 @@ class VTOCoreValue(models.Model):
 
 class VTOSection(models.Model):
     vto = models.ForeignKey(VTO, on_delete=models.CASCADE, related_name='sections')
-    key = models.CharField(max_length=40, choices=SectionKey.CHOICES)
+    # No choices: the valid keys are whatever the organisation's own structure
+    # defines (see apps.vision.structure), which the views validate against.
+    key = models.CharField(max_length=40)
     content = models.TextField(blank=True)
     last_edited_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True,
@@ -109,7 +96,10 @@ class VTOSection(models.Model):
         unique_together = [['vto', 'key']]
 
     def __str__(self):
-        return f'{self.vto} — {self.get_key_display()}'
+        # The key, not a label: the field has no choices any more (labels come
+        # from the organisation's own structure), and resolving one here would
+        # mean a query per row when the export walks every section.
+        return f'{self.vto} — {self.key}'
 
     def save_content(self, content, user):
         """Save content and snapshot history (keep last 5)."""
@@ -132,6 +122,100 @@ class VTOSection(models.Model):
         self.last_edited_by = user
         self.last_edited_at = timezone.now()
         self.save()
+
+
+class VisionPage(models.Model):
+    """One page of an organisation's vision document — a column on screen.
+
+    An organisation with no pages uses the shipped default structure (see
+    ``apps.vision.structure``); creating pages is what opts it into its own.
+    """
+
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name='vision_pages'
+    )
+    label = models.CharField(max_length=100)
+    icon = models.CharField(
+        max_length=40, blank=True,
+        help_text='Bootstrap icon name, e.g. bi-eye. Optional.',
+    )
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'pk']
+
+    def __str__(self):
+        return f'{self.organization.name} — {self.label}'
+
+
+class VisionSectionGroup(models.Model):
+    """One card on a page, grouping related sections."""
+
+    page = models.ForeignKey(VisionPage, on_delete=models.CASCADE, related_name='groups')
+    label = models.CharField(max_length=100)
+    hint = models.CharField(
+        max_length=200, blank=True,
+        help_text='Optional one-line hint shown under the card heading.',
+    )
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'pk']
+
+    def __str__(self):
+        return f'{self.page.label} — {self.label}'
+
+
+class VisionSectionDefinition(models.Model):
+    """One editable free-text section inside a group.
+
+    ``key`` is what ``VTOSection.content`` is stored against, so renaming a
+    section's label keeps its content and changing its key moves to a fresh,
+    empty one — the old content stays in the database, reachable again if the
+    key comes back.
+    """
+
+    group = models.ForeignKey(
+        VisionSectionGroup, on_delete=models.CASCADE, related_name='sections'
+    )
+    key = models.SlugField(max_length=40)
+    label = models.CharField(
+        max_length=100, blank=True,
+        help_text="Leave blank when the card's own heading is label enough.",
+    )
+    order = models.PositiveSmallIntegerField(default=0)
+    render_as = models.CharField(
+        max_length=20, choices=structure.RENDER_CHOICES, default=structure.RENDER_TEXT,
+    )
+    half_width = models.BooleanField(
+        default=False,
+        help_text='Show two of these side by side, as the revenue and profit targets are.',
+    )
+
+    class Meta:
+        ordering = ['order', 'pk']
+
+    def __str__(self):
+        return f'{self.group.label} — {self.label or self.key}'
+
+    def clean(self):
+        """No two sections in one organisation may share a key.
+
+        They are stored against the same ``VTOSection`` rows, so duplicates
+        would silently show and edit the same content in two places.
+        """
+        if not self.group_id or not self.key:
+            return
+        clash = (
+            VisionSectionDefinition.objects
+            .filter(group__page__organization_id=self.group.page.organization_id, key=self.key)
+            .exclude(pk=self.pk)
+            .exists()
+        )
+        if clash:
+            raise ValidationError(
+                {'key': f'Another section in this organisation already uses the key "{self.key}".'}
+            )
 
 
 class VTOSectionHistory(models.Model):
