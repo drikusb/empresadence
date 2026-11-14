@@ -44,7 +44,7 @@ class Scorecard(models.Model):
 
     @property
     def count_ok(self):
-        """EOS: 5-15 metrics."""
+        """Recommended range: 5-15 metrics."""
         n = self.metric_count
         return 5 <= n <= 15
 

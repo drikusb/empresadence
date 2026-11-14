@@ -253,7 +253,7 @@ class OrgSettingsView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
 
 
 class OrgTerminologyView(LoginRequiredMixin, AdminRequiredMixin, FormView):
-    """Rename the EOS building blocks for the active organisation."""
+    """Rename the building blocks for the active organisation."""
 
     form_class = TerminologyForm
     template_name = 'accounts/org_terminology.html'
