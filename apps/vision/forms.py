@@ -1,5 +1,5 @@
 from django import forms
-from .models import VTOCoreValue, SectionKey
+from .models import VTOCoreValue
 
 
 class VTOSectionForm(forms.Form):
@@ -8,12 +8,19 @@ class VTOSectionForm(forms.Form):
         widget=forms.Textarea(attrs={'rows': 6, 'class': 'form-control'}),
     )
 
-    def __init__(self, *args, key=None, **kwargs):
+    def __init__(self, *args, spec=None, **kwargs):
+        """``spec`` is the section's :class:`~apps.vision.structure.SectionSpec`.
+
+        It carries the label and whether this section takes a single line, both
+        of which come from the organisation's own structure rather than a fixed
+        list of sections.
+        """
         super().__init__(*args, **kwargs)
-        self.key = key
-        if key in SectionKey.SINGLE_LINE:
+        self.spec = spec
+        self.key = spec.key if spec else None
+        if spec and spec.is_single_line:
             self.fields['content'].widget = forms.TextInput(attrs={'class': 'form-control'})
-        self.fields['content'].label = SectionKey.LABELS.get(key, 'Content')
+        self.fields['content'].label = (spec.label or spec.key) if spec else 'Content'
 
 
 class VTOCoreValueForm(forms.ModelForm):

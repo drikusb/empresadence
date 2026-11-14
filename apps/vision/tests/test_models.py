@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from apps.accounts.models import Organization
 from apps.vision.models import VTO, VTOSection, VTOSectionHistory, VTOCoreValue, SectionKey
+from apps.vision.structure import section_specs_for
 
 
 def make_org():
@@ -9,18 +10,20 @@ def make_org():
 
 
 class SectionKeyTest(TestCase):
-    def test_all_keys_present(self):
-        self.assertIn(SectionKey.CORE_FOCUS_PURPOSE, SectionKey.ALL)
-        self.assertIn(SectionKey.ONE_YEAR_GOALS, SectionKey.ALL)
-        self.assertEqual(len(SectionKey.ALL), 15)
+    """The default structure must use the keys existing content is stored against.
 
-    def test_labels_match_all(self):
-        for key in SectionKey.ALL:
-            self.assertIn(key, SectionKey.LABELS)
+    Labels, grouping and render style moved to apps.vision.structure (and are
+    covered by test_structure.py); what has to stay stable here is the keys
+    themselves, because a key that stops being referenced takes its written
+    content off the page with it.
+    """
 
-    def test_single_line_subset(self):
-        for key in SectionKey.SINGLE_LINE:
-            self.assertIn(key, SectionKey.ALL)
+    def test_every_default_key_is_in_the_default_structure(self):
+        shipped = section_specs_for(None)
+        for name in dir(SectionKey):
+            if name.isupper() and name != 'THREE_UNIQUES':
+                with self.subTest(key=name):
+                    self.assertIn(getattr(SectionKey, name), shipped)
 
 
 class VTOForOrgTest(TestCase):

@@ -1,0 +1,26 @@
+{# One section of the vision document, on screen. Takes `entry` = {spec, section}. #}
+{% if entry.spec.label %}
+<div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">{{ entry.spec.label }}</div>
+{% endif %}
+<div class="d-flex gap-2">
+    <div class="flex-grow-1">
+        {% if entry.section.content %}
+            {% if entry.spec.is_list %}
+            <ul class="mb-0 ps-3 small">{% for line in entry.section.content.splitlines %}{% if line.strip %}<li>{{ line }}</li>{% endif %}{% endfor %}</ul>
+            {% elif entry.spec.is_single_line %}
+            <p class="small fw-semibold mb-0">{{ entry.section.content }}</p>
+            {% else %}
+            <div class="small" style="white-space:pre-line">{{ entry.section.content }}</div>
+            {% endif %}
+        {% else %}
+        <span class="text-muted fst-italic small">Not set.</span>
+        {% endif %}
+    </div>
+    <a href="{% url 'vision:section_edit' entry.spec.key %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
+</div>
+{% if entry.section.last_edited_by %}
+<div class="text-muted mt-1" style="font-size:.65rem">
+    Updated by {{ entry.section.last_edited_by.get_full_name|default:entry.section.last_edited_by.username }}
+    on {{ entry.section.last_edited_at|date:"N j" }}
+</div>
+{% endif %}
