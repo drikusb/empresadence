@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.utils import timezone
 from apps.accounts.models import Organization, Team
-from apps.meetings.models import Meeting, SegueEntry, Headline, MeetingRating, SEGMENT_NAMES
+from apps.meetings.models import Meeting, SegueEntry, Headline, MeetingRating
 
 
 def make_meeting(status=Meeting.STATUS_SCHEDULED):
@@ -53,21 +53,30 @@ class MeetingAdvanceTest(TestCase):
 
     def test_advance_does_not_exceed_last(self):
         m = make_meeting()
-        m.current_segment = len(SEGMENT_NAMES) - 1
+        m.current_segment = len(m.agenda) - 1
         m.save()
         m.advance()
-        self.assertEqual(m.current_segment, len(SEGMENT_NAMES) - 1)
+        self.assertEqual(m.current_segment, len(m.agenda) - 1)
 
     def test_is_last_segment(self):
         m = make_meeting()
         self.assertFalse(m.is_last_segment)
-        m.current_segment = len(SEGMENT_NAMES) - 1
+        m.current_segment = len(m.agenda) - 1
         self.assertTrue(m.is_last_segment)
 
     def test_segment_name_and_duration(self):
         m = make_meeting()
-        self.assertEqual(m.segment_name, SEGMENT_NAMES[0])
+        self.assertEqual(m.segment_name, 'Check-in')
         self.assertIsInstance(m.segment_duration, int)
+
+    def test_a_new_meeting_snapshots_the_shipped_default_agenda(self):
+        m = make_meeting()
+        self.assertEqual(
+            [s['segment_type'] for s in m.agenda],
+            ['check_in', 'metrics_review', 'priority_review', 'updates',
+             'action_review', 'ids', 'conclude'],
+        )
+        self.assertEqual(m.agenda[5]['duration_minutes'], 60)
 
 
 class MeetingRatingTest(TestCase):

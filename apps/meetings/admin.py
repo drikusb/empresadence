@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Meeting, MeetingNote, SegueEntry, Headline, MeetingRating
+from .models import Meeting, MeetingNote, MeetingSegmentDefinition, SegueEntry, Headline, MeetingRating
 
 
 class SegueInline(admin.TabularInline):
@@ -43,3 +43,15 @@ class HeadlineAdmin(admin.ModelAdmin):
 class MeetingRatingAdmin(admin.ModelAdmin):
     list_display = ['meeting', 'participant', 'score']
     list_filter = ['score']
+
+
+# ── Per-organisation agenda ───────────────────────────────────────────────────
+#
+# An organisation with no rows uses the shipped default agenda; adding rows
+# here is what opts it into its own. See apps/meetings/segments.py.
+
+@admin.register(MeetingSegmentDefinition)
+class MeetingSegmentDefinitionAdmin(admin.ModelAdmin):
+    list_display = ['organization', 'order', 'segment_type', 'label', 'duration_minutes', 'enabled']
+    list_filter = ['organization', 'enabled', 'segment_type']
+    search_fields = ['label']

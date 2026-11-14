@@ -4,10 +4,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from django.db.models import Q
 
-from .models import (
-    Meeting, MeetingNote, SegueEntry, Headline, MeetingRating,
-    SEGMENT_NAMES, SEGMENT_DURATIONS, SEGMENT_TEMPLATES, segment_names_for,
-)
+from .models import Meeting, MeetingNote, SegueEntry, Headline, MeetingRating
+from .segments import resolve_agenda
 from .forms import MeetingCreateForm, SegueEntryForm, HeadlineForm, MeetingRatingForm, CascadingMessagesForm
 from apps.accounts.scoping import get_active_org, get_active_team
 from apps.accounts.terminology import get_terms
@@ -27,7 +25,10 @@ def _build_runner_context(meeting, user, terms):
     ``terms`` is the organisation's vocabulary; segment names are shown in it.
     """
     team = meeting.team
-    segment_names = segment_names_for(terms)
+    resolved_segments = resolve_agenda(meeting.agenda, terms)
+    segment_names = [s['name'] for s in resolved_segments]
+    segment_durations = [s['duration_minutes'] for s in resolved_segments]
+    segment_templates = [s['template'] for s in resolved_segments]
 
     # Scorecards
     from apps.scorecards.models import Scorecard, ScorecardEntry, _current_week_start
@@ -106,7 +107,7 @@ def _build_runner_context(meeting, user, terms):
     all_notes = {n.segment: n for n in meeting.notes.select_related('updated_by').all()}
     current_note = all_notes.get(meeting.current_segment)
     segment_notes = [
-        all_notes[i] for i in range(len(SEGMENT_NAMES)) if i in all_notes
+        all_notes[i] for i in range(len(meeting.agenda)) if i in all_notes
     ]
     for note in segment_notes:
         note.segment_label = segment_names[note.segment]
@@ -117,10 +118,10 @@ def _build_runner_context(meeting, user, terms):
         'segment_idx': meeting.current_segment,
         'segment_name': segment_names[meeting.current_segment],
         'segment_names': segment_names,
-        'segment_duration': SEGMENT_DURATIONS[meeting.current_segment],
-        'segment_template': f"meetings/segments/{SEGMENT_TEMPLATES[meeting.current_segment]}",
+        'segment_duration': segment_durations[meeting.current_segment],
+        'segment_template': f"meetings/segments/{segment_templates[meeting.current_segment]}",
         'is_last_segment': meeting.is_last_segment,
-        'segments': list(enumerate(zip(segment_names, SEGMENT_DURATIONS))),
+        'segments': list(enumerate(zip(segment_names, segment_durations))),
         'current_note': current_note,
         'segment_notes': segment_notes,
         # Segment data
@@ -163,9 +164,8 @@ class MeetingListView(LoginRequiredMixin, View):
             .select_related('team')
             .order_by('-scheduled_date')
         )
-        segment_names = segment_names_for(terms)
         for meeting in meetings:
-            meeting.segment_label = segment_names[meeting.current_segment]
+            meeting.segment_label = resolve_agenda(meeting.agenda, terms)[meeting.current_segment]['name']
         return render(request, self.template_name, {'meetings': meetings, 'org': team.organization})
 
 
