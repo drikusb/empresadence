@@ -219,9 +219,9 @@ class ScopeMarkupTest(DashboardScopeTestBase):
         self.assertNotContains(resp, 'href="?scope=team"')
 
     def test_dashboard_heading_is_unchanged(self):
-        self.client.force_login(self.member)
         # The scope block must not disturb the heading above it. "EOS Dashboard"
         # when #95 wrote this; #102 dropped the trademarked word right after.
+        self.client.force_login(self.member)
         self.assertContains(self.get_home(), '</i>Dashboard')
 
 

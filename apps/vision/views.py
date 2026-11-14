@@ -4,8 +4,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 
-from .models import VTO, VTOCoreValue, VTOSection, VTOSectionHistory, SectionKey
+from .models import VTO, VTOCoreValue, VTOSection, VTOSectionHistory
 from .forms import VTOSectionForm, VTOCoreValueForm
+from .structure import section_specs_for, structure_for
 from apps.accounts.scoping import OrgScopedMixin, get_active_org
 from apps.accounts.terminology import get_terms
 from apps.rocks.models import Rock
@@ -42,14 +43,60 @@ def _long_term_issues(org):
     )
 
 
+def _side_by_side_rows(entries):
+    """Group consecutive half-width sections into rows, so they render side by side.
+
+    Everything else gets a row to itself. Doing it here keeps the templates to
+    a plain nested loop.
+    """
+    rows, pending = [], []
+    for entry in entries:
+        if entry['spec'].half_width:
+            pending.append(entry)
+            if len(pending) == 2:
+                rows.append(pending)
+                pending = []
+            continue
+        if pending:
+            rows.append(pending)
+            pending = []
+        rows.append([entry])
+    if pending:
+        rows.append(pending)
+    return rows
+
+
 def _build_context(vto, org):
-    """Build the full VTO context dict shared by detail and print views."""
-    sections = {s.key: s for s in vto.sections.select_related('last_edited_by')}
+    """Build the full vision-document context shared by the detail and print views.
+
+    ``pages`` is the organisation's own structure (or the shipped default) with
+    each section's stored content attached, so both templates render any
+    structure through the same markup.
+    """
+    stored = {s.key: s for s in vto.sections.select_related('last_edited_by')}
+    pages = [
+        {
+            'label': page.label,
+            'icon': page.icon,
+            'groups': [
+                {
+                    'label': group.label,
+                    'hint': group.hint,
+                    'rows': _side_by_side_rows([
+                        {'spec': spec, 'section': stored.get(spec.key)}
+                        for spec in group.sections
+                    ]),
+                }
+                for group in page.groups
+            ],
+        }
+        for page in structure_for(org)
+    ]
     return {
         'vto': vto,
         'core_values': vto.core_values.all(),
-        'sections': sections,
-        'section_keys': SectionKey,
+        'sections': stored,
+        'pages': pages,
         'rocks': _current_rocks(org),
         'long_term_issues': _long_term_issues(org),
         'rock_quarter': f'Q{Rock.current_quarter()} {Rock.current_year()}',
@@ -97,37 +144,41 @@ class VTOSectionEditView(LoginRequiredMixin, View):
         return section
 
     def get(self, request, key):
-        if key not in SectionKey.ALL:
+        org = get_active_org(request)
+        spec = section_specs_for(org).get(key)
+        if spec is None:
             messages.error(request, 'Unknown section.')
             return redirect('vision:detail')
         vto = _get_vto(request)
         if not vto:
             return redirect('accounts:org_setup')
         section = self._get_or_create_section(vto, key)
-        form = VTOSectionForm(initial={'content': section.content}, key=key)
+        form = VTOSectionForm(initial={'content': section.content}, spec=spec)
         history = section.history.select_related('edited_by')[:5]
         return render(request, self.template_name, {
             'vto': vto, 'section': section, 'form': form,
-            'key': key, 'label': SectionKey.LABELS.get(key, key),
+            'key': key, 'label': spec.edit_label,
             'history': history,
         })
 
     def post(self, request, key):
-        if key not in SectionKey.ALL:
+        org = get_active_org(request)
+        spec = section_specs_for(org).get(key)
+        if spec is None:
             return redirect('vision:detail')
         vto = _get_vto(request)
         if not vto:
             return redirect('accounts:org_setup')
         section = self._get_or_create_section(vto, key)
-        form = VTOSectionForm(request.POST, key=key)
+        form = VTOSectionForm(request.POST, spec=spec)
         if form.is_valid():
             section.save_content(form.cleaned_data['content'], request.user)
-            messages.success(request, f'"{SectionKey.LABELS.get(key)}" updated.')
+            messages.success(request, f'"{spec.edit_label}" updated.')
             return redirect('vision:detail')
         history = section.history.select_related('edited_by')[:5]
         return render(request, self.template_name, {
             'vto': vto, 'section': section, 'form': form,
-            'key': key, 'label': SectionKey.LABELS.get(key, key),
+            'key': key, 'label': spec.edit_label,
             'history': history,
         })
 

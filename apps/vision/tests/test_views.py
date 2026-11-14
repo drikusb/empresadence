@@ -34,8 +34,10 @@ class VTOPrintPageBreakTest(TestCase):
         self.assertContains(resp, '.card { break-inside: avoid; page-break-inside: avoid; }')
         self.assertNotContains(resp, '.row { page-break-inside: avoid; }')
 
-    def test_traction_starts_on_a_new_page(self):
+    def test_every_page_after_the_first_starts_on_a_new_sheet(self):
         self.client.force_login(self.user)
         resp = self.client.get('/vision/print/')
-        self.assertContains(resp, '.page-traction { break-before: page; page-break-before: always; }')
-        self.assertContains(resp, '<div class="col-lg-6 page-traction">')
+        self.assertContains(resp, '.page-break { break-before: page; page-break-before: always; }')
+        self.assertContains(resp, '<div class="col-lg-6 page-break">')
+        # The first page must not carry it, or it lands on its own blank sheet.
+        self.assertContains(resp, '<div class="col-lg-6">')

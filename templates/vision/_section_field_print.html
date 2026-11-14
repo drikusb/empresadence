@@ -1,0 +1,15 @@
+{# One section of the vision document, in the print view. Takes `entry` = {spec, section}. #}
+{% if entry.spec.label %}
+<div class="text-muted fw-semibold" style="font-size:.68rem">{{ entry.spec.label }}</div>
+{% endif %}
+{% if entry.section.content %}
+    {% if entry.spec.is_list %}
+    <ul class="mb-0 ps-3">{% for line in entry.section.content.splitlines %}{% if line.strip %}<li>{{ line }}</li>{% endif %}{% endfor %}</ul>
+    {% elif entry.spec.is_single_line %}
+    <span class="fw-semibold">{{ entry.section.content }}</span>
+    {% else %}
+    <div style="white-space:pre-line">{{ entry.section.content }}</div>
+    {% endif %}
+{% else %}
+<span class="text-muted fst-italic">Not set.</span>
+{% endif %}

@@ -12,15 +12,19 @@
     </a>
 </div>
 
+{# Pages, cards and sections all come from the organisation's own structure
+   (apps.vision.structure), so this markup renders any structure. The core
+   values card and the two live-data cards are fixed: they are not free-text
+   sections, and they pin to the first and last page respectively. #}
 <div class="row g-4">
-
-{# ═══════════════ PAGE 1 — VISION ═══════════════ #}
+{% for page in pages %}
 <div class="col-lg-6">
     <p class="text-uppercase fw-bold text-muted mb-3" style="font-size:.7rem;letter-spacing:.08em">
-        <i class="bi bi-eye me-1"></i>Page 1 — Vision
+        {% if page.icon %}<i class="bi {{ page.icon }} me-1"></i>{% endif %}Page {{ forloop.counter }} — {{ page.label }}
     </p>
 
-    {# Core Values #}
+    {% if forloop.first %}
+    {# ── Core values (not a free-text section) ── #}
     <div class="card border-0 shadow-sm mb-3">
         <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-2">
             <div>
@@ -52,202 +56,38 @@
             {% endif %}
         </div>
     </div>
+    {% endif %}
 
-    {# Core Focus #}
+    {# ── The organisation's own cards and sections ── #}
+    {% for group in page.groups %}
     <div class="card border-0 shadow-sm mb-3">
         <div class="card-header bg-transparent py-2">
-            <span class="fw-semibold small">Core Focus</span>
+            <span class="fw-semibold small">{{ group.label }}</span>
+            {% if group.hint %}
+            <div class="text-muted" style="font-size:.7rem">{{ group.hint }}</div>
+            {% endif %}
         </div>
         <div class="card-body py-2">
-            <div class="mb-3">
-                <div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Purpose / Passion / Cause</div>
-                <div class="d-flex gap-2">
-                    <div class="flex-grow-1 small">
-                        {% if sections.core_focus_purpose and sections.core_focus_purpose.content %}
-                            {{ sections.core_focus_purpose.content }}
-                        {% else %}
-                            <span class="text-muted fst-italic">Not set.</span>
-                        {% endif %}
-                    </div>
-                    <a href="{% url 'vision:section_edit' 'core_focus_purpose' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
-                </div>
-                {% if sections.core_focus_purpose.last_edited_by %}
-                <div class="text-muted mt-1" style="font-size:.65rem">
-                    Updated by {{ sections.core_focus_purpose.last_edited_by.get_full_name|default:sections.core_focus_purpose.last_edited_by.username }}
-                    on {{ sections.core_focus_purpose.last_edited_at|date:"N j" }}
-                </div>
-                {% endif %}
+            {% for row in group.rows %}
+            {% if row|length > 1 %}
+            <div class="row g-2">
+                {% for entry in row %}
+                <div class="col-6">{% include "vision/_section_field.html" %}</div>
+                {% endfor %}
             </div>
-            <hr class="my-2">
-            <div>
-                <div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Niche</div>
-                <div class="d-flex gap-2">
-                    <div class="flex-grow-1 small">
-                        {% if sections.core_focus_niche and sections.core_focus_niche.content %}
-                            {{ sections.core_focus_niche.content }}
-                        {% else %}
-                            <span class="text-muted fst-italic">Not set.</span>
-                        {% endif %}
-                    </div>
-                    <a href="{% url 'vision:section_edit' 'core_focus_niche' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {# 10-Year Target #}
-    <div class="card border-0 shadow-sm mb-3">
-        <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-2">
-            <div>
-                <span class="fw-semibold small">10-Year Target</span>
-                <div class="text-muted" style="font-size:.7rem">One big, audacious, measurable goal</div>
-            </div>
-            <a href="{% url 'vision:section_edit' 'ten_year_target' %}" class="btn btn-sm btn-outline-secondary border-0 py-0"><i class="bi bi-pencil"></i></a>
-        </div>
-        <div class="card-body py-3">
-            {% if sections.ten_year_target and sections.ten_year_target.content %}
-            <p class="fw-semibold mb-0">{{ sections.ten_year_target.content }}</p>
-            {% if sections.ten_year_target.last_edited_by %}
-            <div class="text-muted mt-1" style="font-size:.65rem">Updated by {{ sections.ten_year_target.last_edited_by.get_full_name|default:sections.ten_year_target.last_edited_by.username }} on {{ sections.ten_year_target.last_edited_at|date:"N j" }}</div>
-            {% endif %}
             {% else %}
-            <p class="text-muted fst-italic mb-0 small">Not set.</p>
+            {% for entry in row %}
+            <div>{% include "vision/_section_field.html" %}</div>
+            {% endfor %}
             {% endif %}
+            {% if not forloop.last %}<hr class="my-2">{% endif %}
+            {% endfor %}
         </div>
     </div>
+    {% endfor %}
 
-    {# Marketing Strategy #}
-    <div class="card border-0 shadow-sm mb-3">
-        <div class="card-header bg-transparent py-2">
-            <span class="fw-semibold small">Marketing Strategy</span>
-        </div>
-        <div class="card-body py-2">
-                {# Target Market #}
-            <div class="mb-2">
-                <div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Target Market</div>
-                <div class="d-flex gap-2">
-                    <div class="flex-grow-1 small" style="white-space:pre-line">{% if sections.target_market and sections.target_market.content %}{{ sections.target_market.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-                    <a href="{% url 'vision:section_edit' 'target_market' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
-                </div>
-            </div>
-            <hr class="my-1">
-            {# Three Uniques — three separate blocks #}
-            <div class="mb-2">
-                <div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Three Uniques</div>
-                <div class="ms-1">
-                    <div class="d-flex gap-2 mb-1">
-                        <div class="text-muted small fw-semibold flex-shrink-0" style="min-width:4.5rem">Unique 1.</div>
-                        <div class="flex-grow-1 small" style="white-space:pre-line">{% if sections.three_uniques_1 and sections.three_uniques_1.content %}{{ sections.three_uniques_1.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-                        <a href="{% url 'vision:section_edit' 'three_uniques_1' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
-                    </div>
-                    <div class="d-flex gap-2 mb-1">
-                        <div class="text-muted small fw-semibold flex-shrink-0" style="min-width:4.5rem">Unique 2.</div>
-                        <div class="flex-grow-1 small" style="white-space:pre-line">{% if sections.three_uniques_2 and sections.three_uniques_2.content %}{{ sections.three_uniques_2.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-                        <a href="{% url 'vision:section_edit' 'three_uniques_2' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <div class="text-muted small fw-semibold flex-shrink-0" style="min-width:4.5rem">Unique 3.</div>
-                        <div class="flex-grow-1 small" style="white-space:pre-line">{% if sections.three_uniques_3 and sections.three_uniques_3.content %}{{ sections.three_uniques_3.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-                        <a href="{% url 'vision:section_edit' 'three_uniques_3' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
-                    </div>
-                </div>
-            </div>
-            <hr class="my-1">
-            {# Proven Process #}
-            <div class="mb-2">
-                <div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Proven Process</div>
-                <div class="d-flex gap-2">
-                    <div class="flex-grow-1 small" style="white-space:pre-line">{% if sections.proven_process and sections.proven_process.content %}{{ sections.proven_process.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-                    <a href="{% url 'vision:section_edit' 'proven_process' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
-                </div>
-            </div>
-            <hr class="my-1">
-            {# Guarantee #}
-            <div>
-                <div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Guarantee</div>
-                <div class="d-flex gap-2">
-                    <div class="flex-grow-1 small" style="white-space:pre-line">{% if sections.guarantee and sections.guarantee.content %}{{ sections.guarantee.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}</div>
-                    <a href="{% url 'vision:section_edit' 'guarantee' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-{# ═══════════════ PAGE 2 — TRACTION ═══════════════ #}
-<div class="col-lg-6">
-    <p class="text-uppercase fw-bold text-muted mb-3" style="font-size:.7rem;letter-spacing:.08em">
-        <i class="bi bi-lightning me-1"></i>Page 2 — Delivery
-    </p>
-
-    {# 3-Year Picture #}
-    <div class="card border-0 shadow-sm mb-3">
-        <div class="card-header bg-transparent py-2">
-            <span class="fw-semibold small">3-Year Picture</span>
-            <div class="text-muted" style="font-size:.7rem">Vivid description + measurable goals</div>
-        </div>
-        <div class="card-body py-2">
-            <div class="mb-2">
-                <div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Description</div>
-                <div class="d-flex gap-2">
-                    <div class="flex-grow-1 small" style="white-space:pre-line">
-                        {% if sections.three_year_picture and sections.three_year_picture.content %}{{ sections.three_year_picture.content }}{% else %}<span class="text-muted fst-italic">Not set.</span>{% endif %}
-                    </div>
-                    <a href="{% url 'vision:section_edit' 'three_year_picture' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
-                </div>
-            </div>
-            <hr class="my-2">
-            <div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Measurable Goals (one per line)</div>
-            <div class="d-flex gap-2">
-                <div class="flex-grow-1">
-                    {% if sections.three_year_goals and sections.three_year_goals.content %}
-                    <ul class="mb-0 ps-3 small">{% for line in sections.three_year_goals.content.splitlines %}{% if line.strip %}<li>{{ line }}</li>{% endif %}{% endfor %}</ul>
-                    {% else %}<p class="text-muted small fst-italic mb-0">Not set.</p>{% endif %}
-                </div>
-                <a href="{% url 'vision:section_edit' 'three_year_goals' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
-            </div>
-        </div>
-    </div>
-
-    {# 1-Year Plan #}
-    <div class="card border-0 shadow-sm mb-3">
-        <div class="card-header bg-transparent py-2">
-            <span class="fw-semibold small">1-Year Plan</span>
-        </div>
-        <div class="card-body py-2">
-            <div class="row g-2 mb-2">
-                <div class="col-6">
-                    <div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Revenue Target</div>
-                    <div class="d-flex align-items-center gap-1">
-                        <span class="small fw-semibold flex-grow-1">{% if sections.one_year_revenue and sections.one_year_revenue.content %}{{ sections.one_year_revenue.content }}{% else %}<span class="text-muted fst-italic">Not set</span>{% endif %}</span>
-                        <a href="{% url 'vision:section_edit' 'one_year_revenue' %}" class="btn btn-sm btn-outline-secondary border-0 py-0"><i class="bi bi-pencil"></i></a>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Profit Target</div>
-                    <div class="d-flex align-items-center gap-1">
-                        <span class="small fw-semibold flex-grow-1">{% if sections.one_year_profit and sections.one_year_profit.content %}{{ sections.one_year_profit.content }}{% else %}<span class="text-muted fst-italic">Not set</span>{% endif %}</span>
-                        <a href="{% url 'vision:section_edit' 'one_year_profit' %}" class="btn btn-sm btn-outline-secondary border-0 py-0"><i class="bi bi-pencil"></i></a>
-                    </div>
-                </div>
-            </div>
-            <hr class="my-2">
-            <div class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">Critical Goals — 3–7 (one per line)</div>
-            <div class="d-flex gap-2">
-                <div class="flex-grow-1">
-                    {% if sections.one_year_goals and sections.one_year_goals.content %}
-                    <ul class="mb-0 ps-3 small">{% for line in sections.one_year_goals.content.splitlines %}{% if line.strip %}<li>{{ line }}</li>{% endif %}{% endfor %}</ul>
-                    {% else %}<p class="text-muted small fst-italic mb-0">Not set.</p>{% endif %}
-                </div>
-                <a href="{% url 'vision:section_edit' 'one_year_goals' %}" class="btn btn-sm btn-outline-secondary border-0 py-0 flex-shrink-0"><i class="bi bi-pencil"></i></a>
-            </div>
-            {% if sections.one_year_goals and sections.one_year_goals.last_edited_by %}
-            <div class="text-muted mt-2" style="font-size:.65rem">Updated by {{ sections.one_year_goals.last_edited_by.get_full_name|default:sections.one_year_goals.last_edited_by.username }} on {{ sections.one_year_goals.last_edited_at|date:"N j" }}</div>
-            {% endif %}
-        </div>
-    </div>
-
-    {# Quarterly Rocks (live) #}
+    {% if forloop.last %}
+    {# ── Company priorities, live from the Priorities module ── #}
     <div class="card border-0 shadow-sm mb-3">
         <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-2">
             <div>
@@ -275,7 +115,7 @@
         </div>
     </div>
 
-    {# Long-Term Issues (live) #}
+    {# ── Company blockers list, live from the Blockers module ── #}
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-2">
             <div>
@@ -302,11 +142,13 @@
                 {% endfor %}
             </ul>
             {% else %}
-            <p class="text-muted small fst-italic mb-0">No company-wide long-term issues. <a href="{% url 'issues:list' %}">Mark one as company-wide</a> from its edit screen.</p>
+            <p class="text-muted small fst-italic mb-0">No company-wide long-term {{ terms.issues|lower }}. <a href="{% url 'issues:list' %}">Mark one as company-wide</a> from its edit screen.</p>
             {% endif %}
         </div>
     </div>
+    {% endif %}
 
 </div>
+{% endfor %}
 </div><!-- /row -->
 {% endblock %}
