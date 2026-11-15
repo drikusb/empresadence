@@ -6,7 +6,7 @@ command and the importer all go through it. :func:`build_archive` turns that
 into the archive described in README.txt inside every export.
 
 What belongs to an organisation is discovered from the model registry rather
-than listed by hand, so a model added to one of the EOS apps is exported as
+than listed by hand, so a model added to one of the app modules is exported as
 soon as it exists. A model is organisation-scoped when it has a ForeignKey or
 OneToOneField to ``accounts.Organization`` or to another organisation-scoped
 model; :func:`organization_lookup` gives the ORM path that scopes it. The

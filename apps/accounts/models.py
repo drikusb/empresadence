@@ -43,7 +43,7 @@ class Organization(models.Model):
     support_email = models.EmailField(blank=True)
     terminology = models.JSONField(
         default=dict, blank=True,
-        help_text='Words this organisation uses instead of the EOS defaults, '
+        help_text='Words this organisation uses instead of the shipped defaults, '
                   'e.g. {"rock": "Priority", "rocks": "Priorities"}. Only overrides are stored.',
     )
     created_at = models.DateTimeField(auto_now_add=True)

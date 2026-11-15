@@ -20,7 +20,7 @@ INSTALLED_APPS = [
     'django_otp',
     'django_otp.plugins.otp_totp',
     'django_otp.plugins.otp_static',
-    # EOS modules — uncommented as each phase is built
+    # Feature modules — uncommented as each phase is built
     'apps.accounts',
     'apps.audit',
     'apps.rocks',
