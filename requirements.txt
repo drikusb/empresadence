@@ -8,4 +8,4 @@ Pillow==13.0.0
 python-decouple==3.8
 django-otp==1.7.5
 qrcode[pil]==8.2
-coverage==7.17.2
+coverage==7.17.3
