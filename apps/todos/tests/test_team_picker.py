@@ -142,7 +142,7 @@ class ToDoTeamPickerTest(TestCase):
         ))
         self.assertEqual(resp.status_code, 200)
         self.assertFormError(
-            resp.context['form'], 'linked_rock', 'The linked Rock must be on Beta.'
+            resp.context['form'], 'linked_rock', 'The linked Priority must be on Beta.'
         )
         todo.refresh_from_db()
         self.assertEqual(todo.team, self.alpha)
@@ -159,7 +159,7 @@ class ToDoTeamPickerTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertFormError(
             resp.context['form'], 'linked_issue',
-            'The linked Issue must have been raised by Beta.',
+            'The linked Blocker must have been raised by Beta.',
         )
         todo.refresh_from_db()
         self.assertEqual(todo.team, self.alpha)

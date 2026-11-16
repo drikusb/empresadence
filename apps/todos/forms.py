@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 
 from apps.accounts.models import Team
 from apps.accounts.scoping import TeamPickerMixin
+from apps.accounts.terminology import terms_for
 from apps.rocks.models import Rock
 from apps.issues.models import Issue
 from .models import ToDo
@@ -28,6 +29,7 @@ class ToDoForm(TeamPickerMixin, forms.ModelForm):
         # The submitted team when bound, so owner and links follow a change of team.
         team = self.init_team_picker(team, user)
         if team:
+            terms = terms_for(team.organization)
             self.fields['owner'].queryset = (
                 User.objects
                 .filter(profile__teams=team)
@@ -48,10 +50,10 @@ class ToDoForm(TeamPickerMixin, forms.ModelForm):
                 f'That person is not a member of {team.name}.'
             )
             self.fields['linked_rock'].error_messages['invalid_choice'] = (
-                f'The linked Rock must be on {team.name}.'
+                f'The linked {terms.rock} must be on {team.name}.'
             )
             self.fields['linked_issue'].error_messages['invalid_choice'] = (
-                f'The linked Issue must have been raised by {team.name}.'
+                f'The linked {terms.issue} must have been raised by {team.name}.'
             )
         else:
             self.fields['owner'].queryset = User.objects.none()

@@ -161,7 +161,7 @@ class RockTeamPickerTest(TestCase):
         ))
         self.assertEqual(resp.status_code, 200)
         self.assertFormError(
-            resp.context['form'], 'parent_rock', 'The parent Rock must be on Beta.'
+            resp.context['form'], 'parent_rock', 'The parent Priority must be on Beta.'
         )
         rock.refresh_from_db()
         self.assertEqual(rock.team, self.alpha)

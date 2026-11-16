@@ -146,7 +146,7 @@ class IssueTeamPickerTest(TestCase):
         ))
         self.assertEqual(resp.status_code, 200)
         self.assertFormError(
-            resp.context['form'], 'linked_rocks', 'Linked Rocks must be on Beta.'
+            resp.context['form'], 'linked_rocks', 'Linked Priorities must be on Beta.'
         )
         issue.refresh_from_db()
         self.assertEqual(issue.originating_team, self.alpha)

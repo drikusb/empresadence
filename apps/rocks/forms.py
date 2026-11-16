@@ -54,7 +54,7 @@ class RockForm(TeamPickerMixin, forms.ModelForm):
                 f'That person is not a member of {team.name}.'
             )
             self.fields['parent_rock'].error_messages['invalid_choice'] = (
-                f'The parent Rock must be on {team.name}.'
+                f'The parent {terms.rock} must be on {team.name}.'
             )
         else:
             self.fields['owner'].queryset = User.objects.none()

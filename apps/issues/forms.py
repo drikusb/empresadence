@@ -45,7 +45,7 @@ class IssueForm(TeamPickerMixin, forms.ModelForm):
                 .order_by('title')
             )
             self.fields['linked_rocks'].error_messages['invalid_choice'] = (
-                f'Linked Rocks must be on {team.name}.'
+                f'Linked {terms_for(team.organization).rocks} must be on {team.name}.'
             )
         else:
             self.fields['delegated_to_team'].queryset = Team.objects.none()
