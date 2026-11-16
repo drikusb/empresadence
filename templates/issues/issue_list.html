@@ -21,9 +21,10 @@
 {# ── Filters ── #}
 <div class="d-flex gap-2 mb-2 flex-wrap align-items-center">
 
-    {# Status tabs #}
+    {# Status tabs. The default tab covers every status still being worked on,
+       so it is not named after any one of them. #}
     <a href="?" class="btn btn-sm {% if not status_filter %}btn-dark{% else %}btn-outline-secondary{% endif %}">
-        Open
+        Active
     </a>
     {% for val, label in status_choices %}
     <a href="?status={{ val }}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if team_filter %}&team={{ team_filter }}{% endif %}"
