@@ -156,6 +156,9 @@
                             {% if rock.is_company_rock %}
                             <i class="bi bi-building text-muted ms-1" title="Company {{ terms.rock }}, shown on the {{ terms.vto }}"></i>
                             {% endif %}
+                            {% if rock.is_private %}
+                            <i class="bi bi-lock text-muted ms-1" title="Private {{ terms.rock }}"></i>
+                            {% endif %}
                             {% if rock.child_rocks.exists %}
                             <i class="bi bi-diagram-2 text-muted ms-1"
                                title="Has child {{ terms.rocks }}"></i>

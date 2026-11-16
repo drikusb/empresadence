@@ -25,6 +25,7 @@ def _current_rocks(org):
     return (
         Rock.objects
         .filter(team__organization=org, quarter=q, year=y, is_company_rock=True,
+                is_private=False,
                 status__in=[Rock.STATUS_ON_TRACK, Rock.STATUS_OFF_TRACK])
         .select_related('owner', 'team')
         .order_by('team__name', 'title')

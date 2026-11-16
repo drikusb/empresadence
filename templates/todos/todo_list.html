@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load rock_privacy %}
 {% block page_title %}{{ terms.todos }}{% endblock %}
 
 {% block content %}
@@ -99,7 +100,7 @@
                         {{ todo.title }}
                     </span>
                     <div class="d-flex gap-2 mt-1 flex-wrap align-items-center">
-                        {% if todo.linked_rock %}
+                        {% if todo.linked_rock|visible_to:user %}
                         <a href="{{ todo.linked_rock.get_absolute_url }}" class="badge bg-success text-decoration-none">
                             <i class="bi bi-gem me-1"></i>{{ todo.linked_rock.title|truncatechars:30 }}
                         </a>
