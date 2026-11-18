@@ -237,7 +237,7 @@ class MeetingTerminologyTest(TestCase):
         self.assertContains(resp, 'Update added.')
         self.assertEqual(self.meeting.headlines.count(), 1)
 
-    def test_escalating_a_headline_renames_the_message_but_not_the_stored_note(self):
+    def test_escalating_a_headline_uses_the_organisations_words_in_the_message_and_the_note(self):
         self.start_at_segment(self.meeting, 3)
         headline = Headline.objects.create(
             meeting=self.meeting, author=self.user, headline_type=Headline.TYPE_BAD, text='Server down',
@@ -248,7 +248,8 @@ class MeetingTerminologyTest(TestCase):
         )
         self.assertContains(resp, 'Update escalated to Blockers.')
         activity = IssueActivity.objects.get()
-        self.assertIn('Escalated from Level 10 Meeting headline', activity.notes)
+        self.assertIn('Escalated from Weekly Meeting update on', activity.notes)
+        self.assertNotIn('Level 10', activity.notes)
 
     def test_segue_message_uses_the_organisations_word(self):
         self.meeting.start()
