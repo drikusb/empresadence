@@ -95,3 +95,14 @@ def send_user_invite_email(user, organization, reset_url):
         'organization': organization,
         'reset_url': reset_url,
     }, organization=organization)
+
+
+def send_organization_invitation_email(invitation, accept_url):
+    """Transactional — always sent, not gated by NotificationPreference."""
+    organization = invitation.organization
+    subject = f"You've been invited to {organization.get_display_name()}"
+    return _send(invitation.user, subject, 'notifications/email/organization_invitation.txt', {
+        'organization': organization,
+        'invitation': invitation,
+        'accept_url': accept_url,
+    }, organization=organization)

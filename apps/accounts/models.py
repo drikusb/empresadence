@@ -1,3 +1,4 @@
+from datetime import timedelta
 from urllib.parse import urlsplit
 
 from django.conf import settings
@@ -7,6 +8,8 @@ from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.crypto import constant_time_compare, salted_hmac
 from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -181,6 +184,97 @@ class Membership(models.Model):
 
     def is_admin(self):
         return self.role == self.ROLE_ADMIN
+
+
+class OrganizationInvitation(models.Model):
+    """An invitation for someone who already has an account to join an organisation.
+
+    Membership starts only when the invited person accepts, so an admin cannot
+    attach somebody's account to their organisation without that person agreeing.
+    """
+
+    TOKEN_SALT = 'accounts.organization_invitation'
+
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name='invitations'
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='organization_invitations'
+    )
+    role = models.CharField(
+        max_length=20, choices=Membership.ROLE_CHOICES, default=Membership.ROLE_MEMBER
+    )
+    teams = models.ManyToManyField(Team, blank=True, related_name='invitations')
+    invited_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    accepted_at = models.DateTimeField(null=True, blank=True)
+    declined_at = models.DateTimeField(null=True, blank=True)
+    withdrawn_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['organization', 'user'],
+                condition=Q(accepted_at=None, declined_at=None, withdrawn_at=None),
+                name='one_open_invitation_per_user_and_org',
+            ),
+        ]
+        verbose_name = 'Organisation invitation'
+        verbose_name_plural = 'Organisation invitations'
+
+    def __str__(self):
+        return f'{self.user} — {self.organization}'
+
+    def save(self, *args, **kwargs):
+        if self.expires_at is None:
+            self.expires_at = self.new_expiry()
+        super().save(*args, **kwargs)
+
+    @staticmethod
+    def new_expiry():
+        return timezone.now() + timedelta(days=settings.INVITATION_EXPIRY_DAYS)
+
+    @classmethod
+    def open_q(cls):
+        """Invitations nobody has answered or withdrawn, expired or not."""
+        return Q(accepted_at=None, declined_at=None, withdrawn_at=None)
+
+    @property
+    def is_open(self):
+        return not (self.accepted_at or self.declined_at or self.withdrawn_at)
+
+    @property
+    def is_expired(self):
+        return self.expires_at <= timezone.now()
+
+    @property
+    def can_be_answered(self):
+        return self.is_open and not self.is_expired
+
+    @property
+    def token(self):
+        """Ties the link to this invitation and this account; unguessable from the id."""
+        return salted_hmac(self.TOKEN_SALT, f'{self.pk}:{self.user_id}').hexdigest()[:32]
+
+    def check_token(self, token):
+        return constant_time_compare(self.token, token or '')
+
+    def get_absolute_url(self):
+        return reverse('accounts:invitation_respond', kwargs={'pk': self.pk, 'token': self.token})
+
+    def accept(self):
+        """Create the membership and add the teams. Returns the membership."""
+        membership, _ = Membership.objects.get_or_create(
+            user=self.user, organization=self.organization, defaults={'role': self.role},
+        )
+        self.user.profile.teams.add(*self.teams.filter(organization=self.organization))
+        self.accepted_at = timezone.now()
+        self.save(update_fields=['accepted_at'])
+        return membership
 
 
 class UserProfile(models.Model):
