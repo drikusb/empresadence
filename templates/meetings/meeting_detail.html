@@ -181,6 +181,8 @@
         {# Timer #}
         <div class="timer-box p-3 mb-3" id="meeting-timer"
              data-duration-minutes="{{ segment_duration }}"
+             data-segment-started="{{ meeting.segment_started_at|date:'c' }}"
+             data-timer-key="{{ meeting.pk }}:{{ segment_idx }}"
              data-meeting-started="{{ meeting.started_at|date:'c' }}">
             <div class="small text-white-50 mb-1">{{ segment_name }}</div>
             <div id="timer-segment-remaining" class="fw-bold text-success" style="font-size:1.8rem;">{{ segment_duration }}:00</div>
