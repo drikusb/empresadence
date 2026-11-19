@@ -37,8 +37,10 @@
     <div class="text-muted small">{{ terms.vto }}</div>
 </div>
 
-{# Same structure as the detail view (apps.vision.structure); every page after
-   the first starts on a fresh sheet. #}
+{% comment %}
+   Same structure as the detail view (apps.vision.structure); every page after
+   the first starts on a fresh sheet.
+{% endcomment %}
 <div class="row g-3">
 {% for page in pages %}
 <div class="col-lg-6{% if not forloop.first %} page-break{% endif %}">
