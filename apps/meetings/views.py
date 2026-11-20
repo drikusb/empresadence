@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import View, ListView
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 
 from .models import Meeting, MeetingNote, SegueEntry, Headline, MeetingRating
@@ -166,6 +167,7 @@ class MeetingListView(LoginRequiredMixin, View):
         )
         for meeting in meetings:
             meeting.segment_label = resolve_agenda(meeting.agenda, terms)[meeting.current_segment]['name']
+            meeting.can_change = meeting.can_be_changed_by(request.user)
         return render(request, self.template_name, {'meetings': meetings, 'org': team.organization})
 
 
@@ -193,6 +195,71 @@ class MeetingCreateView(LoginRequiredMixin, View):
         return render(request, self.template_name, {'form': form})
 
 
+def _get_changeable_meeting(request, pk):
+    """The scheduled meeting ``pk`` in the active organisation, if the user may change it.
+
+    Returns ``(meeting, None)``, or ``(None, response)`` when the meeting has
+    already started and the user should be sent back to it.
+    """
+    org = _get_org(request)
+    if not org:
+        return None, redirect('accounts:org_setup')
+    meeting = get_object_or_404(Meeting.objects.select_related('team'), pk=pk, team__organization=org)
+    if not meeting.is_scheduled:
+        word = get_terms(request).get('meeting', lower=True)
+        messages.warning(request, f'This {word} has already started, so it can no longer be changed.')
+        return None, redirect('meetings:detail', pk=pk)
+    if not meeting.can_be_changed_by(request.user):
+        raise PermissionDenied
+    return meeting, None
+
+
+class MeetingUpdateView(LoginRequiredMixin, View):
+    """Change the team or date of a meeting that has not started."""
+    template_name = 'meetings/meeting_form.html'
+
+    def get(self, request, pk):
+        meeting, response = _get_changeable_meeting(request, pk)
+        if response:
+            return response
+        form = MeetingCreateForm(instance=meeting, org=meeting.team.organization)
+        return render(request, self.template_name, {'form': form, 'meeting': meeting})
+
+    def post(self, request, pk):
+        meeting, response = _get_changeable_meeting(request, pk)
+        if response:
+            return response
+        form = MeetingCreateForm(request.POST, instance=meeting, org=meeting.team.organization)
+        if form.is_valid():
+            meeting = form.save()
+            messages.success(request, f'{get_terms(request).meeting} updated: {meeting.team.name}, {meeting.scheduled_date}.')
+            return redirect('meetings:list')
+        # A failed form leaves the rejected values on form.instance; reload so
+        # the heading and Cancel link still describe the saved meeting.
+        meeting = Meeting.objects.select_related('team').get(pk=pk)
+        return render(request, self.template_name, {'form': form, 'meeting': meeting})
+
+
+class MeetingDeleteView(LoginRequiredMixin, View):
+    """Delete a meeting that has not started."""
+    template_name = 'meetings/meeting_confirm_delete.html'
+
+    def get(self, request, pk):
+        meeting, response = _get_changeable_meeting(request, pk)
+        if response:
+            return response
+        return render(request, self.template_name, {'meeting': meeting})
+
+    def post(self, request, pk):
+        meeting, response = _get_changeable_meeting(request, pk)
+        if response:
+            return response
+        label = f'{meeting.team.name}, {meeting.scheduled_date}'
+        meeting.delete()
+        messages.success(request, f'{get_terms(request).meeting} deleted ({label}).')
+        return redirect('meetings:list')
+
+
 # ---------------------------------------------------------------------------
 # Meeting runner
 # ---------------------------------------------------------------------------
@@ -212,6 +279,7 @@ class MeetingDetailView(LoginRequiredMixin, View):
         if not org:
             return redirect('accounts:org_setup')
         ctx = _build_runner_context(meeting, request.user, get_terms(request))
+        ctx['can_change'] = meeting.can_be_changed_by(request.user)
         return render(request, self.template_name, ctx)
 
 

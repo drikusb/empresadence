@@ -81,6 +81,8 @@ def pk_urls(f):
         f'/teams/{f["team"].pk}/edit/',
         f'/meetings/{f["meeting"].pk}/',
         f'/meetings/{f["meeting"].pk}/print/',
+        f'/meetings/{f["meeting"].pk}/edit/',
+        f'/meetings/{f["meeting"].pk}/delete/',
         f'/accountability/nodes/{f["node"].pk}/edit/',
         f'/accountability/nodes/{f["node"].pk}/delete/',
         f'/accountability/nodes/{f["node"].pk}/roles/add/',
@@ -109,6 +111,8 @@ def pk_urls(f):
         (f'/teams/{f["team"].pk}/members/', {'users': [f['user'].pk]}),
         (f'/teams/{f["team"].pk}/switch/', {}),
         (f'/meetings/{f["meeting"].pk}/start/', {}),
+        (f'/meetings/{f["meeting"].pk}/edit/', {}),
+        (f'/meetings/{f["meeting"].pk}/delete/', {}),
         (f'/accountability/nodes/{f["node"].pk}/move/', {'direction': 'up'}),
     ]
     return gets, posts
