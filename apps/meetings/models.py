@@ -122,6 +122,19 @@ class Meeting(models.Model):
     def is_complete(self):
         return self.status == self.STATUS_COMPLETE
 
+    def can_be_changed_by(self, user):
+        """Whether ``user`` may reschedule or delete this meeting.
+
+        Only a meeting that has not started can be changed, and only by the
+        person who scheduled it, a member of its team or an organisation admin.
+        """
+        from apps.accounts.scoping import is_org_admin
+        if not self.is_scheduled:
+            return False
+        if user == self.created_by or is_org_admin(user, self.team.organization):
+            return True
+        return self.team.members.filter(user=user).exists()
+
     def start(self):
         self.status = self.STATUS_ACTIVE
         self.started_at = timezone.now()
