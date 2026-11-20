@@ -20,7 +20,7 @@
             <div class="card-body p-0">
                 <form method="post" novalidate>
                     {% csrf_token %}
-                    <table class="table table-hover mb-0 align-middle">
+                    <table class="table table-hover mb-0 align-middle table-stack-md">
                         <thead class="table-light">
                             <tr>
                                 <th>Metric</th>
@@ -38,8 +38,8 @@
                                     <div class="fw-semibold small">{{ row.metric.name }}</div>
                                     <div class="text-muted" style="font-size:.7rem">{{ row.metric.get_metric_type_display }}</div>
                                 </td>
-                                <td class="text-center text-muted small">{{ row.metric.format_goal }}</td>
-                                <td class="text-center">
+                                <td class="text-center text-muted small stack-inline" data-label="Goal">{{ row.metric.format_goal }}</td>
+                                <td class="text-center stack-inline" data-label="Owner">
                                     {% if row.metric.owner.profile.avatar %}
                                     <img src="{{ row.metric.owner.profile.avatar.url }}" class="rounded-circle" width="22" height="22"
                                          title="{{ row.metric.owner.get_full_name|default:row.metric.owner.username }}" alt="">
@@ -47,9 +47,13 @@
                                     <i class="bi bi-person-circle text-muted"
                                        title="{{ row.metric.owner.get_full_name|default:row.metric.owner.username }}"></i>
                                     {% endif %}
+                                    {# A phone shows no tooltip, so the stacked layout prints the name. #}
+                                    <span class="d-md-none text-muted small">{{ row.metric.owner.get_full_name|default:row.metric.owner.username }}</span>
                                 </td>
                                 <td>
+                                    <label for="id_value_{{ row.metric.pk }}" class="form-label small text-muted mb-1 d-md-none">Value</label>
                                     <input type="number" step="any"
+                                           id="id_value_{{ row.metric.pk }}"
                                            name="value_{{ row.metric.pk }}"
                                            value="{{ row.value_str }}"
                                            class="form-control form-control-sm {% if row.error %}is-invalid{% endif %}"
@@ -57,12 +61,14 @@
                                     {% if row.error %}<div class="invalid-feedback">{{ row.error }}</div>{% endif %}
                                 </td>
                                 <td>
+                                    <label for="id_notes_{{ row.metric.pk }}" class="form-label small text-muted mb-1 d-md-none">Note</label>
                                     <input type="text" name="notes_{{ row.metric.pk }}"
+                                           id="id_notes_{{ row.metric.pk }}"
                                            value="{{ row.entry.notes|default:'' }}"
                                            class="form-control form-control-sm"
                                            placeholder="Optional">
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center" data-label="Current">
                                     {% if row.entry %}
                                     <span class="badge {% if row.entry.on_track %}bg-success{% else %}bg-danger{% endif %}">
                                         {% if row.metric.metric_type == 'integer' %}{{ row.entry.value|floatformat:"0g" }}
