@@ -21,8 +21,10 @@
 {# ── Filters ── #}
 <div class="d-flex gap-2 mb-2 flex-wrap align-items-center">
 
-    {# Status tabs. The default tab covers every status still being worked on,
-       so it is not named after any one of them. #}
+    {% comment %}
+    Status tabs. The default tab covers every status still being worked on,
+    so it is not named after any one of them.
+    {% endcomment %}
     <a href="?" class="btn btn-sm {% if not status_filter %}btn-dark{% else %}btn-outline-secondary{% endif %}">
         Active
     </a>
