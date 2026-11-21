@@ -10,6 +10,19 @@ from apps.accounts.models import Team
 CHECKIN_OVERDUE_DAYS = 7
 
 
+class RockQuerySet(models.QuerySet):
+    def visible_to(self, user):
+        """Rocks ``user`` may see: every Rock that is not private, and the private
+        ones they own, created or have been added to.
+
+        Organisation admins are not included: a private Rock is for the people on
+        it, and the Django admin stays the audit path. Use this on every surface a
+        Rock appears, so a private Rock never shows up, or gets counted, anywhere
+        else.
+        """
+        return self.filter(Rock.visible_q(user))
+
+
 class Rock(models.Model):
     STATUS_ON_TRACK = 'on_track'
     STATUS_OFF_TRACK = 'off_track'
@@ -42,6 +55,14 @@ class Rock(models.Model):
         default=False,
         help_text='Company-wide Rocks appear on the VTO. Other Rocks stay on their team\'s own list.',
     )
+    is_private = models.BooleanField(
+        default=False,
+        help_text='Private Rocks are seen only by their owner, their creator and the people they are shared with.',
+    )
+    shared_with = models.ManyToManyField(
+        User, blank=True, related_name='shared_rocks',
+        help_text='Who else may see this Rock while it is private.',
+    )
     quarter = models.PositiveSmallIntegerField(choices=QUARTER_CHOICES)
     year = models.PositiveSmallIntegerField()
     due_date = models.DateField()
@@ -64,6 +85,8 @@ class Rock(models.Model):
         related_name='created_rocks',
     )
 
+    objects = RockQuerySet.as_manager()
+
     class Meta:
         ordering = ['team__name', 'owner__first_name', 'owner__username', 'title']
         verbose_name = 'Rock'
@@ -74,6 +97,33 @@ class Rock(models.Model):
 
     def get_absolute_url(self):
         return reverse('rocks:detail', kwargs={'pk': self.pk})
+
+    # --- Visibility ---
+
+    @staticmethod
+    def visible_q(user, prefix=''):
+        """The filter behind ``visible_to``; ``prefix`` reaches a Rock through a
+        relation, e.g. ``'rock__'`` from a milestone."""
+        public = models.Q(**{f'{prefix}is_private': False})
+        if not getattr(user, 'is_authenticated', False):
+            return public
+        shared = Rock.shared_with.through.objects.filter(user=user).values('rock_id')
+        return (
+            public
+            | models.Q(**{f'{prefix}owner': user})
+            | models.Q(**{f'{prefix}created_by': user})
+            | models.Q(**{f'{prefix}pk__in': shared})
+        )
+
+    def is_visible_to(self, user):
+        if not self.is_private:
+            return True
+        if not getattr(user, 'is_authenticated', False):
+            return False
+        return (
+            user.pk in (self.owner_id, self.created_by_id)
+            or self.shared_with.filter(pk=user.pk).exists()
+        )
 
     # --- Status helpers ---
 

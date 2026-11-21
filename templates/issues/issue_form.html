@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load rock_privacy %}
 {% block page_title %}{{ action }} {{ terms.issue }}{% endblock %}
 
 {% block content %}
@@ -124,14 +125,11 @@
                             <select name="{{ form.originating_team.html_name }}"
                                     id="{{ form.originating_team.id_for_label }}"
                                     class="form-select {% if form.originating_team.errors %}is-invalid{% endif %}">
-                                <option value="">— Select team —</option>
                                 {% for val, label in form.originating_team.field.choices %}
-                                {% if val %}
                                 <option value="{{ val }}" {% if form.originating_team.value|stringformat:"s" == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
-                                {% endif %}
                                 {% endfor %}
                             </select>
-                            <div class="form-text">The team that raised this {{ terms.issue|lower }}. Cannot be changed later.</div>
+                            <div class="form-text">The team that raised this {{ terms.issue|lower }}.</div>
                             {% for error in form.originating_team.errors %}
                             <div class="invalid-feedback">{{ error }}</div>
                             {% endfor %}
@@ -169,8 +167,12 @@
                                        id="rock_{{ rock.pk }}" value="{{ rock.pk }}"
                                        {% if rock.pk in form.linked_rocks.value %}checked{% endif %}>
                                 <label class="form-check-label small" for="rock_{{ rock.pk }}">
+                                    {% if rock|visible_to:user %}
                                     <span class="badge bg-{{ rock.status_badge_class }} me-1">{{ rock.get_status_display }}</span>
                                     {{ rock.title }}
+                                    {% else %}
+                                    <i class="bi bi-lock me-1"></i>A private {{ terms.rock }}
+                                    {% endif %}
                                     <span class="text-muted">— {{ rock.team.name }}</span>
                                 </label>
                             </div>

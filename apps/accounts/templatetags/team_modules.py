@@ -12,11 +12,14 @@ from apps.scorecards.models import ScorecardMetric
 register = template.Library()
 
 
-def module_tiles(team):
-    """Counts for the team's Rocks, Issues, Scorecard metrics and Meetings."""
+def module_tiles(team, user=None):
+    """Counts for the team's Rocks, Issues, Scorecard metrics and Meetings.
+
+    The Rocks count leaves out private Rocks ``user`` is not on.
+    """
     quarter, year = Rock.current_quarter(), Rock.current_year()
     open_rocks = (
-        Rock.objects.filter(team=team, quarter=quarter, year=year)
+        Rock.objects.visible_to(user).filter(team=team, quarter=quarter, year=year)
         .exclude(status__in=[Rock.STATUS_COMPLETE, Rock.STATUS_DROPPED])
         .count()
     )
@@ -52,7 +55,7 @@ def team_modules(context, team):
     is_member = user.is_authenticated and team.members.filter(user=user).exists()
     return {
         'team': team,
-        'tiles': module_tiles(team),
+        'tiles': module_tiles(team, user),
         'is_member': is_member,
         'csrf_token': context.get('csrf_token'),
     }

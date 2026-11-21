@@ -50,7 +50,7 @@ def _build_runner_context(meeting, user, terms):
     from apps.rocks.models import Rock
     q, y = Rock.current_quarter(), Rock.current_year()
     rocks = list(
-        Rock.objects
+        Rock.objects.visible_to(user)
         .filter(team=team, quarter=q, year=y,
                 status__in=[Rock.STATUS_ON_TRACK, Rock.STATUS_OFF_TRACK])
         .select_related('owner')

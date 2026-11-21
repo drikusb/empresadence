@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load rock_privacy %}
 {% block page_title %}Delete {{ terms.todo }}{% endblock %}
 
 {% block content %}
@@ -13,7 +14,7 @@
                 <p class="text-muted mb-1">You're about to permanently delete:</p>
                 <p class="fw-semibold mb-3">{{ object.title }}</p>
 
-                {% if object.linked_rock %}
+                {% if object.linked_rock|visible_to:user %}
                 <div class="alert alert-warning text-start small">
                     <i class="bi bi-gem me-1 text-success"></i>
                     This {{ terms.todo }} is linked to {{ terms.rock }} <strong>{{ object.linked_rock.title }}</strong>.
