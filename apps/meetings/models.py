@@ -66,6 +66,10 @@ class Meeting(models.Model):
     started_at = models.DateTimeField(null=True, blank=True)
     ended_at = models.DateTimeField(null=True, blank=True)
     current_segment = models.PositiveSmallIntegerField(default=0)
+    # When the current segment began, so its countdown survives a page reload
+    # (every action in the runner reloads the page). Empty for meetings that
+    # were already running before this field existed.
+    segment_started_at = models.DateTimeField(null=True, blank=True)
     # The organisation's agenda at the moment this meeting was created — see
     # apps.meetings.segments. Frozen here, not read live from the
     # organisation's current MeetingSegmentDefinition rows, so reordering or
@@ -125,12 +129,14 @@ class Meeting(models.Model):
     def start(self):
         self.status = self.STATUS_ACTIVE
         self.started_at = timezone.now()
-        self.save(update_fields=['status', 'started_at'])
+        self.segment_started_at = self.started_at
+        self.save(update_fields=['status', 'started_at', 'segment_started_at'])
 
     def advance(self):
         if self.current_segment < len(self.agenda) - 1:
             self.current_segment += 1
-            self.save(update_fields=['current_segment'])
+            self.segment_started_at = timezone.now()
+            self.save(update_fields=['current_segment', 'segment_started_at'])
 
     def complete(self, cascading_messages=''):
         self.status = self.STATUS_COMPLETE

@@ -1,7 +1,13 @@
 /**
  * Level 10 Meeting Timer
  * Segment countdown + total elapsed time.
- * Reads data-duration-minutes and data-meeting-started (ISO string) from #meeting-timer.
+ * Reads data-duration-minutes, data-segment-started and data-meeting-started
+ * (ISO strings) from #meeting-timer.
+ *
+ * The countdown runs from when the segment started on the server, so it carries
+ * on across the page reloads that every action in the runner causes. Pause and
+ * Reset belong to this browser tab and are remembered in sessionStorage for the
+ * segment they were pressed in.
  */
 (function () {
     'use strict';
@@ -14,12 +20,33 @@
         ? new Date(el.dataset.meetingStarted)
         : null;
 
+    const segmentStarted = el.dataset.segmentStarted
+        ? new Date(el.dataset.segmentStarted).getTime()
+        : NaN;
+
     const segmentMs = durationMinutes * 60 * 1000;
-    let anchorTime = Date.now();
+    // Meetings started before segment start times were recorded have none;
+    // they count from page load, as every meeting used to.
+    let anchorTime = Number.isNaN(segmentStarted) ? Date.now() : segmentStarted;
     let pausedOffset = 0;
     let paused = false;
     let pausedAt = null;
     let alerted = false;
+
+    const storageKey = 'meeting-timer:' + el.dataset.timerKey + ':' + (el.dataset.segmentStarted || '');
+
+    function remember() {
+        try {
+            sessionStorage.setItem(storageKey, JSON.stringify({ anchorTime, pausedOffset, paused, pausedAt }));
+        } catch (e) { /* storage unavailable: the timer still works for this page view */ }
+    }
+
+    try {
+        const saved = JSON.parse(sessionStorage.getItem(storageKey) || 'null');
+        if (saved) {
+            ({ anchorTime, pausedOffset, paused, pausedAt } = saved);
+        }
+    } catch (e) { /* ignore unreadable state */ }
 
     const segRemEl = document.getElementById('timer-segment-remaining');
     const totalElEl = document.getElementById('timer-total-elapsed');
@@ -38,6 +65,7 @@
             this.textContent = 'Resume';
             this.className = 'btn btn-sm btn-warning';
         }
+        remember();
     });
 
     document.getElementById('timer-btn-reset')?.addEventListener('click', function () {
@@ -48,7 +76,13 @@
         if (alertEl) alertEl.classList.add('d-none');
         const pauseBtn = document.getElementById('timer-btn-pause');
         if (pauseBtn) { pauseBtn.textContent = 'Pause'; pauseBtn.className = 'btn btn-sm btn-outline-secondary'; }
+        remember();
     });
+
+    if (paused) {
+        const pauseBtn = document.getElementById('timer-btn-pause');
+        if (pauseBtn) { pauseBtn.textContent = 'Resume'; pauseBtn.className = 'btn btn-sm btn-warning'; }
+    }
 
     function fmt(ms) {
         const totalSec = Math.max(0, Math.floor(ms / 1000));
