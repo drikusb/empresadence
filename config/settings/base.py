@@ -149,6 +149,9 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='Empresadence <noreply
 # Base URL used to build absolute links in emails (no trailing slash).
 SITE_URL = config('SITE_URL', default='http://localhost:8000')
 
+# Days an invitation to join an organisation stays open before it must be re-sent.
+INVITATION_EXPIRY_DAYS = config('INVITATION_EXPIRY_DAYS', default=14, cast=int)
+
 # Name shown in the navbar, page titles and emails when no organisation
 # branding applies (the main host's login page, for instance).
 DEFAULT_BRAND_NAME = config('BRAND_NAME', default='Empresadence')

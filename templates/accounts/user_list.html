@@ -78,4 +78,58 @@
         {% endif %}
     </div>
 </div>
+
+{% if invitations %}
+<h2 class="h5 mt-5 mb-3">Pending invitations</h2>
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Teams</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invitation in invitations %}
+                    <tr>
+                        {# Only the address the admin typed: no name or picture until the person accepts. #}
+                        <td>{{ invitation.user.email }}</td>
+                        <td><span class="badge bg-light text-dark border">{{ invitation.get_role_display }}</span></td>
+                        <td>
+                            {% for team in invitation.teams.all %}
+                            <span class="badge bg-light text-dark border me-1">{{ team.name }}</span>
+                            {% empty %}
+                            <span class="text-muted small">No teams</span>
+                            {% endfor %}
+                        </td>
+                        <td class="small">
+                            {% if invitation.is_expired %}
+                            <span class="text-danger">Expired {{ invitation.expires_at|date:"j M Y" }}</span>
+                            {% else %}
+                            <span class="text-muted">Open until {{ invitation.expires_at|date:"j M Y" }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end text-nowrap">
+                            <form method="post" action="{% url 'accounts:invitation_resend' invitation.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">Resend</button>
+                            </form>
+                            <form method="post" action="{% url 'accounts:invitation_withdraw' invitation.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Withdraw</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

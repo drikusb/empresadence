@@ -48,9 +48,10 @@ PORTABLE_APPS = (
 )
 
 # Models of the portable apps that are deliberately not exported, as
-# ``app_label.model_name``. Empty today; the test against the app registry
-# fails for any model that is neither collected nor listed here.
-EXCLUDED_MODELS = frozenset()
+# ``app_label.model_name``. The test against the app registry fails for any
+# model that is neither collected nor listed here. Invitations are left out
+# because their links are tied to this instance's secret key and accounts.
+EXCLUDED_MODELS = frozenset({'accounts.organizationinvitation'})
 
 # Models that belong to a user rather than to an organisation. They are
 # exported for the users the archive carries, not by a path to the

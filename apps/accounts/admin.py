@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import Membership, Organization, OrganizationDomain, Team, UserProfile
+from .models import (
+    Membership, Organization, OrganizationDomain, OrganizationInvitation, Team, UserProfile,
+)
 
 
 class MembershipInline(admin.TabularInline):
@@ -46,6 +48,16 @@ class MembershipAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'user__email', 'organization__name']
     raw_id_fields = ['user']
     readonly_fields = ['created_at', 'updated_at']
+
+
+@admin.register(OrganizationInvitation)
+class OrganizationInvitationAdmin(admin.ModelAdmin):
+    list_display = ['user', 'organization', 'role', 'invited_by', 'created_at', 'expires_at', 'accepted_at']
+    list_filter = ['organization', 'role']
+    search_fields = ['user__username', 'user__email', 'organization__name']
+    raw_id_fields = ['user', 'invited_by']
+    filter_horizontal = ['teams']
+    readonly_fields = ['created_at']
 
 
 @admin.register(UserProfile)

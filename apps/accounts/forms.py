@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Membership, Organization, Team, UserProfile
+from .models import Membership, Organization, OrganizationInvitation, Team, UserProfile
 from .terminology import PLURAL_KEYS, TERMS, Terms
 
 
@@ -175,16 +175,49 @@ class InviteUserForm(forms.Form):
 
     def __init__(self, *args, organization=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.organization = organization
+        # Set by clean() when the email belongs to an account that already
+        # exists: that person is invited instead of a new account being created.
+        self.existing_user = None
         teams = Team.objects.none()
         if organization:
             teams = Team.objects.filter(organization=organization)
         self.fields['teams'].queryset = teams
 
-    def clean_username(self):
-        username = self.cleaned_data['username']
-        if User.objects.filter(username=username).exists():
-            raise forms.ValidationError('A user with that username already exists.')
-        return username
+    def clean(self):
+        cleaned = super().clean()
+        username = cleaned.get('username')
+        email = cleaned.get('email')
+        if not username or not email:
+            return cleaned
+
+        named = User.objects.filter(username=username).first()
+        same_email = User.objects.filter(email__iexact=email, is_active=True)
+        if named is not None:
+            # The username decides, as long as the email agrees with it.
+            if not named.is_active or named.email.lower() != email.lower():
+                self.add_error('username', 'A user with that username already exists.')
+                return cleaned
+            self.existing_user = named
+        else:
+            matches = list(same_email[:2])
+            if len(matches) > 1:
+                self.add_error(
+                    'email',
+                    'More than one account uses this email address. '
+                    'Enter the username of the person you want to invite.',
+                )
+                return cleaned
+            if matches:
+                self.existing_user = matches[0]
+
+        if self.existing_user is not None and self.organization is not None:
+            if Membership.objects.filter(
+                user=self.existing_user, organization=self.organization
+            ).exists():
+                self.existing_user = None
+                self.add_error('email', f'This person is already in {self.organization.name}.')
+        return cleaned
 
 
 class TeamMemberForm(forms.Form):
