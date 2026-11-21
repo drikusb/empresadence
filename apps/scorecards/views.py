@@ -225,6 +225,10 @@ class ScorecardDetailView(LoginRequiredMixin, OrgScopedMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         sc = self.object
         periods, table = _build_scorecard_table(sc)
+        # Pair each cell with its period, so the body rows can mark the
+        # current week's column the way the header does.
+        for row in table:
+            row['period_cells'] = list(zip(periods, row['cells']))
 
         ctx['periods'] = periods
         ctx['table'] = table
