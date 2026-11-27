@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 
 from apps.accounts.models import Team
+from apps.accounts.terminology import terms_for
 
 
 class Issue(models.Model):
@@ -19,7 +20,7 @@ class Issue(models.Model):
     STATUS_DROPPED = 'dropped'
     STATUS_CHOICES = [
         (STATUS_OPEN, 'Open'),
-        (STATUS_IN_IDS, 'In IDS'),
+        (STATUS_IN_IDS, 'In Review'),
         (STATUS_RESOLVED, 'Resolved'),
         (STATUS_DROPPED, 'Dropped'),
     ]
@@ -39,7 +40,7 @@ class Issue(models.Model):
     )
     is_company_issue = models.BooleanField(
         default=False,
-        help_text='Company-wide long-term Issues appear on the VTO. Other Issues stay on their team\'s own list.',
+        help_text='Company-wide long-term Issues appear on the vision document. Other Issues stay on their team\'s own list.',
     )
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default=STATUS_OPEN
@@ -68,6 +69,12 @@ class Issue(models.Model):
 
     def get_absolute_url(self):
         return reverse('issues:detail', kwargs={'pk': self.pk})
+
+    def get_status_display(self):
+        """The badge text for ``status``, with ``in_ids`` taking the organisation's own word."""
+        if self.status == self.STATUS_IN_IDS:
+            return f'In {terms_for(self.originating_team.organization).ids}'
+        return dict(self.STATUS_CHOICES).get(self.status, self.status)
 
     # ── State helpers ────────────────────────────────────────────────────────
 

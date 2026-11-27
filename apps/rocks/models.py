@@ -40,7 +40,7 @@ class Rock(models.Model):
     )
     is_company_rock = models.BooleanField(
         default=False,
-        help_text='Company-wide Rocks appear on the VTO. Other Rocks stay on their team\'s own list.',
+        help_text='Company-wide Rocks appear on the vision document. Other Rocks stay on their team\'s own list.',
     )
     quarter = models.PositiveSmallIntegerField(choices=QUARTER_CHOICES)
     year = models.PositiveSmallIntegerField()

@@ -64,6 +64,23 @@ A pass through every file in the repo against [the live US trademark list](https
 - ~~**`docker-compose.yml`, `.github/workflows/ci.yml`, `.env.example`**~~ — **done, #98 (merged).** Default DB name/user/password renamed from the `eos_` prefix to `epd_`; `config/settings/base.py`'s own fallback defaults and the README's env var table, found while fixing it, were also still on `eos_`.
 - ~~**Internal docstrings, code comments, and one admin-visible `help_text`**~~ — **done, #108 (merged).** A final full-repo grep (not just templates and user-facing strings) turned up five more literal "EOS" spots missed by every earlier sweep: `Organization.terminology`'s `help_text`, `OrgTerminologyView`'s docstring, `apps/accounts/portability/export.py`'s module docstring, `Scorecard.count_ok`'s docstring, and a comment in `config/settings/base.py`. All reworded to generic phrasing.
 
+### 7. Issue #134 — a fresh sweep against the live trademark list found more leftovers
+Opened by @RCheesley on 2026-11-27, a read of `main` against [the current list](https://branding.eosworldwide.com/us-trademarks/) found terms the #100/#102/#108 sweeps didn't reach, because #106's structural-configurability work made the VTO/meeting structure *overridable* without changing what actually ships as the default. Four reached people using the app; the rest reached only the site administration or the page source.
+
+| Term | Where | Fix |
+|---|---|---|
+| IDS® | `Issue.STATUS_IN_IDS`'s choice label, "In IDS" | Static label → "In Review"; the badge and CSV export now show the organisation's own `terms.ids` word instead (default "PRS"), via an override of `get_status_display()` |
+| Core Focus™, 10-Year Target™, 3-Year Picture™ | `templates/home.html`'s vision card description | Reworded to "Purpose and Niche, Long-Range Target, ..., Mid-Range Picture, ..." |
+| Core Focus™, 10-Year Target™, 3-Year Picture™ | `apps/vision/structure.py`'s shipped `DEFAULT_STRUCTURE` group labels | Labels (not the stored `key`s) renamed to "Purpose and Niche" / "Long-Range Target" / "Mid-Range Picture" |
+| The Accountability Chart® | `apps/accountability/apps.py`'s `verbose_name` (shown in `/admin/`) | → "Org Chart" |
+| V/TO® | `help_text` in `apps/rocks/models.py` and `apps/issues/models.py`; an HTML comment and a `{% comment %}` block in `templates/home.html` and `templates/issues/issue_form.html` (the latter not flagged by #134 itself, found while fixing the rest) | → "the vision document" / "Vision" |
+| IDS® | A `{# #}` template comment in `templates/meetings/segments/ids.html` | Comment reworded to drop the acronym |
+| (not a mark, stale vocabulary) | `apps/rocks/apps.py`, `apps/todos/apps.py`, `apps/scorecards/apps.py` verbose_names; `team_modules.py`'s tile labels; `team_list.html`'s empty-state copy | All now read from `terms`/generic wording instead of the hardcoded EOS-era English words |
+
+Also added: `apps/accounts/tests/test_trademark_sweep.py`, a standing test that scans every template and the `help_text=`/`verbose_name=`/`label=`/choices-tuple surfaces of `apps/` (outside migrations and tests) for the marks above, plus the bare ®/™ symbols, so a later PR can't reintroduce one unnoticed. "Level 10 Meeting" is deliberately left off its term list until #121 lands — it already has unresolved instances tracked separately, below.
+
+**Status: fixed on `close-out-trademark-remediation`, not yet merged.**
+
 ## The project's new name — agreed and executed at the repo level
 
 **Empresadence** ("EPD" for short) — agreed between @drikusb and @RCheesley in #58's discussion. The GitHub repo itself has been renamed (now `drikusb/empresadence`), and the leftover "OpenEOS" references in code and docs were swept in #83.
@@ -96,7 +113,7 @@ Quick collision checks run so far (not a substitute for a real trademark search)
 6. ~~Sweep README, CONTRIBUTING, repo description and GitHub topics~~ — **done, #100 (merged) plus the repo description, updated directly, plus #102 (merged) for a handful more literals found during unrelated PR review, plus #108 (merged) for the last of the internal docstrings/comments.** GitHub topics are still empty; adding some is purely additive (not a trademark fix), so left for whenever, not tracked here as a blocker.
 7. ~~Fix the README's broken diff-block rendering and take the "on hold" banner down~~ — **done**, removed directly on `main` on 2026-11-01.
 
-**Everything is closed. Items 1 through 7 are all fully merged or otherwise done** — there is nothing left outstanding against EOS Worldwide's [#17](https://github.com/drikusb/empresadence/issues/17) request. The one loose end is the `deleted_at`-bin follow-up noted under item 4 above, which is a product-quality gap against our own design doc, not a trademark-remediation gap.
+Items 1 through 7 are fully merged or otherwise done. **One item reopened this closed list: issue #134** (2026-11-27) found leftovers from a fresh sweep against the live trademark list — see item 7 under Status above. Fixed on `close-out-trademark-remediation`; not yet merged. The `deleted_at`-bin follow-up noted under item 4 above remains a product-quality gap against our own design doc, not a trademark-remediation gap. There is still a separate, already-open PR (#121) for the "Level 10 Meeting" instances #134 deliberately left out of scope.
 
 ## Open questions
 
