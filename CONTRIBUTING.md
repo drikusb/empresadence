@@ -126,7 +126,7 @@ Common prefixes:
 apps/
   accounts/       # Organisations, memberships, teams, user profiles
   rocks/          # Quarterly priorities (Rocks), milestones
-  issues/         # Blockers with PRS workflow and delegation
+  issues/         # Blockers with PSR workflow and delegation
   todos/          # Weekly Actions (To-Dos)
   scorecards/     # Weekly metrics and 13-week history
   vision/         # Vision and Delivery Board (8 sections)

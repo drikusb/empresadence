@@ -27,7 +27,7 @@ RENAMED = {
     'rock': 'Objective', 'rocks': 'Objectives',
 }
 RENAMED_SEGMENTS = [
-    'Check-in', 'Metrics Board Review', 'Objective Review', 'Updates', 'Action Review', 'PRS', 'Conclude',
+    'Check-in', 'Metrics Board Review', 'Objective Review', 'Updates', 'Action Review', 'PSR', 'Conclude',
 ]
 
 
@@ -40,7 +40,7 @@ class SegmentNamesTest(TestCase):
         self.assertEqual(
             names_for(Terms()),
             ['Check-in', 'Metrics Board Review', 'Priority Review', 'Updates',
-             'Action Review', 'PRS', 'Conclude'],
+             'Action Review', 'PSR', 'Conclude'],
         )
 
     def test_uses_the_organisations_words(self):

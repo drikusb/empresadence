@@ -35,7 +35,7 @@ SEGMENT_TYPE_CHOICES = [
     (PRIORITY_REVIEW, 'Priority Review'),
     (UPDATES, 'Updates'),
     (ACTION_REVIEW, 'Action Review'),
-    (IDS, 'PRS'),
+    (IDS, 'PSR'),
     (CUSTOM_NOTES, 'Custom (free text)'),
 ]
 
