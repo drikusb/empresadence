@@ -12,10 +12,12 @@
     </a>
 </div>
 
-{# Pages, cards and sections all come from the organisation's own structure
+{% comment %}
+   Pages, cards and sections all come from the organisation's own structure
    (apps.vision.structure), so this markup renders any structure. The core
    values card and the two live-data cards are fixed: they are not free-text
-   sections, and they pin to the first and last page respectively. #}
+   sections, and they pin to the first and last page respectively.
+{% endcomment %}
 <div class="row g-4">
 {% for page in pages %}
 <div class="col-lg-6">
