@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 from apps.accounts.terminology import terms_for
 from .models import Rock, RockDependency
@@ -26,6 +27,8 @@ class RockForm(TeamPickerMixin, forms.ModelForm):
             'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'parent_rock': forms.Select(attrs={'class': 'form-select'}),
             'is_company_rock': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'is_private': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'shared_with': forms.SelectMultiple(attrs={'class': 'form-select', 'size': 6}),
         }
 
     def __init__(self, *args, team=None, user=None, **kwargs):
@@ -47,8 +50,11 @@ class RockForm(TeamPickerMixin, forms.ModelForm):
             self.fields['owner'].queryset = User.objects.filter(
                 profile__teams=team
             ).distinct().order_by('first_name', 'username')
-            self.fields['parent_rock'].queryset = Rock.objects.filter(
-                team=team
+            # The current parent stays a choice even when it is a private Rock
+            # this user is not on, so saving the form does not unlink it.
+            current_parent = Q(pk=self.instance.parent_rock_id) if self.instance.parent_rock_id else Q(pk__in=[])
+            self.fields['parent_rock'].queryset = Rock.objects.filter(team=team).filter(
+                Rock.visible_q(user) | current_parent
             ).order_by('-year', '-quarter', 'title')
             self.fields['owner'].error_messages['invalid_choice'] = (
                 f'That person is not a member of {team.name}.'
@@ -59,6 +65,8 @@ class RockForm(TeamPickerMixin, forms.ModelForm):
         else:
             self.fields['owner'].queryset = User.objects.none()
             self.fields['parent_rock'].queryset = Rock.objects.none()
+            self.fields['shared_with'].queryset = User.objects.none()
+        self.fields['shared_with'].required = False
         self.fields['title'].widget.attrs['placeholder'] = f'What is this {terms.rock}? Keep it concise.'
         self.fields['parent_rock'].required = False
         self.fields['parent_rock'].empty_label = f'— None (top-level {terms.rock}) —'
@@ -85,6 +93,12 @@ class RockForm(TeamPickerMixin, forms.ModelForm):
         is_company_rock = cleaned_data.get(
             'is_company_rock', getattr(self.instance, 'is_company_rock', False)
         )
+        if is_company_rock and cleaned_data.get('is_private'):
+            self.add_error(
+                'is_private',
+                f'A company-wide {self.terms.rock} is shown to the whole organisation, '
+                f'so it cannot also be private.',
+            )
         parent_rock = cleaned_data.get('parent_rock')
         if is_company_rock and parent_rock and not parent_rock.is_company_rock:
             self.add_error(
@@ -135,7 +149,7 @@ class RockDependencyForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
 
-    def __init__(self, *args, rock=None, **kwargs):
+    def __init__(self, *args, rock=None, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         terms = terms_for(rock.team.organization if rock else None)
         self.fields['description'].widget.attrs['placeholder'] = (
@@ -144,7 +158,7 @@ class RockDependencyForm(forms.ModelForm):
         if rock:
             # Show only rocks from the same org, different team, same quarter/year
             self.fields['depends_on_rock'].queryset = (
-                Rock.objects
+                Rock.objects.visible_to(user)
                 .filter(team__organization=rock.team.organization, quarter=rock.quarter, year=rock.year)
                 .exclude(pk=rock.pk)
                 .exclude(dependencies__rock=rock)   # exclude already-linked

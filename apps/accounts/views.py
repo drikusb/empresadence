@@ -106,10 +106,11 @@ class HomeView(LoginRequiredMixin, TemplateView):
         })
 
         if teams:
-            ctx['active_rocks'] = Rock.objects.filter(team__in=teams).exclude(
+            visible_rocks = Rock.objects.visible_to(self.request.user)
+            ctx['active_rocks'] = visible_rocks.filter(team__in=teams).exclude(
                 status__in=[Rock.STATUS_COMPLETE, Rock.STATUS_DROPPED]
             ).count()
-            ctx['off_track_rocks'] = Rock.objects.filter(
+            ctx['off_track_rocks'] = visible_rocks.filter(
                 team__in=teams, status=Rock.STATUS_OFF_TRACK
             ).count()
 
@@ -598,7 +599,7 @@ class SearchView(LoginRequiredMixin, View):
         from apps.todos.models import ToDo
 
         rocks = (
-            Rock.objects
+            Rock.objects.visible_to(request.user)
             .filter(team__in=user_teams)
             .filter(Q(title__icontains=query) | Q(description__icontains=query))
             .select_related('owner', 'team')

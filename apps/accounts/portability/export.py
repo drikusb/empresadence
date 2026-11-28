@@ -479,7 +479,9 @@ teams, the memberships, the member accounts (name, email, username and
 activity dates only; no password hashes or permissions), user profiles and
 notification preferences, and every Vision and Delivery Board, Org Chart,
 Rock, Issue, To-Do, Scorecard and Weekly Meeting record, with the
-organisation logo and members' avatars where the files exist.
+organisation logo and members' avatars where the files exist. Private
+Rocks are included whoever they are shared with: this is a whole-
+organisation archive, and making it is recorded in the audit log.
 
 Layout
 ------

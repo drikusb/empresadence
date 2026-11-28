@@ -2,6 +2,7 @@ from datetime import date, timedelta
 
 from django import forms
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 from apps.accounts.models import Team
 from apps.accounts.scoping import TeamPickerMixin
@@ -36,10 +37,18 @@ class ToDoForm(TeamPickerMixin, forms.ModelForm):
                 .distinct()
                 .order_by('first_name', 'last_name', 'username')
             )
+            # The current link stays a choice even when it is a private Rock this
+            # user is not on, so saving the form does not unlink it.
+            current = Q(pk=self.instance.linked_rock_id) if self.instance.linked_rock_id else Q(pk__in=[])
             self.fields['linked_rock'].queryset = (
                 Rock.objects
                 .filter(team=team, status__in=[Rock.STATUS_ON_TRACK, Rock.STATUS_OFF_TRACK])
+                .filter(Rock.visible_q(user) | current)
                 .order_by('title')
+            )
+            rock_word = terms_for(team.organization).rock
+            self.fields['linked_rock'].label_from_instance = (
+                lambda r: r.title if r.is_visible_to(user) else f'A private {rock_word}'
             )
             self.fields['linked_issue'].queryset = (
                 Issue.objects

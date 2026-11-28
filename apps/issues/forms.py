@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 
 from apps.accounts.models import Team
 from apps.accounts.scoping import TeamPickerMixin, is_org_admin
@@ -38,9 +39,13 @@ class IssueForm(TeamPickerMixin, forms.ModelForm):
             # Delegation can go to any team in the org
             org_teams = Team.objects.filter(organization=team.organization).order_by('name')
             self.fields['delegated_to_team'].queryset = org_teams
+            # Existing links stay choices even when they are private Rocks this
+            # user is not on, so saving the form does not unlink them.
+            current = Q(pk__in=self.instance.linked_rocks.values('pk')) if self.instance.pk else Q(pk__in=[])
             self.fields['linked_rocks'].queryset = (
                 Rock.objects
                 .filter(team=team, status__in=[Rock.STATUS_ON_TRACK, Rock.STATUS_OFF_TRACK])
+                .filter(Rock.visible_q(user) | current)
                 .select_related('owner')
                 .order_by('title')
             )

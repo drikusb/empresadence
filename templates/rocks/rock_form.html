@@ -176,6 +176,27 @@
                     </div>
                     {% endif %}
 
+                    {# Privacy: seen only by the owner, the creator and the people listed #}
+                    <div class="form-check mb-2">
+                        <input type="checkbox"
+                               name="{{ form.is_private.html_name }}"
+                               id="{{ form.is_private.id_for_label }}"
+                               class="form-check-input {% if form.is_private.errors %}is-invalid{% endif %}"
+                               {% if form.is_private.value %}checked{% endif %}>
+                        <label for="{{ form.is_private.id_for_label }}" class="form-check-label">
+                            <i class="bi bi-lock me-1"></i>Private {{ terms.rock }}
+                        </label>
+                        <div class="form-text">Only the owner, whoever created it and the people below can see it, organisation admins included.</div>
+                        {% for error in form.is_private.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.shared_with.id_for_label }}" class="form-label fw-semibold">Shared with</label>
+                        {{ form.shared_with }}
+                        <div class="form-text">Only applies while the {{ terms.rock }} is private. Hold Ctrl or Cmd to pick several people.</div>
+                    </div>
+
                     {# Cascade-demote confirmation (admins only, same as is_company_rock above) #}
                     {% if form.confirm_demote_children and form.company_children.exists %}
                     <div class="form-check mb-3">
