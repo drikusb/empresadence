@@ -1,0 +1,42 @@
+{% extends "base_minimal.html" %}
+{% block page_title %}Invitation{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    {% if invitation.accepted_at %}
+                    <h1 class="h4">You have joined {{ invitation.organization.name }}</h1>
+                    <a href="{% url 'home' %}" class="btn btn-dark mt-2">Continue</a>
+                    {% elif invitation.declined_at %}
+                    <h1 class="h4">Invitation declined</h1>
+                    <p class="text-muted mb-0">You have not been added to {{ invitation.organization.name }}. Nothing else is needed.</p>
+                    {% elif invitation.withdrawn_at or invitation.is_expired %}
+                    <h1 class="h4">This invitation is no longer open</h1>
+                    <p class="text-muted mb-0">Ask the person who invited you to send a new one.</p>
+                    {% else %}
+                    <h1 class="h4">Join {{ invitation.organization.name }}?</h1>
+                    <p>
+                        {% if invitation.invited_by %}{{ invitation.invited_by.get_full_name|default:invitation.invited_by.username }} has invited you{% else %}You have been invited{% endif %}
+                        to join <strong>{{ invitation.organization.name }}</strong> as
+                        <strong>{{ invitation.get_role_display }}</strong>.
+                    </p>
+                    <p class="text-muted small">
+                        You are signed in as {{ request.user.username }}. If you accept, people in
+                        {{ invitation.organization.name }} will see your name and profile picture.
+                        Nothing changes if you decline.
+                    </p>
+                    <form method="post" class="d-flex flex-wrap gap-2">
+                        {% csrf_token %}
+                        <button type="submit" name="action" value="accept" class="btn btn-dark">Accept</button>
+                        <button type="submit" name="action" value="decline" class="btn btn-outline-secondary">Decline</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

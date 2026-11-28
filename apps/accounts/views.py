@@ -6,12 +6,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import (
     TemplateView, CreateView, UpdateView, ListView, DetailView, FormView, View,
 )
-from django.db import connection, models
+from django.db import connection, models, transaction
 from django.db.utils import OperationalError
 from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.shortcuts import redirect, get_object_or_404, render
 from django.db.models import Prefetch, Q
 from django.utils.cache import patch_cache_control
+from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.decorators import method_decorator
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -20,7 +21,7 @@ from django.views.decorators.cache import never_cache
 from django.contrib import messages
 from django.contrib.auth.models import User
 
-from .models import Membership, Organization, Team, UserProfile
+from .models import Membership, Organization, OrganizationInvitation, Team, UserProfile
 from .forms import (
     InviteUserForm, OrganizationForm, OrganizationSettingsForm, TeamForm, TeamMemberForm,
     TerminologyForm, UserProfileForm,
@@ -410,6 +411,11 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         profile, _ = UserProfile.objects.get_or_create(user=self.request.user)
         ctx['profile'] = profile
         ctx['memberships'] = self.request.user.memberships.select_related('organization')
+        ctx['invitations'] = (
+            self.request.user.organization_invitations
+            .filter(OrganizationInvitation.open_q(), expires_at__gt=timezone.now())
+            .select_related('organization')
+        )
         ctx['teams'] = profile.teams.select_related('organization')
         return ctx
 
@@ -492,7 +498,15 @@ class UserListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['org'] = get_active_org(self.request)
+        org = get_active_org(self.request)
+        ctx['org'] = org
+        ctx['invitations'] = (
+            OrganizationInvitation.objects
+            .filter(OrganizationInvitation.open_q(), organization=org)
+            .select_related('user', 'invited_by')
+            .prefetch_related('teams')
+            if org else []
+        )
         return ctx
 
 
@@ -511,6 +525,9 @@ class UserInviteView(LoginRequiredMixin, AdminRequiredMixin, FormView):
         if not org:
             messages.error(self.request, 'No organisation found.')
             return redirect('home')
+
+        if form.existing_user is not None:
+            return self._invite_existing(form, org)
 
         user = User.objects.create_user(
             username=form.cleaned_data['username'],
@@ -532,6 +549,27 @@ class UserInviteView(LoginRequiredMixin, AdminRequiredMixin, FormView):
         )
         return super().form_valid(form)
 
+    def _invite_existing(self, form, org):
+        """Invite someone who already has an account; they join only if they accept."""
+        with transaction.atomic():
+            invitation = (
+                OrganizationInvitation.objects
+                .filter(OrganizationInvitation.open_q(), organization=org, user=form.existing_user)
+                .first()
+            ) or OrganizationInvitation(organization=org, user=form.existing_user)
+            invitation.role = form.cleaned_data['role']
+            invitation.invited_by = self.request.user
+            invitation.expires_at = OrganizationInvitation.new_expiry()
+            invitation.save()
+            invitation.teams.set(form.cleaned_data['teams'])
+        send_invitation(self.request, invitation)
+        messages.success(
+            self.request,
+            f'Invitation sent to {form.cleaned_data["email"]}. '
+            f'They will appear in this list once they accept.',
+        )
+        return redirect(self.get_success_url())
+
     def _send_invite_email(self, user, org):
         from django.contrib.auth.tokens import default_token_generator
         from django.utils.encoding import force_bytes
@@ -549,6 +587,102 @@ class UserInviteView(LoginRequiredMixin, AdminRequiredMixin, FormView):
         ctx = super().get_context_data(**kwargs)
         ctx['org'] = get_active_org(self.request)
         return ctx
+
+
+def send_invitation(request, invitation):
+    """Email the invitation link and note it in the audit log."""
+    from apps.audit.services import record
+    from apps.notifications.emails import send_organization_invitation_email
+
+    org = invitation.organization
+    base = org.site_url or request.build_absolute_uri('/').rstrip('/')
+    send_organization_invitation_email(invitation, base + invitation.get_absolute_url())
+    record(
+        'invitation.sent', request=request, organization=org, target=invitation,
+        details={'role': invitation.role},
+    )
+
+
+class InvitationAdminView(LoginRequiredMixin, AdminRequiredMixin, View):
+    """POST-only base: an open invitation of the active organisation, or 404."""
+
+    def post(self, request, pk):
+        invitation = get_object_or_404(
+            OrganizationInvitation.objects.filter(OrganizationInvitation.open_q()),
+            pk=pk, organization=get_active_org(request),
+        )
+        self.handle(request, invitation)
+        return redirect('accounts:user_list')
+
+
+class InvitationResendView(InvitationAdminView):
+    def handle(self, request, invitation):
+        invitation.expires_at = OrganizationInvitation.new_expiry()
+        invitation.invited_by = request.user
+        invitation.save(update_fields=['expires_at', 'invited_by'])
+        send_invitation(request, invitation)
+        messages.success(request, f'Invitation sent again to {invitation.user.email}.')
+
+
+class InvitationWithdrawView(InvitationAdminView):
+    def handle(self, request, invitation):
+        from apps.audit.services import record
+
+        invitation.withdrawn_at = timezone.now()
+        invitation.save(update_fields=['withdrawn_at'])
+        record(
+            'invitation.withdrawn', request=request,
+            organization=invitation.organization, target=invitation,
+        )
+        messages.success(request, f'Invitation to {invitation.user.email} withdrawn.')
+
+
+@method_decorator(never_cache, name='dispatch')
+class InvitationRespondView(LoginRequiredMixin, View):
+    """The invited person accepts or declines.
+
+    Only the invited account can open the page, and only with the token from
+    the email; anything else is a 404, so the link confirms nothing to anyone
+    else. Nothing about the organisation beyond its name is shown.
+    """
+
+    template_name = 'accounts/invitation_respond.html'
+
+    def get_invitation(self, request, pk, token):
+        invitation = get_object_or_404(
+            OrganizationInvitation.objects.select_related('organization', 'invited_by'),
+            pk=pk, user=request.user,
+        )
+        if not invitation.check_token(token):
+            raise Http404
+        return invitation
+
+    def get(self, request, pk, token):
+        invitation = self.get_invitation(request, pk, token)
+        return render(request, self.template_name, {'invitation': invitation})
+
+    def post(self, request, pk, token):
+        from apps.audit.services import record
+
+        invitation = self.get_invitation(request, pk, token)
+        if not invitation.can_be_answered:
+            return render(request, self.template_name, {'invitation': invitation})
+
+        org = invitation.organization
+        if request.POST.get('action') == 'accept':
+            with transaction.atomic():
+                invitation.accept()
+            record('invitation.accepted', request=request, organization=org, target=invitation)
+            host_org = getattr(request, 'host_org', None)
+            if host_org is None or host_org == org:
+                set_active_org(request, org)
+            messages.success(request, f'You have joined {org.name}.')
+            return redirect('home')
+
+        invitation.declined_at = timezone.now()
+        invitation.save(update_fields=['declined_at'])
+        record('invitation.declined', request=request, organization=org, target=invitation)
+        return redirect(invitation.get_absolute_url())
 
 
 # ---------------------------------------------------------------------------

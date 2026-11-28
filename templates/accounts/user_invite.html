@@ -9,7 +9,7 @@
                 <i class="bi bi-arrow-left me-1"></i> Users
             </a>
             <h1 class="h3 mt-2 mb-0">Invite a user</h1>
-            <p class="text-muted mt-1">Add a new user to <strong>{{ org.name }}</strong>. They'll set their own password via the login page.</p>
+            <p class="text-muted mt-1">Add someone to <strong>{{ org.name }}</strong>. A new user sets their own password via the login page; someone who already has an account is asked to accept first.</p>
         </div>
         <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
@@ -35,6 +35,9 @@
                     <div class="mb-3">
                         <label for="id_email" class="form-label fw-semibold">Email <span class="text-muted fw-normal">(used for password reset)</span></label>
                         {{ form.email }}
+                        {% if form.email.errors %}
+                        <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                        {% endif %}
                     </div>
                     <div class="mb-3">
                         <label for="id_role" class="form-label fw-semibold">Role</label>
@@ -53,11 +56,13 @@
                         <i class="bi bi-info-circle me-1"></i>
                         The user will be created with a random password. Share the app URL and ask them to use
                         <strong>"Forgot password?"</strong> to set their own password.
+                        If the email already has an account, no new user is created: that person gets an
+                        invitation and joins once they accept.
                     </div>
 
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-dark">
-                            <i class="bi bi-person-plus me-1"></i> Create user
+                            <i class="bi bi-person-plus me-1"></i> Invite
                         </button>
                         <a href="{% url 'accounts:user_list' %}" class="btn btn-outline-secondary">Cancel</a>
                     </div>

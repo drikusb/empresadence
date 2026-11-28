@@ -22,6 +22,14 @@ urlpatterns = [
     path('media/avatars/<path:name>', views.MediaAvatarView.as_view(), name='media_avatar'),
     path('users/', views.UserListView.as_view(), name='user_list'),
     path('users/invite/', views.UserInviteView.as_view(), name='user_invite'),
+    path('users/invitations/<int:pk>/resend/', views.InvitationResendView.as_view(), name='invitation_resend'),
+    path('users/invitations/<int:pk>/withdraw/', views.InvitationWithdrawView.as_view(), name='invitation_withdraw'),
+    # Under /accounts/ so the invited person, who is not a member yet, can open
+    # it on an organisation's own hostname (see OPEN_PATH_PREFIXES).
+    path(
+        'accounts/invitations/<int:pk>/<str:token>/',
+        views.InvitationRespondView.as_view(), name='invitation_respond',
+    ),
     path('teams/<int:pk>/switch/', views.TeamSwitchView.as_view(), name='team_switch'),
     path('search/', views.SearchView.as_view(), name='search'),
 ]

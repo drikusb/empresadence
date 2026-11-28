@@ -45,6 +45,22 @@
             </div>
         </div>
 
+        {% if invitations %}
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0"><i class="bi bi-envelope me-2"></i>Invitation{{ invitations|length|pluralize }}</h5>
+            </div>
+            <div class="card-body">
+                {% for invitation in invitations %}
+                <p class="mb-1">
+                    <span class="fw-semibold">{{ invitation.organization.name }}</span>
+                    <a href="{{ invitation.get_absolute_url }}" class="btn btn-sm btn-outline-dark ms-2">View invitation</a>
+                </p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-header bg-white border-bottom">
                 <h5 class="mb-0"><i class="bi bi-people me-2"></i>My Teams</h5>
