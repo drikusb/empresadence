@@ -12,7 +12,7 @@ class RockForm(TeamPickerMixin, forms.ModelForm):
     class Meta:
         model = Rock
         fields = ['title', 'description', 'owner', 'team', 'quarter', 'year', 'due_date',
-                  'parent_rock', 'is_company_rock', 'is_private', 'shared_with']
+                  'parent_rock', 'is_company_rock']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={
@@ -61,15 +61,6 @@ class RockForm(TeamPickerMixin, forms.ModelForm):
             )
             self.fields['parent_rock'].error_messages['invalid_choice'] = (
                 f'The parent {terms.rock} must be on {team.name}.'
-            )
-            self.fields['parent_rock'].label_from_instance = (
-                lambda r: r.title if r.is_visible_to(user) else f'A private {terms.rock}'
-            )
-            self.fields['shared_with'].queryset = User.objects.filter(
-                memberships__organization=team.organization
-            ).distinct().order_by('first_name', 'last_name', 'username')
-            self.fields['shared_with'].label_from_instance = (
-                lambda u: u.get_full_name() or u.username
             )
         else:
             self.fields['owner'].queryset = User.objects.none()

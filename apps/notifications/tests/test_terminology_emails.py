@@ -112,6 +112,15 @@ class TerminologyEmailTest(TestCase):
         self.assertContains(resp, 'Priority off-track alerts')
         self.assertNotContains(resp, 'Overdue To-Do digest')
         self.assertNotContains(resp, 'Rock off-track alerts')
+        self.assert_descriptions_use_the_current_words(resp)
+
+    def assert_descriptions_use_the_current_words(self, resp):
+        self.assertContains(resp, 'Daily email listing your overdue Actions.')
+        self.assertContains(resp, "Email reminder on your team's Weekly Meeting day.", html=False)
+        self.assertContains(resp, 'Email when one of your Priorities is marked off track.')
+        for old in ['Level 10', 'To-Dos', 'Rocks']:
+            with self.subTest(old=old):
+                self.assertNotContains(resp, old)
 
     @override_settings(ALLOWED_HOSTS=['testserver', 'plain.example.test'])
     def test_preferences_page_on_a_default_host_shows_the_generic_words(self):
@@ -121,3 +130,4 @@ class TerminologyEmailTest(TestCase):
         self.assertContains(resp, 'Overdue Action digest')
         self.assertContains(resp, 'Weekly Meeting day reminders')
         self.assertContains(resp, 'Priority off-track alerts')
+        self.assert_descriptions_use_the_current_words(resp)

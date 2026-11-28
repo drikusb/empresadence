@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.formats import date_format
 
 from .models import Meeting, SegueEntry, Headline, MeetingRating
 from apps.accounts.models import Team
@@ -19,6 +20,20 @@ class MeetingCreateForm(forms.ModelForm):
         if org:
             teams = Team.objects.filter(organization=org).order_by('name')
         self.fields['team'].queryset = teams
+
+    def clean(self):
+        cleaned = super().clean()
+        team, scheduled_date = cleaned.get('team'), cleaned.get('scheduled_date')
+        if team and scheduled_date:
+            clash = Meeting.objects.filter(
+                team=team, scheduled_date=scheduled_date, status=Meeting.STATUS_SCHEDULED,
+            ).exclude(pk=self.instance.pk)
+            if clash.exists():
+                raise forms.ValidationError(
+                    f'{team.name} already has one scheduled for {date_format(scheduled_date, "j F Y")}.',
+                    code='duplicate',
+                )
+        return cleaned
 
 
 class SegueEntryForm(forms.ModelForm):

@@ -52,10 +52,6 @@ class IssueForm(TeamPickerMixin, forms.ModelForm):
             self.fields['linked_rocks'].error_messages['invalid_choice'] = (
                 f'Linked {terms_for(team.organization).rocks} must be on {team.name}.'
             )
-            rock_word = terms_for(team.organization).rock
-            self.fields['linked_rocks'].label_from_instance = (
-                lambda r: r.title if r.is_visible_to(user) else f'A private {rock_word}'
-            )
         else:
             self.fields['delegated_to_team'].queryset = Team.objects.none()
             self.fields['linked_rocks'].queryset = Rock.objects.none()
