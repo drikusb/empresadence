@@ -52,3 +52,30 @@
 .ids-identify { border-left: 4px solid var(--bs-warning); }
 .ids-discuss  { border-left: 4px solid var(--bs-info); }
 .ids-solve    { border-left: 4px solid var(--bs-success); }
+
+/* A table whose rows stack into cards below the md breakpoint, so a form laid
+   out as a table stays usable on a phone. Cells that carry data-label print
+   it in front of their content; .stack-inline cells share a line. */
+@media (max-width: 767.98px) {
+    .table-stack-md thead { display: none; }
+    .table-stack-md,
+    .table-stack-md > tbody,
+    .table-stack-md > tbody > tr,
+    .table-stack-md > tbody > tr > td { display: block; width: 100%; }
+    .table-stack-md > tbody > tr { padding: .75rem 1rem; border-bottom: 1px solid var(--bs-border-color); }
+    .table-stack-md > tbody > tr:last-child { border-bottom: 0; }
+    .table-stack-md > tbody > tr > td { border: 0; padding: .2rem 0; text-align: left !important; }
+    /* Bootstrap paints row states (hover, table-danger) on each cell, which
+       shows as patches once the cells are separate blocks. Paint the row
+       instead, and drop the hover tint: it means nothing on a touch screen. */
+    .table-stack-md > tbody > tr > td { background-color: transparent; box-shadow: none; }
+    .table-stack-md > tbody > tr.table-danger { background-color: var(--bs-danger-bg-subtle); }
+    .table-stack-md > tbody > tr > td.stack-inline { display: inline-block; width: auto; margin-right: 1rem; }
+    .table-stack-md > tbody > tr > td[data-label]::before {
+        content: attr(data-label) ": ";
+        color: var(--bs-secondary-color);
+        font-size: .875rem;
+    }
+    /* 16px text stops iOS zooming the page when the field takes focus. */
+    .table-stack-md .form-control { font-size: 1rem; min-height: 44px; }
+}
