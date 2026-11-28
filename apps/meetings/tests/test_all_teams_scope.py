@@ -33,7 +33,7 @@ class MeetingListAllTeamsScopeTest(TestCase):
         self.client.force_login(self.admin)
         resp = self.client.get('/meetings/')
         self.assertContains(resp, 'Leadership')
-        self.assertNotContains(resp, 'Operations')
+        self.assertEqual([t for t, _ in resp.context['teams_meetings']], [self.leadership])
         self.assertEqual(resp.context['other_meetings_total'], 1)
 
     def test_all_teams_scope_shows_every_visible_team_s_meetings(self):

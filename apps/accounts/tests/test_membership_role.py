@@ -25,11 +25,11 @@ class MembershipRoleUpdateTest(TestCase):
         self.client.force_login(self.admin)
 
     def _url(self, membership):
-        return f'/accounts/users/memberships/{membership.pk}/role/'
+        return f'/users/memberships/{membership.pk}/role/'
 
     def test_admin_can_promote_a_member_to_leader(self):
         resp = self.client.post(self._url(self.member_membership), {'role': Membership.ROLE_LEADER})
-        self.assertRedirects(resp, '/accounts/users/')
+        self.assertRedirects(resp, '/users/')
         self.member_membership.refresh_from_db()
         self.assertEqual(self.member_membership.role, Membership.ROLE_LEADER)
 
@@ -43,19 +43,19 @@ class MembershipRoleUpdateTest(TestCase):
     def test_cannot_demote_the_only_admin(self):
         self.other_admin_membership.delete()
         resp = self.client.post(self._url(self.admin_membership), {'role': Membership.ROLE_MEMBER})
-        self.assertRedirects(resp, '/accounts/users/')
+        self.assertRedirects(resp, '/users/')
         self.admin_membership.refresh_from_db()
         self.assertEqual(self.admin_membership.role, Membership.ROLE_ADMIN)
 
     def test_can_demote_an_admin_when_another_admin_remains(self):
         resp = self.client.post(self._url(self.admin_membership), {'role': Membership.ROLE_MEMBER})
-        self.assertRedirects(resp, '/accounts/users/')
+        self.assertRedirects(resp, '/users/')
         self.admin_membership.refresh_from_db()
         self.assertEqual(self.admin_membership.role, Membership.ROLE_MEMBER)
 
     def test_invalid_role_is_rejected(self):
         resp = self.client.post(self._url(self.member_membership), {'role': 'wizard'})
-        self.assertRedirects(resp, '/accounts/users/')
+        self.assertRedirects(resp, '/users/')
         self.member_membership.refresh_from_db()
         self.assertEqual(self.member_membership.role, Membership.ROLE_MEMBER)
 
