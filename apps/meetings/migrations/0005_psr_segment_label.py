@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('meetings', '0003_configurable_meeting_agenda'),
+        ('meetings', '0004_meeting_segment_started_at'),
     ]
 
     operations = [
