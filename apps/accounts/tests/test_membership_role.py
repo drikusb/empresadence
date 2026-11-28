@@ -48,8 +48,10 @@ class MembershipRoleUpdateTest(TestCase):
         self.assertEqual(self.admin_membership.role, Membership.ROLE_ADMIN)
 
     def test_can_demote_an_admin_when_another_admin_remains(self):
+        # Demoting themself costs the admin their own access to this page,
+        # so the redirect target is not fetched here.
         resp = self.client.post(self._url(self.admin_membership), {'role': Membership.ROLE_MEMBER})
-        self.assertRedirects(resp, '/users/')
+        self.assertRedirects(resp, '/users/', fetch_redirect_response=False)
         self.admin_membership.refresh_from_db()
         self.assertEqual(self.admin_membership.role, Membership.ROLE_MEMBER)
 
