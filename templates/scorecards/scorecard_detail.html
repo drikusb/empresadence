@@ -104,7 +104,7 @@
                         </td>
 
                         {# Weekly cells #}
-                        {% for cell in row.cells %}
+                        {% for period, cell in row.period_cells %}
                         <td class="text-center small {% if cell %}{{ cell.cell_class }}{% else %}table-secondary{% endif %}"
                             {% if period == current_week %}style="border-left:2px solid #0d6efd"{% endif %}>
                             {% if cell %}
