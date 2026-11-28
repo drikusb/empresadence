@@ -140,7 +140,7 @@ A living checklist of what's been built and what's coming next. PRs welcome for 
 - [ ] Recurring To-Dos (weekly/monthly)
 - [ ] Rock progress percentage (manual 0–100% slider)
 - [ ] Issue voting / priority scoring in IDS
-- [ ] VTO section permissions (lock sections to leadership only)
+- [ ] Vision section permissions (lock sections to leadership only)
 - [ ] Multi-language / i18n support
 - [ ] REST API (Django REST Framework) for mobile or third-party integrations
 - [ ] Webhooks: post events to Slack, Teams, or custom endpoints
