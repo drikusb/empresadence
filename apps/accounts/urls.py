@@ -24,6 +24,7 @@ urlpatterns = [
     path('users/invite/', views.UserInviteView.as_view(), name='user_invite'),
     path('users/invitations/<int:pk>/resend/', views.InvitationResendView.as_view(), name='invitation_resend'),
     path('users/invitations/<int:pk>/withdraw/', views.InvitationWithdrawView.as_view(), name='invitation_withdraw'),
+    path('users/memberships/<int:pk>/role/', views.MembershipRoleUpdateView.as_view(), name='membership_role'),
     # Under /accounts/ so the invited person, who is not a member yet, can open
     # it on an organisation's own hostname (see OPEN_PATH_PREFIXES).
     path(

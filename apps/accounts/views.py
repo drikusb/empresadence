@@ -508,6 +508,7 @@ class UserListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
         ctx = super().get_context_data(**kwargs)
         org = get_active_org(self.request)
         ctx['org'] = org
+        ctx['role_choices'] = Membership.ROLE_CHOICES
         ctx['invitations'] = (
             OrganizationInvitation.objects
             .filter(OrganizationInvitation.open_q(), organization=org)
@@ -516,6 +517,41 @@ class UserListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
             if org else []
         )
         return ctx
+
+
+class MembershipRoleUpdateView(LoginRequiredMixin, AdminRequiredMixin, View):
+    """Change a member's role. An organisation may never be left with no Admin."""
+
+    def post(self, request, pk):
+        from apps.audit.services import record
+
+        membership = get_org_object_or_404(request, Membership, org_lookup='organization', pk=pk)
+        new_role = request.POST.get('role')
+        if new_role not in dict(Membership.ROLE_CHOICES):
+            messages.error(request, 'Not a valid role.')
+            return redirect('accounts:user_list')
+
+        name = membership.user.get_full_name() or membership.user.username
+        if membership.role == Membership.ROLE_ADMIN and new_role != Membership.ROLE_ADMIN:
+            other_admins = Membership.objects.filter(
+                organization=membership.organization, role=Membership.ROLE_ADMIN
+            ).exclude(pk=membership.pk)
+            if not other_admins.exists():
+                messages.error(
+                    request,
+                    f'{name} is the only Admin left. Make someone else Admin first.',
+                )
+                return redirect('accounts:user_list')
+
+        old_role = membership.role
+        membership.role = new_role
+        membership.save(update_fields=['role', 'updated_at'])
+        record(
+            'membership.role_changed', request=request, organization=membership.organization,
+            target=membership, details={'old_role': old_role, 'new_role': new_role},
+        )
+        messages.success(request, f'{name} is now {membership.get_role_display()}.')
+        return redirect('accounts:user_list')
 
 
 class UserInviteView(LoginRequiredMixin, AdminRequiredMixin, FormView):

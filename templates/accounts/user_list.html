@@ -48,7 +48,19 @@
                             </div>
                         </td>
                         <td class="text-muted">{{ profile.user.email|default:"—" }}</td>
-                        <td><span class="badge bg-light text-dark border">{{ membership.get_role_display }}</span></td>
+                        <td>
+                            <form method="post" action="{% url 'accounts:membership_role' membership.pk %}"
+                                  class="d-flex gap-1 align-items-center">
+                                {% csrf_token %}
+                                <select name="role" class="form-select form-select-sm" style="width:auto"
+                                        aria-label="Role for {{ profile.display_name }}">
+                                    {% for val, label in role_choices %}
+                                    <option value="{{ val }}" {% if val == membership.role %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">Save</button>
+                            </form>
+                        </td>
                         <td>
                             {% for team in profile.teams.all %}
                             <span class="badge bg-light text-dark border me-1">{{ team.name }}</span>
