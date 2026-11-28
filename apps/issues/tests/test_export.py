@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 
 from apps.accounts.models import Membership, Organization, Team
+from apps.accounts.terminology import DEFAULTS
 from apps.issues.models import Issue
 
 
@@ -60,7 +61,7 @@ class IssueCsvExportViewTest(TestCase):
 
         delegated_row = next(row for row in rows if row[0] == 'Delegated Issue')
         # Title, Type, Status, Originating Team, Delegated To, Created By, Created At
-        self.assertEqual(delegated_row[2], 'In IDS')
+        self.assertEqual(delegated_row[2], f'In {DEFAULTS["ids"]}')
         self.assertEqual(delegated_row[4], 'Other Team')
 
     def test_dropped_issue_excluded_by_default(self):

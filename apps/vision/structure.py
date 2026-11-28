@@ -81,11 +81,11 @@ DEFAULT_STRUCTURE = (
         label='Vision',
         icon='bi-eye',
         groups=(
-            GroupSpec(label='Core Focus', sections=(
+            GroupSpec(label='Purpose and Niche', sections=(
                 SectionSpec('core_focus_purpose', 'Purpose / Passion / Cause', RENDER_SINGLE_LINE),
                 SectionSpec('core_focus_niche', 'Niche', RENDER_SINGLE_LINE),
             )),
-            GroupSpec(label='10-Year Target', sections=(
+            GroupSpec(label='Long-Range Target', sections=(
                 SectionSpec('ten_year_target', '', RENDER_SINGLE_LINE),
             )),
             GroupSpec(label='Marketing Strategy', sections=(
@@ -102,7 +102,7 @@ DEFAULT_STRUCTURE = (
         label='Delivery',
         icon='bi-lightning',
         groups=(
-            GroupSpec(label='3-Year Picture', hint='Vivid description + measurable goals', sections=(
+            GroupSpec(label='Mid-Range Picture', hint='Vivid description + measurable goals', sections=(
                 SectionSpec('three_year_picture', 'Description'),
                 SectionSpec('three_year_goals', 'Measurable Goals (one per line)', RENDER_LIST),
             )),

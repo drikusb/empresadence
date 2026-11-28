@@ -105,8 +105,8 @@ class DefaultStructureRendersTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         for text in [
             'Page 1 — Vision', 'Page 2 — Delivery',
-            'Core Focus', '10-Year Target', 'Marketing Strategy',
-            '3-Year Picture', '1-Year Plan',
+            'Purpose and Niche', 'Long-Range Target', 'Marketing Strategy',
+            'Mid-Range Picture', '1-Year Plan',
             'Purpose / Passion / Cause', 'Niche', 'Target Market',
             'Unique 1.', 'Unique 2.', 'Unique 3.', 'Proven Process', 'Guarantee',
         ]:
@@ -166,7 +166,7 @@ class CustomStructureRendersTest(TestCase):
         self.assertContains(resp, 'Page 2 — How We Get There')
         self.assertContains(resp, 'North Star')
         self.assertContains(resp, 'Our one metric')
-        self.assertNotContains(resp, '10-Year Target')
+        self.assertNotContains(resp, 'Long-Range Target')
         self.assertNotContains(resp, 'Marketing Strategy')
 
     def test_the_built_in_cards_still_pin_to_the_first_and_last_page(self):

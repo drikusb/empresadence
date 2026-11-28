@@ -77,7 +77,7 @@ class VTOTerminologyTest(TestCase):
     def test_section_edit_title_uses_the_organisation_word(self):
         resp = self.client.get('/vision/edit/ten_year_target/', HTTP_HOST=METRICS_HOST)
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, '<title>Edit 10-Year Target — Blueprint — Metrics Org</title>', html=True)
+        self.assertContains(resp, '<title>Edit Long-Range Target — Blueprint — Metrics Org</title>', html=True)
 
     def test_add_core_value_message_uses_the_organisation_word(self):
         resp = self.client.post(

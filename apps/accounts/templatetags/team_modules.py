@@ -4,6 +4,7 @@ from datetime import date
 from django import template
 from django.urls import reverse
 
+from apps.accounts.terminology import get_terms
 from apps.issues.models import Issue
 from apps.meetings.models import Meeting
 from apps.rocks.models import Rock
@@ -12,7 +13,7 @@ from apps.scorecards.models import ScorecardMetric
 register = template.Library()
 
 
-def module_tiles(team, user=None):
+def module_tiles(team, terms, user=None):
     """Counts for the team's Rocks, Issues, Scorecard metrics and Meetings.
 
     The Rocks count leaves out private Rocks ``user`` is not on.
@@ -35,13 +36,13 @@ def module_tiles(team, user=None):
         .count()
     )
     return [
-        {'label': 'Rocks', 'icon': 'bi-gem', 'url': reverse('rocks:list'),
+        {'label': terms.rocks, 'icon': 'bi-gem', 'url': reverse('rocks:list'),
          'count': open_rocks, 'caption': f'open in Q{quarter} {year}'},
         {'label': 'Meetings', 'icon': 'bi-calendar3', 'url': reverse('meetings:list'),
          'count': upcoming_meetings, 'caption': 'upcoming'},
-        {'label': 'Scorecard', 'icon': 'bi-bar-chart', 'url': reverse('scorecards:list'),
+        {'label': terms.scorecard, 'icon': 'bi-bar-chart', 'url': reverse('scorecards:list'),
          'count': active_metrics, 'caption': 'active metrics'},
-        {'label': 'Issues', 'icon': 'bi-exclamation-triangle', 'url': reverse('issues:list'),
+        {'label': terms.issues, 'icon': 'bi-exclamation-triangle', 'url': reverse('issues:list'),
          'count': open_issues, 'caption': 'open'},
     ]
 
@@ -55,7 +56,7 @@ def team_modules(context, team):
     is_member = user.is_authenticated and team.members.filter(user=user).exists()
     return {
         'team': team,
-        'tiles': module_tiles(team, user),
+        'tiles': module_tiles(team, get_terms(request), user),
         'is_member': is_member,
         'csrf_token': context.get('csrf_token'),
     }

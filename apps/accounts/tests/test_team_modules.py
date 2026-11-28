@@ -73,7 +73,7 @@ class TeamModulesCardTest(TestCase):
         self.client.force_login(self.member)
         resp = self.client.get(self.url)
         tiles = {t['label']: t['count'] for t in resp.context['tiles']}
-        self.assertEqual(tiles, {'Rocks': 1, 'Meetings': 1, 'Scorecard': 1, 'Issues': 2})
+        self.assertEqual(tiles, {'Priorities': 1, 'Meetings': 1, 'Metrics Board': 1, 'Blockers': 2})
         self.assertContains(resp, 'open in Q')
 
     def test_member_gets_tiles_that_switch_to_the_team_and_open_the_module(self):
@@ -95,4 +95,4 @@ class TeamModulesCardTest(TestCase):
         self.assertNotContains(resp, 'team-module-tile')
         self.assertContains(resp, 'Join this team to open its modules')
         tiles = {t['label']: t['count'] for t in resp.context['tiles']}
-        self.assertEqual(tiles['Rocks'], 1)
+        self.assertEqual(tiles['Priorities'], 1)
