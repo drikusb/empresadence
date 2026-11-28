@@ -65,26 +65,57 @@ A living checklist of what's been built and what's coming next. PRs welcome for 
 
 ---
 
-## ✅ Multiple organisations
+## ✅ v0.7 — Multiple Organisations
 
 - [x] Scope every record fetched by id to the active organisation, with isolation tests
 - [x] Membership model: a user can belong to several organisations with a role in each
 - [x] Organisation switcher in the navbar; superusers can create further organisations
 - [ ] Invite an existing user into another organisation from the Users page
-- [ ] Serve uploaded logos and avatars through an authenticated view
+- [x] Serve avatars through a permission-checked view (logos stay public, as the login page shows them)
 
 ---
 
-## 🗺️ v0.7 — Export & Reporting
+## ✅ v0.8 — Export & Reporting
 
 - [x] Meeting notes PDF: export a completed meeting's notes and summary
-- [ ] Rocks CSV: export current quarter's rocks with status and owner
-- [ ] Scorecard CSV: export 13-week history for a scorecard
-- [ ] Issues CSV: export open issues with status and delegation info
+- [x] Rocks CSV: export current quarter's rocks with status and owner
+- [x] Scorecard CSV: export 13-week history for a scorecard
+- [x] Issues CSV: export open issues with status and delegation info
 
 ---
 
-## 🗺️ v0.8 — Mobile Polish
+## ✅ v0.9 — Security & Deployment
+
+- [x] Optional two-factor authentication (TOTP with backup codes)
+- [x] Audit log of logins and administrative actions, with a prune command
+- [x] `/healthz/` endpoint for container and load balancer health checks
+- [x] Application container runs as an unprivileged user
+- [x] Pinned dependency versions, kept current by Dependabot
+- [x] Extra Django apps can be enabled from the environment
+
+---
+
+## ✅ v0.10 — Branding, Terminology & Configurable Structure
+
+- [x] Pin an organisation to its own hostname
+- [x] Per-organisation branding: display name, logo, favicon, colour and navbar style, plus a product-name setting
+- [x] Per-organisation terminology, with generic defaults (Priority, Action, Blocker, Metrics Board, Vision and Delivery Board)
+- [x] Vision document structure configurable per organisation
+- [x] Meeting segment agenda configurable per organisation
+- [x] `create_organization` command for setting up a new organisation
+
+---
+
+## ✅ v0.11 — Cross-Team Views & Data Portability
+
+- [x] Company-wide Priorities and Blockers, shown on the Vision and Delivery Board
+- [x] All-teams scope on the Priorities list, the Metrics Boards list and the dashboard
+- [x] Team page module tiles with live counts
+- [x] Full data export for one organisation, and import into another instance
+
+---
+
+## 🗺️ v0.12 — Mobile Polish
 
 - [ ] Audit all views on 375px viewport (iPhone SE baseline)
 - [ ] Fix any broken layouts in meeting runner on mobile
@@ -93,7 +124,7 @@ A living checklist of what's been built and what's coming next. PRs welcome for 
 
 ---
 
-## 🗺️ v0.9 — In-App Notifications
+## 🗺️ v0.13 — In-App Notifications
 
 - [ ] Notification model: per-user feed of actionable events
 - [ ] Notification bell in navbar with unread count badge
