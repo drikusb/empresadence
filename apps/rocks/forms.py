@@ -12,7 +12,7 @@ class RockForm(TeamPickerMixin, forms.ModelForm):
     class Meta:
         model = Rock
         fields = ['title', 'description', 'owner', 'team', 'quarter', 'year', 'due_date',
-                  'parent_rock', 'is_company_rock']
+                  'parent_rock', 'is_company_rock', 'is_private', 'shared_with']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={
