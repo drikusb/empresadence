@@ -12,7 +12,7 @@ class NotificationPreference(models.Model):
         default=True, help_text='Daily email listing your overdue To-Dos.'
     )
     meeting_reminders = models.BooleanField(
-        default=True, help_text="Email reminder on your team's Level 10 Meeting day."
+        default=True, help_text="Email reminder on your team's meeting day."
     )
     rock_off_track_alerts = models.BooleanField(
         default=True, help_text='Email when one of your Rocks is marked off track.'

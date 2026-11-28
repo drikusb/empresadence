@@ -73,11 +73,27 @@ def scoped_rocks(request, quarter, year):
             return Rock.objects.none()
         team_filter = {'team': team}
     return (
-        Rock.objects
+        Rock.objects.visible_to(request.user)
         .filter(quarter=quarter, year=year, **team_filter)
         .select_related('owner', 'owner__profile', 'team')
         .order_by('team__name', 'owner__first_name', 'owner__username', 'title')
     )
+
+
+def _visible_rock_or_404(request, pk):
+    """The Rock with this pk in the active organisation, if the user may see it.
+
+    A private Rock the user is not on is a 404, never a 403, so a guessed URL
+    does not confirm it exists.
+    """
+    return get_org_object_or_404(request, Rock.objects.visible_to(request.user), pk=pk)
+
+
+class VisibleRockMixin(OrgScopedMixin):
+    """OrgScopedMixin that also hides private Rocks the user is not on."""
+
+    def get_queryset(self):
+        return super().get_queryset().filter(Rock.visible_q(self.request.user))
 
 
 def _can_edit(user, rock):
@@ -108,7 +124,7 @@ class RockListView(LoginRequiredMixin, ListView):
 
     def _other_team_counts(self, team, visible_teams, quarter, year):
         """How many matching Rocks the user's other visible teams have this quarter."""
-        others = Rock.objects.filter(quarter=quarter, year=year)
+        others = Rock.objects.visible_to(self.request.user).filter(quarter=quarter, year=year)
         status = self._status_filter()
         if status:
             others = others.filter(status=status)
@@ -199,7 +215,6 @@ class RockCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
     def form_valid(self, form):
-        form.instance.team = get_active_team(self.request)
         form.instance.created_by = self.request.user
         terms = get_terms(self.request)
         messages.success(self.request, f'{terms.rock} "{form.instance.title}" created.')
@@ -214,7 +229,7 @@ class RockCreateView(LoginRequiredMixin, CreateView):
         return ctx
 
 
-class RockUpdateView(LoginRequiredMixin, OrgScopedMixin, UpdateView):
+class RockUpdateView(LoginRequiredMixin, VisibleRockMixin, UpdateView):
     model = Rock
     form_class = RockForm
     template_name = 'rocks/rock_form.html'
@@ -236,7 +251,7 @@ class RockUpdateView(LoginRequiredMixin, OrgScopedMixin, UpdateView):
         return ctx
 
 
-class RockDetailView(LoginRequiredMixin, OrgScopedMixin, DetailView):
+class RockDetailView(LoginRequiredMixin, VisibleRockMixin, DetailView):
     model = Rock
     template_name = 'rocks/rock_detail.html'
     context_object_name = 'rock'
@@ -244,14 +259,21 @@ class RockDetailView(LoginRequiredMixin, OrgScopedMixin, DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         rock = self.object
+        user = self.request.user
         ctx['dependencies'] = (
-            rock.dependencies.select_related('depends_on_rock', 'depends_on_rock__team', 'depends_on_rock__owner')
+            rock.dependencies
+            .filter(Rock.visible_q(user, prefix='depends_on_rock__'))
+            .select_related('depends_on_rock', 'depends_on_rock__team', 'depends_on_rock__owner')
         )
         ctx['dependents'] = (
-            rock.dependents.select_related('rock', 'rock__team', 'rock__owner')
+            rock.dependents
+            .filter(Rock.visible_q(user, prefix='rock__'))
+            .select_related('rock', 'rock__team', 'rock__owner')
         )
-        ctx['child_rocks'] = rock.child_rocks.select_related('owner', 'team')
-        ctx['dependency_form'] = RockDependencyForm(rock=rock)
+        ctx['child_rocks'] = rock.child_rocks.visible_to(user).select_related('owner', 'team')
+        ctx['parent_rock_visible'] = bool(rock.parent_rock) and rock.parent_rock.is_visible_to(user)
+        ctx['shared_with'] = rock.shared_with.order_by('first_name', 'username') if rock.is_private else []
+        ctx['dependency_form'] = RockDependencyForm(rock=rock, user=user)
         ctx['status_form'] = RockStatusForm(initial={'status': rock.status})
         ctx['can_edit'] = _can_edit(self.request.user, rock)
         ctx['today'] = date.today()
@@ -268,7 +290,7 @@ class RockDetailView(LoginRequiredMixin, OrgScopedMixin, DetailView):
         return ctx
 
 
-class RockDeleteView(LoginRequiredMixin, OrgScopedMixin, DeleteView):
+class RockDeleteView(LoginRequiredMixin, VisibleRockMixin, DeleteView):
     model = Rock
     template_name = 'rocks/rock_confirm_delete.html'
     success_url = reverse_lazy('rocks:list')
@@ -287,7 +309,7 @@ class RockStatusView(LoginRequiredMixin, View):
     """POST-only: update a Rock's status and redirect back."""
 
     def post(self, request, pk):
-        rock = get_org_object_or_404(request, Rock, pk=pk)
+        rock = _visible_rock_or_404(request, pk)
         form = RockStatusForm(request.POST)
         if form.is_valid():
             new_status = form.cleaned_data['status']
@@ -311,7 +333,7 @@ class RockCheckinCreateView(LoginRequiredMixin, View):
     """POST-only: log a weekly progress check-in (owner or admin only)."""
 
     def post(self, request, pk):
-        rock = get_org_object_or_404(request, Rock, pk=pk)
+        rock = _visible_rock_or_404(request, pk)
         if not _can_edit(request.user, rock):
             return HttpResponseForbidden()
 
@@ -345,7 +367,7 @@ class RockArchiveView(LoginRequiredMixin, ListView):
             return Rock.objects.none()
         quarter, year = get_quarter_year_from_request(self.request)
         return (
-            Rock.objects
+            Rock.objects.visible_to(self.request.user)
             .filter(team=team, quarter=quarter, year=year)
             .select_related('owner', 'team')
             .order_by('status', 'title')
@@ -379,8 +401,8 @@ class RockArchiveView(LoginRequiredMixin, ListView):
 
 class RockDependencyCreateView(LoginRequiredMixin, View):
     def post(self, request, pk):
-        rock = get_org_object_or_404(request, Rock, pk=pk)
-        form = RockDependencyForm(request.POST, rock=rock)
+        rock = _visible_rock_or_404(request, pk)
+        form = RockDependencyForm(request.POST, rock=rock, user=request.user)
         if form.is_valid():
             dep = form.save(commit=False)
             dep.rock = rock
@@ -394,7 +416,9 @@ class RockDependencyCreateView(LoginRequiredMixin, View):
 class RockDependencyDeleteView(LoginRequiredMixin, View):
     def post(self, request, pk):
         dep = get_org_object_or_404(
-            request, RockDependency, org_lookup='rock__team__organization', pk=pk
+            request,
+            RockDependency.objects.filter(Rock.visible_q(request.user, prefix='rock__')),
+            org_lookup='rock__team__organization', pk=pk,
         )
         rock_pk = dep.rock.pk
         dep.delete()
@@ -408,13 +432,15 @@ class RockDependencyDeleteView(LoginRequiredMixin, View):
 
 def _get_milestone(request, pk):
     return get_org_object_or_404(
-        request, RockMilestone, org_lookup='rock__team__organization', pk=pk
+        request,
+        RockMilestone.objects.filter(Rock.visible_q(request.user, prefix='rock__')),
+        org_lookup='rock__team__organization', pk=pk,
     )
 
 
 class MilestoneCreateView(LoginRequiredMixin, View):
     def post(self, request, pk):
-        rock = get_org_object_or_404(request, Rock, pk=pk)
+        rock = _visible_rock_or_404(request, pk)
         title = request.POST.get('title', '').strip()
         due_date = request.POST.get('due_date') or None
         description = request.POST.get('description', '').strip()
@@ -477,7 +503,7 @@ class RockIssueLinkView(LoginRequiredMixin, View):
     """POST-only: add an Issue to a Rock's linked_issues M2M."""
 
     def post(self, request, pk):
-        rock = get_org_object_or_404(request, Rock, pk=pk)
+        rock = _visible_rock_or_404(request, pk)
         issue = get_object_or_404(
             Issue, pk=request.POST.get('issue_id'), originating_team=rock.team
         )
@@ -495,7 +521,7 @@ class RockIssueUnlinkView(LoginRequiredMixin, View):
     """POST-only: remove an Issue from a Rock's linked_issues M2M."""
 
     def post(self, request, pk):
-        rock = get_org_object_or_404(request, Rock, pk=pk)
+        rock = _visible_rock_or_404(request, pk)
         issue = get_object_or_404(rock.linked_issues, pk=request.POST.get('issue_id'))
         rock.linked_issues.remove(issue)
         IssueActivity.objects.create(

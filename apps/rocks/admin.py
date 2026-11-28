@@ -26,10 +26,11 @@ class RockCheckinInline(admin.TabularInline):
 
 @admin.register(Rock)
 class RockAdmin(admin.ModelAdmin):
-    list_display = ['title', 'owner', 'team', 'quarter_label', 'status', 'due_date']
-    list_filter = ['status', 'quarter', 'year', 'team']
+    list_display = ['title', 'owner', 'team', 'quarter_label', 'status', 'is_private', 'due_date']
+    list_filter = ['status', 'quarter', 'year', 'team', 'is_private']
     search_fields = ['title', 'owner__username', 'owner__first_name', 'team__name']
     raw_id_fields = ['owner', 'created_by', 'parent_rock']
+    filter_horizontal = ['shared_with']
     readonly_fields = ['created_at', 'updated_at']
     inlines = [RockMilestoneInline, RockCheckinInline, RockDependencyInline]
 

@@ -105,7 +105,6 @@ class IssueCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
     def form_valid(self, form):
-        form.instance.originating_team = get_active_team(self.request)
         form.instance.created_by = self.request.user
         response = super().form_valid(form)
         _log(self.object, self.request.user, IssueActivity.ACTION_CREATED)
@@ -160,7 +159,7 @@ class IssueDetailView(LoginRequiredMixin, OrgScopedMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         issue = self.object
         ctx['activity'] = issue.activity.select_related('actor', 'actor__profile').order_by('created_at')
-        ctx['linked_rocks'] = issue.linked_rocks.select_related('team', 'owner')
+        ctx['linked_rocks'] = issue.linked_rocks.visible_to(self.request.user).select_related('team', 'owner')
         ctx['status_form'] = IssueStatusForm(
             initial={'status': issue.status, 'resolution_notes': issue.resolution_notes},
             terms=get_terms(self.request),
