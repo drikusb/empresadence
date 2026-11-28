@@ -327,15 +327,18 @@ class HeadlineEscalateView(LoginRequiredMixin, View):
                 created_by=headline.author or request.user,
                 status=Issue.STATUS_OPEN,
             )
+            terms = get_terms(request)
             IssueActivity.objects.create(
                 issue=issue,
                 actor=request.user,
                 action=IssueActivity.ACTION_CREATED,
-                notes=f'Escalated from Level 10 Meeting headline on {meeting.scheduled_date}',
+                notes=(
+                    f'Escalated from {terms.meeting} {terms.get("headline", lower=True)} '
+                    f'on {meeting.scheduled_date}'
+                ),
             )
             headline.escalated_issue = issue
             headline.save(update_fields=['escalated_issue'])
-            terms = get_terms(request)
             messages.success(request, f'{terms.headline} escalated to {terms.issues}.')
         return redirect('meetings:detail', pk=pk)
 

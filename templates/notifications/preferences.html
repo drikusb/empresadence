@@ -19,21 +19,21 @@
                         <label class="form-check-label" for="{{ form.overdue_todo_digest.id_for_label }}">
                             Overdue {{ terms.todo }} digest
                         </label>
-                        <div class="text-muted small">{{ form.overdue_todo_digest.help_text }}</div>
+                        <div class="text-muted small">Daily email listing your overdue {{ terms.todos }}.</div>
                     </div>
                     <div class="form-check mb-3">
                         {{ form.meeting_reminders }}
                         <label class="form-check-label" for="{{ form.meeting_reminders.id_for_label }}">
                             {{ terms.meeting }} day reminders
                         </label>
-                        <div class="text-muted small">{{ form.meeting_reminders.help_text }}</div>
+                        <div class="text-muted small">Email reminder on your team's {{ terms.meeting }} day.</div>
                     </div>
                     <div class="form-check mb-4">
                         {{ form.rock_off_track_alerts }}
                         <label class="form-check-label" for="{{ form.rock_off_track_alerts.id_for_label }}">
                             {{ terms.rock }} off-track alerts
                         </label>
-                        <div class="text-muted small">{{ form.rock_off_track_alerts.help_text }}</div>
+                        <div class="text-muted small">Email when one of your {{ terms.rocks }} is marked off track.</div>
                     </div>
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-dark">

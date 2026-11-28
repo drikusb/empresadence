@@ -1,5 +1,5 @@
 /**
- * Level 10 Meeting Timer
+ * Meeting timer
  * Segment countdown + total elapsed time.
  * Reads data-duration-minutes and data-meeting-started (ISO string) from #meeting-timer.
  */
