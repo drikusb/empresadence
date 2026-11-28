@@ -9,7 +9,22 @@ from .models import Meeting, MeetingNote, SegueEntry, Headline, MeetingRating
 from .segments import resolve_agenda
 from .forms import MeetingCreateForm, SegueEntryForm, HeadlineForm, MeetingRatingForm, CascadingMessagesForm
 from apps.accounts.scoping import get_active_org, get_active_team
+from apps.accounts.team_scope import (
+    SCOPE_ALL, count_other_teams, get_scope, get_visible_teams, summarise_other_teams,
+)
 from apps.accounts.terminology import get_terms
+
+SCOPE_SESSION_KEY = 'meetings_scope'
+
+
+def get_meetings_scope(request):
+    """Return the list scope: ``'team'`` (the navbar's active team) or ``'all'``.
+
+    Shares the helpers in ``apps.accounts.team_scope`` with the Priorities and
+    Metrics Board lists, so a meeting scheduled for another team no longer
+    goes unseen until the user switches team (#131).
+    """
+    return get_scope(request, SCOPE_SESSION_KEY)
 
 
 def _get_org(request):
@@ -159,16 +174,40 @@ class MeetingListView(LoginRequiredMixin, View):
         if not team:
             messages.warning(request, f'Join a team to see {terms.get("meeting", plural=True, lower=True)}.')
             return redirect('home')
+
+        scope = get_meetings_scope(request)
+        visible_teams = list(get_visible_teams(request))
+        scoped_teams = visible_teams if scope == SCOPE_ALL else [team]
         meetings = list(
             Meeting.objects
-            .filter(team=team)
+            .filter(team__in=scoped_teams)
             .select_related('team')
             .order_by('-scheduled_date')
         )
         for meeting in meetings:
             meeting.segment_label = resolve_agenda(meeting.agenda, terms)[meeting.current_segment]['name']
             meeting.can_change = meeting.can_be_changed_by(request.user)
-        return render(request, self.template_name, {'meetings': meetings, 'org': team.organization})
+
+        other_team_counts = []
+        if scope != SCOPE_ALL:
+            other_team_counts = count_other_teams(Meeting.objects.all(), team, visible_teams)
+
+        teams_meetings = [
+            (t, [m for m in meetings if m.team_id == t.pk]) for t in scoped_teams
+        ]
+        teams_meetings = [(t, ms) for t, ms in teams_meetings if ms]
+
+        return render(request, self.template_name, {
+            'meetings': meetings,
+            'org': team.organization,
+            'scope': scope,
+            'active_team': team,
+            'visible_teams': visible_teams,
+            'teams_meetings': teams_meetings,
+            'other_team_counts': other_team_counts,
+            'other_meetings_total': sum(n for _, n in other_team_counts),
+            'other_teams_summary': summarise_other_teams(other_team_counts),
+        })
 
 
 class MeetingCreateView(LoginRequiredMixin, View):
