@@ -33,12 +33,22 @@
         </div>
     </div>
     {% if meeting.is_scheduled %}
-    <form method="post" action="{% url 'meetings:start' meeting.pk %}">
-        {% csrf_token %}
-        <button class="btn btn-success">
-            <i class="bi bi-play-fill me-1"></i>Start {{ terms.meeting }}
-        </button>
-    </form>
+    <div class="d-flex gap-2 flex-wrap justify-content-end">
+        {% if can_change %}
+        <a href="{% url 'meetings:edit' meeting.pk %}" class="btn btn-outline-secondary">
+            <i class="bi bi-pencil me-1"></i>Edit
+        </a>
+        <a href="{% url 'meetings:delete' meeting.pk %}" class="btn btn-outline-danger">
+            <i class="bi bi-trash me-1"></i>Delete
+        </a>
+        {% endif %}
+        <form method="post" action="{% url 'meetings:start' meeting.pk %}">
+            {% csrf_token %}
+            <button class="btn btn-success">
+                <i class="bi bi-play-fill me-1"></i>Start {{ terms.meeting }}
+            </button>
+        </form>
+    </div>
     {% elif meeting.is_complete %}
     <a href="{% url 'meetings:print' meeting.pk %}" class="btn btn-outline-secondary" target="_blank">
         <i class="bi bi-printer me-1"></i>Export PDF

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block page_title %}Schedule {{ terms.meeting }}{% endblock %}
+{% block page_title %}{% if meeting %}Edit{% else %}Schedule{% endif %} {{ terms.meeting }}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -9,7 +9,7 @@
             <a href="{% url 'meetings:list' %}" class="btn btn-sm btn-outline-secondary me-3">
                 <i class="bi bi-arrow-left"></i>
             </a>
-            <h1 class="h3 mb-0">Schedule {{ terms.meeting }}</h1>
+            <h1 class="h3 mb-0">{% if meeting %}Edit{% else %}Schedule{% endif %} {{ terms.meeting }}</h1>
         </div>
 
         <div class="card border-0 shadow-sm">
@@ -45,7 +45,7 @@
                         </label>
                         <input type="date" name="{{ form.scheduled_date.html_name }}"
                                id="{{ form.scheduled_date.id_for_label }}"
-                               value="{{ form.scheduled_date.value|default:'' }}"
+                               value="{{ form.scheduled_date.value|date:'Y-m-d'|default:form.scheduled_date.value|default:'' }}"
                                class="form-control {% if form.scheduled_date.errors %}is-invalid{% endif %}">
                         {% for e in form.scheduled_date.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
                     </div>
@@ -58,7 +58,7 @@
 
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-dark">
-                            <i class="bi bi-calendar-plus me-1"></i>Schedule {{ terms.meeting }}
+                            {% if meeting %}<i class="bi bi-check-lg me-1"></i>Save changes{% else %}<i class="bi bi-calendar-plus me-1"></i>Schedule {{ terms.meeting }}{% endif %}
                         </button>
                         <a href="{% url 'meetings:list' %}" class="btn btn-outline-secondary">Cancel</a>
                     </div>
