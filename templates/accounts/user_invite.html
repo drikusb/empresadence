@@ -43,7 +43,7 @@
                         <label for="id_role" class="form-label fw-semibold">Role</label>
                         {{ form.role }}
                     </div>
-                    {% if form.teams.queryset.exists %}
+                    {% if form.teams.field.queryset.exists %}
                     <div class="mb-4">
                         <label class="form-label fw-semibold">Add to teams <span class="text-muted fw-normal">(optional)</span></label>
                         <div class="border rounded p-3">

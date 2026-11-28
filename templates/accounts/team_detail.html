@@ -56,7 +56,7 @@
             </div>
             {% endif %}
 
-            {% if is_admin %}
+            {% if can_manage_members %}
             <div class="card-footer bg-white border-top">
                 <p class="fw-semibold mb-2 small text-uppercase text-muted">Update members</p>
                 <form method="post" action="{% url 'accounts:team_members' team.pk %}">

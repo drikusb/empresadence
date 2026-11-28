@@ -130,6 +130,10 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
+# Matches the 24-hour lifetime the password reset page tells the user.
+# Django's own default is 3 days, which the page was wrong about.
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 24
+
 # Shown as the account label in authenticator apps.
 OTP_TOTP_ISSUER = config('OTP_TOTP_ISSUER', default='Empresadence')
 

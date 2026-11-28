@@ -28,7 +28,7 @@ from .forms import (
 )
 from .scoping import (
     SESSION_TEAM_KEY, OrgScopedMixin, get_active_org, get_active_team, get_org_object_or_404,
-    get_user_orgs, is_org_admin, set_active_org,
+    get_user_orgs, is_org_admin, is_team_leader, set_active_org,
 )
 from .team_scope import SCOPE_ALL, get_scope, get_visible_teams
 from .terminology import get_terms
@@ -365,11 +365,19 @@ class TeamDetailView(LoginRequiredMixin, OrgScopedMixin, DetailView):
             initial={'users': [p.user for p in members]},
         )
         ctx['is_admin'] = is_org_admin(self.request.user, org)
+        ctx['can_manage_members'] = ctx['is_admin'] or is_team_leader(self.request.user, self.object)
         return ctx
 
 
-class TeamMembersUpdateView(LoginRequiredMixin, AdminRequiredMixin, FormView):
+class TeamMembersUpdateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
+    """An org Admin, or the Leader of this specific team, may change its members."""
+
     form_class = TeamMemberForm
+
+    def test_func(self):
+        return is_org_admin(self.request.user, self.get_team().organization) or is_team_leader(
+            self.request.user, self.get_team()
+        )
 
     def get_team(self):
         return get_org_object_or_404(

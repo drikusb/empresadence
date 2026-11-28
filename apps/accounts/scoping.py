@@ -85,6 +85,23 @@ def is_org_admin(user, org):
     ).exists()
 
 
+def is_team_leader(user, team):
+    """Whether ``user`` holds the Leader role and is on ``team`` itself.
+
+    Leader is an organisation-wide role (Membership has no per-team notion of
+    who leads what), so this only grants abilities on teams the leader is
+    actually a member of, not every team in their organisation.
+    """
+    if team is None:
+        return False
+    return (
+        Membership.objects.filter(
+            user=user, organization=team.organization, role=Membership.ROLE_LEADER
+        ).exists()
+        and team.members.filter(user=user).exists()
+    )
+
+
 def get_org_object_or_404(request, model, org_lookup='team__organization', **kwargs):
     """Like get_object_or_404, but only for records in the active organisation."""
     org = get_active_org(request)
