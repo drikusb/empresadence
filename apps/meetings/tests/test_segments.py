@@ -150,7 +150,7 @@ class HistoricalSafetyTest(TestCase):
         )
         # Agenda at this point: [check_in, ids, conclude].
         self.old_meeting = make_meeting(self.team, self.user)
-        MeetingNote.objects.create(meeting=self.old_meeting, segment=1, text='PRS notes from before the change')
+        MeetingNote.objects.create(meeting=self.old_meeting, segment=1, text='PSR notes from before the change')
 
     def test_an_existing_meetings_agenda_is_unaffected_by_a_later_reorder(self):
         self.old_meeting.refresh_from_db()
@@ -175,13 +175,13 @@ class HistoricalSafetyTest(TestCase):
     def test_the_note_still_means_what_it_meant_when_it_was_written(self):
         """This is the failure mode from the proposal made concrete: without a
         snapshot, this note would start rendering under "Check-in" instead of
-        "PRS" the moment the organisation's segment 1 changed."""
+        "PSR" the moment the organisation's segment 1 changed."""
         MeetingSegmentDefinition.objects.filter(organization=self.org).update(enabled=False)
         MeetingSegmentDefinition.objects.create(
             organization=self.org, order=0, segment_type='check_in', duration_minutes=5,
         )
         note = MeetingNote.objects.get(meeting=self.old_meeting, segment=1)
-        self.assertEqual(note.segment_name, 'PRS')
+        self.assertEqual(note.segment_name, 'PSR')
 
     def test_a_new_meeting_picks_up_the_changed_agenda(self):
         MeetingSegmentDefinition.objects.filter(organization=self.org, segment_type='ids').delete()

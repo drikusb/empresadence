@@ -20,7 +20,7 @@ TERMS = [
     ('milestone', 'Step', 'Steps', ''),
     ('headline', 'Update', 'Updates', ''),
     ('segue', 'Check-in', 'Check-ins', ''),
-    ('ids', 'PRS', 'PRS', 'Problem, Solve, Resolve'),
+    ('ids', 'PSR', 'PSR', 'Problem, Solve, Resolve'),
     ('cascading_message', 'Key Message', 'Key Messages', ''),
 ]
 

@@ -83,7 +83,7 @@ class TermsTest(TestCase):
         self.assertEqual(PLURAL_KEYS['ids'], 'ids_plural')
         self.assertNotIn('idss', DEFAULTS)
         terms = Terms({'ids_plural': 'Problem Solving Sessions'})
-        self.assertEqual(terms.ids, 'PRS')
+        self.assertEqual(terms.ids, 'PSR')
         self.assertEqual(terms.ids_plural, 'Problem Solving Sessions')
         self.assertEqual(terms.get('ids', count=2), 'Problem Solving Sessions')
 
@@ -125,7 +125,7 @@ class TermTagTest(TestCase):
         html = Template('{{ terms.rocks }} / {{ terms.ids_plural }}').render(
             Context({'terms': Terms(PRIORITIES)})
         )
-        self.assertEqual(html, 'Priorities / PRS')
+        self.assertEqual(html, 'Priorities / PSR')
 
 
 @override_settings(ALLOWED_HOSTS=HOSTS)
@@ -161,7 +161,7 @@ class TerminologyFormTest(TestCase):
         self.assertEqual(form['issue'].value(), 'Blocker')
         self.assertEqual(form['rock'].field.widget.attrs['placeholder'], 'Priority')
         self.assertEqual(form['rocks'].field.widget.attrs['placeholder'], 'Priorities')
-        self.assertEqual(form['ids_plural'].field.widget.attrs['placeholder'], 'PRS')
+        self.assertEqual(form['ids_plural'].field.widget.attrs['placeholder'], 'PSR')
         self.assertEqual(len(form.fields), 2 * len(TERMS))
 
     def test_rows_pair_each_term_with_its_fields(self):
@@ -211,7 +211,7 @@ class OrgTerminologyViewTest(TestCase):
         self.assertContains(resp, 'Problem, Solve, Resolve')
         self.assertContains(resp, 'name="rock" value="Priority"')
         self.assertContains(resp, 'name="rocks" value="Priorities"')
-        self.assertContains(resp, 'name="ids_plural" value="PRS"')
+        self.assertContains(resp, 'name="ids_plural" value="PSR"')
         self.assertContains(resp, 'placeholder="Weekly Meeting"')
         self.assertContains(resp, 'name="reset"')
 
