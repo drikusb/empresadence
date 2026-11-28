@@ -29,6 +29,7 @@ class IssueCompanyIssueFormPermissionTest(TestCase):
             'title': 'An Issue',
             'description': '',
             'issue_type': Issue.TYPE_SHORT_TERM,
+            'originating_team': self.team.pk,
             'delegated_to_team': '',
             'linked_rocks': [],
             'target_quarter': '',

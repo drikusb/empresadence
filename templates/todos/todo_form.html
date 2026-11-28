@@ -79,11 +79,8 @@
                             <select name="{{ form.team.html_name }}"
                                     id="{{ form.team.id_for_label }}"
                                     class="form-select {% if form.team.errors %}is-invalid{% endif %}">
-                                <option value="">— Select —</option>
                                 {% for val, label in form.team.field.choices %}
-                                {% if val %}
                                 <option value="{{ val }}" {% if form.team.value|stringformat:"s" == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
-                                {% endif %}
                                 {% endfor %}
                             </select>
                             {% for error in form.team.errors %}
